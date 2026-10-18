@@ -4,9 +4,9 @@
   "signed": true,
   "versionName": "1.0.0",
   "versionCode": 10000,
-  "commit": "a30e839cb9fa1bba68a143454503a837567379c1",
+  "commit": "0d9f163b935c59c5c365537fd8552dc594c3b7c7",
   "upstreamCommit": "b1135897cff4ddf01797f042bdd15f7d7e364e0d",
-  "buildUrl": "https://github.com/withite/ns-detector/actions/runs/39134457401",
+  "buildUrl": "https://github.com/withite/ns-detector/actions/runs/39135231922",
   "toolchain": {
     "duckdetector.android.buildTools": "37.0.0",
     "duckdetector.android.cmake": "4.1.2",

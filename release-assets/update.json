@@ -5,17 +5,17 @@
   "versionName": "1.0.0",
   "versionCode": 10000,
   "commit": {
-    "sha": "a30e839cb9fa1bba68a143454503a837567379c1",
-    "subject": "fix(ui): match the adaptive retry button API",
-    "body": "Use the shared text-button contract for both Material and MIUIX failure cards.\n\nAssisted-by: Codex",
+    "sha": "0d9f163b935c59c5c365537fd8552dc594c3b7c7",
+    "subject": "build(ui): declare scan and layout dependencies explicitly",
+    "body": "The dependency-analysis gate found Dashboard uses core scan types and Network Environment uses foundation layout directly. Declare these dependencies rather than relying on transitive availability.\n\nVerification: GitHub a30e839c passed all 1547 JVM tests and four-ABI Debug compilation. The buildHealth report identified precisely these two missing declarations; rerun the gate and remaining SDK/lint checks for this commit.\n\nAssisted-by: Codex",
     "authorName": "Kjuqr Eedvahh",
-    "authoredAt": "2026-10-18T14:02:15Z"
+    "authoredAt": "2026-10-18T14:16:00Z"
   },
-  "builtAtUtc": "2026-10-18T14:02:15Z",
+  "builtAtUtc": "2026-10-18T14:16:00Z",
   "apk": {
     "name": "NS-Detector-1.0.0.apk",
     "sizeBytes": 18909551,
-    "sha256": "a055318f56a1c35e165b4220b5e06d83be3ddd75c778754bd90a3a6e00ada587",
+    "sha256": "4b52648295e3c361b3d9233f000d430d1ac8911fa71b0f293efc88bb3bd9e3ea",
     "downloadUrl": "https://github.com/withite/ns-detector/releases/download/v1.0.0/NS-Detector-1.0.0.apk"
   }
 }
