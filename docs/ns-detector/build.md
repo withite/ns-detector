@@ -28,6 +28,7 @@ Debug 不需要签名 Secret，安装包 ID 为 `io.github.withite.nsdetector.de
 | CI / 预览构建 | `main` 提交、Pull Request、手动运行，以工作流定义为准 | 单元测试、架构守卫、Debug APK、SDK AAR、lint/测试报告；主分支增加模拟器启动检查与截图。无需自备 Secret。 |
 | 预览分发 | `main` 构建与模拟器检查通过 | 版本化 `preview-<run_number>` prerelease，保留提交来源，使用测试应用 ID 和调试签名。 |
 | 正式发布 | `v*` 标签或手动运行 `release.yml` | 默认验证四项签名配置，产生正式 APK 和校验信息；不会退回调试签名。手动选 `external_signing=true` 时仅导出未签名工件，不自动发布。 |
+| 离线签名后验证 | 手动运行 `verify-release.yml` | 校验已签名公开文件和指定源码，安装到模拟器验证；可将验证通过的文件上传到现有草稿 Release，保留最终发布步骤。 |
 
 预览是开发验证产物。模拟器启动成功不能代替硬件 KeyStore、SELinux、挂载、app zygote 和真实 Root/Hook 环境的真机验证。某次运行是否通过、是否生成 APK，以其最终日志为准；文档没有代替未运行的检查作出通过声明。
 
@@ -68,9 +69,38 @@ GitHub 自动提供的 `GITHUB_TOKEN` 用于仓库内发布，不需要额外创
 
 手动运行 `release.yml`，设置 `external_signing=true` 和确定的版本名称/版本码。构建仍使用 Release 混淆与资源压缩，并执行相应检查，但只上传 `ns-detector-release-unsigned` 工件；APK 名含 `UNSIGNED`，`build-info.json` 的 `signed=false`，清单为 `unsigned-manifest.json`。此路径不会触发自动正式发布，也不会用调试签名代替。
 
-将工件下载到经授权的私有工作区后，使用项目所有者持有的长期密钥离线签名：先按 Android 工具要求确认/完成 `zipalign`，再用 `apksigner sign`，最后执行 `apksigner verify --verbose --print-certs` 核对证书指纹、应用 ID 和版本。首次创建的密钥与密码需要私有备份；私钥文件、密码和备份均不得上传 GitHub，不得包含在 APK、工件或日志内。工作区备份不代替项目所有者的长期离线保管。
+将工件解压到经授权的私有工作区后，使用项目所有者持有的长期密钥和仓库脚本签名。以下 `$NS_SOURCE_COMMIT` 必须是已审阅且与工件一致的 40 位源码提交 SHA；`--output` 指定的目录必须不存在或为空。
 
-签名会改变 APK 字节，因此必须基于**签名后的 APK**重新生成 SHA-256、`update.json` 中的文件名/大小/哈希和最终 `build-info.json`；不得发布未签名工件中的旧哈希或将 `UNSIGNED` 文案原样用于正式版。完成这些校验之后，才可把已签名 APK、签名指纹、校验值和构建来源发布到对应版本的 Release。
+```bash
+python3 scripts/ns_sign_external_release.py \
+  --input /private/unsigned-export \
+  --output /private/signed-export \
+  --tools /path/to/android-sdk/build-tools/37.0.0 \
+  --keystore /private/ns-detector-release.keystore \
+  --password-file /private/password.txt \
+  --expected-commit "$NS_SOURCE_COMMIT" \
+  --alias ns-detector
+```
+
+`--tools` 是同时包含 `apksigner` 和 `zipalign` 的目录。当前脚本从同一密码文件提供 keystore 与 key 密码；密钥使用不同密码时需采用相应的私有签名流程。脚本先校验未签名工件的清单、哈希、应用 ID、源码提交与四 ABI 原生库，再完成 16 KiB 对齐、签名和实际证书验证，重新生成 `build-info.json`、`update.json` 与 `SHA256SUMS`。签名会改变 APK 字节，不能沿用未签名 APK 的哈希。
+
+首次创建的密钥与密码需要私有备份；私钥文件、密码和备份均不得上传 GitHub，不得包含在 APK、工件或日志内。工作区备份不代替项目所有者的长期离线保管。
+
+若本地无法直接上传 Release 文件，可创建临时产物分支，仅把签名输出中的**可公开文件**放入该分支的 `release-assets/` 目录。该目录包括已签名 APK、公开签名指纹、构建/更新清单与校验值；不得包含 keystore、密码或私有备份。产物分支不需要合并到 `main`。
+
+先创建目标草稿 Release，再手动运行验证工作流。以下 `$NS_SIGNED_ASSETS_REF` 为产物分支或其提交，`$NS_APK_SHA256` 为已审阅的签名后 APK 的 64 位小写 SHA-256，版本标签应与 APK 的版本名称一致。
+
+```bash
+gh release create v1.0.0 --draft --target "$NS_SOURCE_COMMIT" \
+  --title 'NS Detector 1.0.0' --notes-file release-notes.md
+gh workflow run verify-release.yml --ref main \
+  -f tag_name=v1.0.0 \
+  -f signed_assets_ref="$NS_SIGNED_ASSETS_REF" \
+  -f expected_apk_sha256="$NS_APK_SHA256" \
+  -f source_commit="$NS_SOURCE_COMMIT"
+```
+
+工作流验证所有公开文件的校验值、源码与包版本元数据、宿主证书策略、APK 实际签名及对齐，然后执行模拟器安装与界面检查；通过后仅把文件上传到仍处于草稿状态的目标 Release，不自动公开。若文件已经在草稿中，省略 `signed_assets_ref` 即可直接下载该草稿进行验证，其余三个输入仍须提供。复核 Actions 结果、截图和最终文件后，才公开对应 Release；临时产物分支可在之后删除。
 
 这一流程的存在不表示某个版本已完成正式签名；具体下载是否为正式签名版，以其最终发布文件、签名校验和构建说明为准。
 
