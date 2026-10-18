@@ -32,6 +32,7 @@ import com.eltavine.duckdetector.features.mount.detector.MountDetector
 import com.eltavine.duckdetector.features.nativeroot.detector.NativeRootDetector
 import com.eltavine.duckdetector.features.networkenvironment.detector.NetworkEnvironmentDetector
 import com.eltavine.duckdetector.features.playintegrityfix.detector.PlayIntegrityFixDetector
+import com.eltavine.duckdetector.features.processsandbox.detector.ProcessSandboxDetector
 import com.eltavine.duckdetector.features.rootmanagers.detector.RootManagersDetector
 import com.eltavine.duckdetector.features.selinux.detector.SelinuxDetector
 import com.eltavine.duckdetector.features.su.detector.SuDetector
@@ -64,6 +65,7 @@ public object DetectorCatalog {
         NativeRootDetector,
         NetworkEnvironmentDetector,
         PlayIntegrityFixDetector,
+        ProcessSandboxDetector,
         RootManagersDetector,
         SelinuxDetector,
         SuDetector,
