@@ -1,7 +1,6 @@
 /* Copyright 2026 NS Detector contributors. Licensed under the Apache License, Version 2.0. */
 package com.eltavine.duckdetector.features.dashboard.ui
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,26 +9,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,14 +37,16 @@ internal fun DashboardScanConsole(model: DashboardConsoleModel, isLoading: Boole
     val palette = DuckTheme.palette
     val scheme = MaterialTheme.colorScheme
     val progressLabel = stringResource(R.string.dashboard_console_progress, model.readyCount, model.totalCount)
-    val colors = model.segments.map { segment ->
-        when (segment) {
-            DashboardConsoleSegment.PENDING -> palette.groupedInset
-            DashboardConsoleSegment.DANGER, DashboardConsoleSegment.ERROR -> palette.critical
-            DashboardConsoleSegment.WARNING -> palette.caution
-            DashboardConsoleSegment.CLEAR -> palette.positive
-            DashboardConsoleSegment.CONTEXT -> scheme.primary.copy(alpha = 0.65f)
-            DashboardConsoleSegment.LIMITED, DashboardConsoleSegment.OTHER_INFO -> palette.neutral
+    val colors = remember(model.segments, palette, scheme.primary) {
+        model.segments.map { segment ->
+            when (segment) {
+                DashboardConsoleSegment.PENDING -> palette.groupedInset
+                DashboardConsoleSegment.DANGER, DashboardConsoleSegment.ERROR -> palette.critical
+                DashboardConsoleSegment.WARNING -> palette.caution
+                DashboardConsoleSegment.CLEAR -> palette.positive
+                DashboardConsoleSegment.CONTEXT -> scheme.primary.copy(alpha = 0.65f)
+                DashboardConsoleSegment.LIMITED, DashboardConsoleSegment.OTHER_INFO -> palette.neutral
+            }
         }
     }
     DuckPanel(
@@ -98,28 +93,7 @@ internal fun DashboardScanConsole(model: DashboardConsoleModel, isLoading: Boole
                 )
             }
         }
-        Canvas(
-            modifier = Modifier.fillMaxWidth().height(10.dp).semantics {
-                progressBarRangeInfo = ProgressBarRangeInfo(model.completedFraction, 0f..1f)
-                stateDescription = progressLabel
-            },
-        ) {
-            if (colors.isEmpty()) {
-                drawRoundRect(palette.groupedInset, cornerRadius = CornerRadius(size.height / 2))
-            } else {
-                // One segment per registered module; no animation loop or per-frame state updates.
-                val gap = 3.dp.toPx().coerceAtMost(size.width / (colors.size * 3))
-                val width = (size.width - gap * (colors.size - 1)) / colors.size
-                colors.forEachIndexed { index, color ->
-                    drawRoundRect(
-                        color = color,
-                        topLeft = Offset(index * (width + gap), 0f),
-                        size = Size(width, size.height),
-                        cornerRadius = CornerRadius(2.dp.toPx()),
-                    )
-                }
-            }
-        }
+        DashboardConsoleProgress(model.completedFraction, colors, progressLabel)
         ConsoleDistribution(model)
     }
 }
@@ -152,7 +126,7 @@ private fun ConsoleDistribution(model: DashboardConsoleModel) {
     )
     val fontScale = LocalDensity.current.fontScale
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val columns = if (maxWidth < 280.dp || fontScale > 1.3f) 2 else 4
+        val columns = dashboardConsoleColumns(maxWidth.value, fontScale)
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             stats.chunked(columns).forEach { row ->
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -172,14 +146,16 @@ private fun ConsoleDistributionStat(stat: ConsoleStat, modifier: Modifier) {
             .padding(horizontal = 12.dp, vertical = 10.dp).semantics(mergeDescendants = true) {},
         verticalArrangement = Arrangement.spacedBy(3.dp),
     ) {
+        WrapSafeText(text = stat.count.toString(), style = DuckTypography.MetricNumeral, color = MaterialTheme.colorScheme.onSurface)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Box(Modifier.size(5.dp).background(stat.color, CircleShape))
-            WrapSafeText(
+            androidx.compose.material3.Text(
                 text = stringResource(stat.label),
                 style = DuckTypography.PanelCaption,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                minLines = 2,
+                maxLines = 2,
             )
         }
-        WrapSafeText(text = stat.count.toString(), style = DuckTypography.MetricNumeral, color = MaterialTheme.colorScheme.onSurface)
     }
 }

@@ -13,12 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Modified 2026 by NS Detector contributors: cached drawing and viewport-bounded tiling.
  */
 
 package com.eltavine.duckdetector.core.ui.components
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,8 +28,10 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -38,6 +41,7 @@ import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.floor
 
 @Composable
 public fun ScreenshotWatermarkOverlay(
@@ -71,22 +75,17 @@ public fun ScreenshotWatermarkOverlay(
 
     val isDarkTheme = isSystemInDarkTheme()
 
-    Canvas(
-        modifier = modifier.fillMaxSize()
-    ) {
-        val canvasWidth = size.width
-        val canvasHeight = size.height
-
-        val diagonal = kotlin.math.sqrt(canvasWidth * canvasWidth + canvasHeight * canvasHeight)
-
-        rotate(degrees = rotationDegrees, pivot = Offset(canvasWidth / 2, canvasHeight / 2)) {
+    Box(
+        // Isolate the static watermark's display list from content scrolling underneath it.
+        // drawWithCache rebuilds Paint and geometry only for size, text or theme changes.
+        modifier = modifier.fillMaxSize().graphicsLayer().drawWithCache {
             val colorValue = if (isDarkTheme) 255 else 0
             val paint = android.graphics.Paint().apply {
                 color = android.graphics.Color.argb(
                     (alpha * 255).toInt(),
                     colorValue, colorValue, colorValue
                 )
-                textSize = textSizePx
+                textSize = textSizePx.coerceAtLeast(1f)
                 isAntiAlias = true
                 typeface = android.graphics.Typeface.MONOSPACE
             }
@@ -101,21 +100,25 @@ public fun ScreenshotWatermarkOverlay(
             val safeHSpacing = maxOf(spacingPx, maxTextWidth * 1.3f)
             val safeVSpacing = maxOf(spacingPx * 0.6f, lineHeight * 2.5f)
 
-            val startX = -diagonal / 2
-            val startY = -diagonal / 2 + lineHeight
-            val endX = canvasWidth + diagonal / 2
-            val endY = canvasHeight + diagonal / 2
+            val bounds = screenshotWatermarkBounds(size.width, size.height, rotationDegrees)
+            // Include tiles that start outside the inverse-rotated viewport but overlap it.
+            val startX = floor((bounds.left - maxTextWidth) / safeHSpacing) * safeHSpacing
+            val startY = floor((bounds.top - lineHeight * 2) / safeVSpacing) * safeVSpacing
 
-            var y = startY
-            while (y < endY) {
-                var x = startX
-                while (x < endX) {
-                    drawContext.canvas.nativeCanvas.drawText(versionLine, x + offset1, y, paint)
-                    drawContext.canvas.nativeCanvas.drawText(timeLine, x + offset2, y + lineHeight, paint)
-                    x += safeHSpacing
+            onDrawBehind {
+                rotate(degrees = rotationDegrees, pivot = Offset(size.width / 2, size.height / 2)) {
+                    var y = startY
+                    while (y < bounds.bottom + lineHeight) {
+                        var x = startX
+                        while (x < bounds.right) {
+                            drawContext.canvas.nativeCanvas.drawText(versionLine, x + offset1, y, paint)
+                            drawContext.canvas.nativeCanvas.drawText(timeLine, x + offset2, y + lineHeight, paint)
+                            x += safeHSpacing
+                        }
+                        y += safeVSpacing
+                    }
                 }
-                y += safeVSpacing
             }
-        }
-    }
+        },
+    )
 }

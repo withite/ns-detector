@@ -37,5 +37,6 @@ dependencies {
     api(libs.androidx.material3)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
+    implementation("androidx.compose.animation:animation-core")
     implementation(libs.androidx.activity)
 }
