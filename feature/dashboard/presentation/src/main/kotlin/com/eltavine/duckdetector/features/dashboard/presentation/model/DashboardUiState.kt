@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Modified 2026 by NS Detector contributors: explicit coverage, private history and redacted exports.
  */
 
 package com.eltavine.duckdetector.features.dashboard.presentation.model
@@ -33,6 +35,8 @@ enum class DashboardOverviewMetric(val label: String) {
     WARNING("Warning"),
     READY("Ready"),
     PENDING("Pending"),
+    COVERAGE_LIMITED("Limited"),
+    ERROR("Error"),
 }
 
 data class DashboardOverviewMetricModel(
@@ -48,6 +52,8 @@ enum class OverviewVerdict {
     DANGER,
     WARNING,
     INFO,
+    COVERAGE_LIMITED,
+    ERROR,
     READY,
     PENDING,
     OK,
@@ -89,6 +95,7 @@ data class DashboardUiState(
     /** Detector cards in display order: most severe first, then by title. */
     val cardOrder: List<DetectorId>,
     val isLoading: Boolean,
+    val detectorSummaries: List<DetectorSummary> = emptyList(),
 )
 
 fun buildDashboardOverview(
@@ -105,13 +112,18 @@ fun buildDashboardOverview(
         it.status.severity == DetectionSeverity.INFO && it.status.infoKind == InfoKind.ERROR
     }
 
+    val coverageLimitedCount = contributions.count {
+        it.ready && it.status.severity == DetectionSeverity.INFO && it.status.infoKind == InfoKind.SUPPORT
+    }
+
     val focus = prioritizedContributions(contributions).take(2)
     val focusTitles = focus.map { it.title }
 
     val verdict = when {
         dangerCount > 0 -> OverviewVerdict.DANGER
         warningCount > 0 -> OverviewVerdict.WARNING
-        infoErrorCount > 0 -> OverviewVerdict.INFO
+        infoErrorCount > 0 -> OverviewVerdict.ERROR
+        coverageLimitedCount > 0 -> OverviewVerdict.COVERAGE_LIMITED
         readyCount == 0 -> OverviewVerdict.READY
         pendingCount > 0 -> OverviewVerdict.PENDING
         else -> OverviewVerdict.OK
@@ -120,7 +132,9 @@ fun buildDashboardOverview(
     val overviewStatus = when (verdict) {
         OverviewVerdict.DANGER -> DetectorStatus.danger()
         OverviewVerdict.WARNING -> DetectorStatus.warning()
-        OverviewVerdict.INFO -> DetectorStatus.info(InfoKind.ERROR)
+        OverviewVerdict.INFO,
+        OverviewVerdict.ERROR -> DetectorStatus.info(InfoKind.ERROR)
+        OverviewVerdict.COVERAGE_LIMITED -> DetectorStatus.info(InfoKind.SUPPORT)
         OverviewVerdict.READY,
         OverviewVerdict.PENDING -> DetectorStatus.info(InfoKind.SUPPORT)
 
@@ -131,6 +145,8 @@ fun buildDashboardOverview(
         OverviewVerdict.DANGER -> "Danger"
         OverviewVerdict.WARNING -> "Warning"
         OverviewVerdict.INFO -> "Info"
+        OverviewVerdict.ERROR -> "Checks failed"
+        OverviewVerdict.COVERAGE_LIMITED -> "Coverage limited"
         OverviewVerdict.READY -> "Ready"
         OverviewVerdict.PENDING -> "Pending"
         OverviewVerdict.OK -> "OK"
@@ -139,7 +155,9 @@ fun buildDashboardOverview(
     val summary = when (verdict) {
         OverviewVerdict.DANGER -> "Start with ${focusTitles.joinToString(separator = " and ")}."
         OverviewVerdict.WARNING -> "Review ${focusTitles.joinToString(separator = " and ")} next."
-        OverviewVerdict.INFO -> "${focusTitles.joinToString(separator = " and ")} need more context before treating results as clean."
+        OverviewVerdict.INFO,
+        OverviewVerdict.ERROR -> "Some checks failed. Review their evidence before interpreting the scan."
+        OverviewVerdict.COVERAGE_LIMITED -> "Some checks are unsupported or visibility-limited. Their result cannot establish absence of evidence."
         OverviewVerdict.READY -> "Detector cards will populate as local checks complete."
         OverviewVerdict.PENDING -> "Additional modules are still collecting their local evidence."
         OverviewVerdict.OK -> "Use the detector cards below to inspect local evidence in detail."
@@ -176,14 +194,22 @@ fun buildDashboardOverview(
             DashboardOverviewMetricModel(
                 metric = DashboardOverviewMetric.READY,
                 value = readyCount.toString(),
-                status = if (readyCount > 0) DetectorStatus.allClear() else DetectorStatus.info(
-                    InfoKind.SUPPORT
-                ),
+                status = DetectorStatus.info(InfoKind.SUPPORT),
             ),
             DashboardOverviewMetricModel(
                 metric = DashboardOverviewMetric.PENDING,
                 value = pendingCount.toString(),
                 status = if (pendingCount > 0) DetectorStatus.info(InfoKind.SUPPORT) else DetectorStatus.allClear(),
+            ),
+            DashboardOverviewMetricModel(
+                metric = DashboardOverviewMetric.COVERAGE_LIMITED,
+                value = coverageLimitedCount.toString(),
+                status = DetectorStatus.info(InfoKind.SUPPORT),
+            ),
+            DashboardOverviewMetricModel(
+                metric = DashboardOverviewMetric.ERROR,
+                value = infoErrorCount.toString(),
+                status = DetectorStatus.info(InfoKind.ERROR),
             ),
         ),
         showTitleIcon = scanDurationMillis != null && pendingCount == 0,
@@ -216,7 +242,8 @@ fun buildDashboardFindings(
             DetectionSeverity.DANGER,
             DetectionSeverity.WARNING -> true
 
-            DetectionSeverity.INFO -> contribution.status.infoKind == InfoKind.ERROR
+            DetectionSeverity.INFO -> contribution.status.infoKind == InfoKind.ERROR ||
+                (contribution.ready && contribution.status.infoKind == InfoKind.SUPPORT)
             DetectionSeverity.ALL_CLEAR -> false
         }
     }

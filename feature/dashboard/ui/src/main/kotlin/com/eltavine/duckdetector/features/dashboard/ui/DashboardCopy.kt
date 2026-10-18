@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Modified 2026 by NS Detector contributors: explicit coverage and execution states.
  */
 
 package com.eltavine.duckdetector.features.dashboard.ui
@@ -34,6 +35,8 @@ internal fun dashboardOverviewHeadline(model: DashboardOverviewModel): String = 
         OverviewVerdict.DANGER -> R.string.dashboard_headline_danger
         OverviewVerdict.WARNING -> R.string.dashboard_headline_warning
         OverviewVerdict.INFO -> R.string.dashboard_headline_info
+        OverviewVerdict.COVERAGE_LIMITED -> R.string.dashboard_headline_limited
+        OverviewVerdict.ERROR -> R.string.dashboard_headline_error
         OverviewVerdict.READY -> R.string.dashboard_headline_ready
         OverviewVerdict.PENDING -> R.string.dashboard_headline_pending
         OverviewVerdict.OK -> R.string.dashboard_headline_ok
@@ -55,6 +58,8 @@ internal fun dashboardOverviewSummary(model: DashboardOverviewModel): String {
         OverviewVerdict.DANGER -> stringResource(R.string.dashboard_summary_danger, focus)
         OverviewVerdict.WARNING -> stringResource(R.string.dashboard_summary_warning, focus)
         OverviewVerdict.INFO -> stringResource(R.string.dashboard_summary_info, focus)
+        OverviewVerdict.COVERAGE_LIMITED -> stringResource(R.string.dashboard_summary_limited)
+        OverviewVerdict.ERROR -> stringResource(R.string.dashboard_summary_error)
         OverviewVerdict.READY -> stringResource(R.string.dashboard_summary_ready)
         OverviewVerdict.PENDING -> stringResource(R.string.dashboard_summary_pending)
         OverviewVerdict.OK -> stringResource(R.string.dashboard_summary_ok)
@@ -82,6 +87,8 @@ internal fun dashboardMetricLabel(metric: DashboardOverviewMetric): String = str
         DashboardOverviewMetric.WARNING -> R.string.dashboard_metric_warning
         DashboardOverviewMetric.READY -> R.string.dashboard_metric_ready
         DashboardOverviewMetric.PENDING -> R.string.dashboard_metric_pending
+        DashboardOverviewMetric.COVERAGE_LIMITED -> R.string.dashboard_metric_limited
+        DashboardOverviewMetric.ERROR -> R.string.dashboard_metric_error
     },
 )
 

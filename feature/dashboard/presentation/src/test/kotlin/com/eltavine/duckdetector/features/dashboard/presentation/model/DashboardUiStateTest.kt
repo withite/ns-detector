@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -153,5 +154,28 @@ class DashboardUiStateTest {
         assertEquals(OverviewVerdict.DANGER, overview.verdict)
         assertEquals("Danger", overview.headline)
         assertEquals(false, overview.titleDescribesCompletedScan)
+    }
+    @Test
+    fun `unsupported and failed checks never produce an all clear overview`() {
+        fun summary(id: String, status: DetectorStatus) = DetectorSummary(
+            DetectorId(id), id, status, "Any wording", "Any wording", ready = true,
+        )
+        val limited = buildDashboardOverview(listOf(summary("unsupported", DetectorStatus.info(InfoKind.SUPPORT))))
+        assertEquals(OverviewVerdict.COVERAGE_LIMITED, limited.verdict)
+        assertEquals(DetectorStatus.info(InfoKind.SUPPORT), limited.status)
+        assertEquals("1", limited.metrics.single { it.metric == DashboardOverviewMetric.COVERAGE_LIMITED }.value)
+        val failed = buildDashboardOverview(listOf(summary("failed", DetectorStatus.info(InfoKind.ERROR))))
+        assertEquals(OverviewVerdict.ERROR, failed.verdict)
+        assertEquals("1", failed.metrics.single { it.metric == DashboardOverviewMetric.ERROR }.value)
+        val findings = buildDashboardFindings(listOf(summary("unsupported", DetectorStatus.info(InfoKind.SUPPORT))))
+        assertEquals(DetectorStatus.info(InfoKind.SUPPORT), findings.single().status)
+    }
+    @Test
+    fun `neutral context does not become limited coverage or a priority finding`() {
+        val summary = DetectorSummary(DetectorId("context"), "Context", DetectorStatus.info(InfoKind.CONTEXT), "VPN active", "Context only", true)
+        val overview = buildDashboardOverview(listOf(summary))
+        assertEquals(OverviewVerdict.OK, overview.verdict)
+        assertEquals("0", overview.metrics.single { it.metric == DashboardOverviewMetric.COVERAGE_LIMITED }.value)
+        assertEquals(DashboardFindingKind.OVERVIEW, buildDashboardFindings(listOf(summary)).single().kind)
     }
 }

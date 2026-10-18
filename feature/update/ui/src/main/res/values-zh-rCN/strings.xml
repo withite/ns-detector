@@ -1,5 +1,6 @@
 <!--
 Copyright 2026 Duck Apps Contributor
+Modified 2026 by NS Detector contributors: independent diagnostics product.
 If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +35,7 @@ limitations under the License.
     <string name="update_download_retry">重试</string>
     <string name="update_install">安装</string>
     <string name="github_acceleration_dialog_title">开启 GitHub 加速？</string>
-    <string name="github_acceleration_dialog_message">您当前所在地区访问 GitHub 可能较为困难。开启后，Duck Detector 将通过第三方加速服务 gh-proxy.com 检查和下载 Nightly 更新。之后可随时在设置中更改。</string>
+    <string name="github_acceleration_dialog_message">您当前所在地区访问 GitHub 可能较为困难。开启后，NS Detector 将通过第三方加速服务 gh-proxy.com 检查和下载 Nightly 更新。之后可随时在设置中更改。</string>
     <string name="github_acceleration_dialog_enable">开启加速</string>
     <string name="github_acceleration_dialog_decline">暂不开启</string>
 </resources>

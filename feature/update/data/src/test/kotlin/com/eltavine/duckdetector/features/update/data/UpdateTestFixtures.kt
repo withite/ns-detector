@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +24,7 @@ import org.json.JSONObject
 internal const val TEST_HEAD_SHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 internal const val TEST_BASE_SHA = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 internal const val TEST_DOWNLOAD_URL =
-    "https://github.com/eltavine/Duck-Detector-Refactoring/releases/download/nightly/Duck.Detector-test.apk"
+    "https://github.com/withite/ns-detector/releases/download/nightly/NS.Detector-test.apk"
 
 internal fun validUpdateManifestJson(
     versionCode: Int = 500,
@@ -51,7 +52,7 @@ internal fun validUpdateManifestJson(
         .put(
             "apk",
             JSONObject()
-                .put("name", "Duck.Detector-test.apk")
+                .put("name", "NS.Detector-test.apk")
                 .put("downloadUrl", downloadUrl)
                 .put("sizeBytes", 12_345_678L)
                 .put("sha256", "c".repeat(64)),

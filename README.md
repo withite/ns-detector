@@ -1,214 +1,65 @@
-<p align="center">
-  <img src="app/src/main/ic_launcher-playstore.png" alt="DuckDetector logo" width="128">
-</p>
+# NS Detector
 
-<h1 align="center">DuckDetector</h1>
+Android 设备环境诊断工具，基于固定版本的 Duck Detector 开发，提供本地证据扫描、结果详情、扫描历史比较和默认脱敏报告。面向 Android 10 及以上设备，无需 Root 权限。
 
-<p align="center"><strong>On-device Android environment integrity diagnostics backed by Kotlin and native probes.</strong></p>
+[下载与构建记录](https://github.com/withite/ns-detector/actions) · [版本下载](https://github.com/withite/ns-detector/releases) · [构建与签名](docs/ns-detector/build.md) · [隐私说明](docs/ns-detector/privacy.md) · [测试矩阵](docs/ns-detector/test-matrix.md) · [上游与归属](docs/ns-detector/upstream.md)
 
-<p align="center">
-  <strong>
-    <a href="https://github.com/eltavine/Duck-Detector-Refactoring/releases/tag/nightly">Download Nightly</a> ·
-    <a href="#quick-start">Documentation</a> ·
-    <a href="docs/guides/sdk-integration.md">SDK Integration</a>
-  </strong>
-</p>
+## 当前交付范围
 
-<p align="center">
-  <a href="https://github.com/eltavine/Duck-Detector-Refactoring/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/eltavine/Duck-Detector-Refactoring/build.yml?branch=main&amp;style=flat-square&amp;label=build&amp;logo=githubactions&amp;logoColor=white" alt="Main branch build workflow status"></a>
-  <a href="#compatibility"><img src="https://img.shields.io/badge/Android-10%2B-3DDC84?style=flat-square&amp;logo=android&amp;logoColor=white" alt="Android 10 or later"></a>
-  <a href="https://github.com/eltavine/Duck-Detector-Refactoring/blob/main/LICENSE"><img src="https://img.shields.io/github/license/eltavine/Duck-Detector-Refactoring?style=flat-square" alt="License"></a>
-  <a href="https://t.me/duck_detector"><img src="https://img.shields.io/badge/Telegram-Channel-2CA5E0?logo=telegram&logoColor=white&style=flat-square" alt="Telegram channel"></a>
-</p>
+本项目完整保留 Duck 上游全部 18 个检测模块，在此基础上完善功能并新增第 19 个网络环境模块。仪表盘提供分项证据、执行覆盖情况和解释；扫描历史保留最近 20 次已完成扫描的脱敏摘要，并比较类型化状态变化；TXT / JSON 导出报告默认脱敏。
 
-<p align="center">
-  <a href="https://trendshift.io/repositories/44818?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-44818" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/44818" alt="eltavine/Duck-Detector-Refactoring | Trendshift" width="250" height="55"></a>
-  <a href="https://trendshift.io/repositories/44818?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-44818" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/trendshift/repositories/44818/daily?language=Kotlin" alt="eltavine/Duck-Detector-Refactoring | Trendshift daily Kotlin ranking" width="250" height="55"></a>
-</p>
+| 范围 | 模块 |
+| --- | --- |
+| 启动与系统 | Bootloader、Custom ROM、SELinux、System Properties、Kernel Check |
+| Root 与运行时 | SU、Native Root、Root Managers、Zygisk、LSPosed、Memory、Heap Residue、Mount |
+| 应用与调试 | Dangerous Apps、ADB Runtime、Play Integrity Fix |
+| 硬件与虚拟化 | TEE、Virtualization |
+| 网络环境 | 应用默认网络的 VPN、Android 推荐代理和 Private DNS 状态 |
 
-<p align="center">
-  <a href="README.md">English</a> &nbsp; <a href="README_ZH.md">简体中文</a>
-</p>
+覆盖守卫 [`scripts/ns_check_upstream_coverage.py`](scripts/ns_check_upstream_coverage.py) 对照固定上游提交，检查全部 18 个检测器、18 个原生单元与 10 个进程/Provider 入口仍在；这不替代运行态验证。
 
-# Overview
+每项检测的依据与观察限制见对应的 `feature/<模块>/EVIDENCE.md`。新增网络模块的依据见 [Network Environment](feature/networkenvironment/EVIDENCE.md)。VPN、代理、Private DNS、开发者配置或单个包名不能单独证明设备危险；网络模块将这些状态作为环境信息展示。
 
-DuckDetector collects and correlates security-relevant evidence on an Android device. It looks for boot-state changes, root and SU artifacts, runtime injection or hooking, mount namespace anomalies, modified system properties, suspicious applications, KeyStore and attestation inconsistencies, and signs of virtualization.
+“顶级”是持续验证目标，不是当前检出率承诺。源码、CI、模拟器和真机分别承担不同验证工作；实际通过的检查以对应提交的 Actions 记录为准。当前没有可发布的多厂商真机准确率或性能数据，尚不能宣称已完成正式版真机验收。
 
-The app combines a Jetpack Compose interface, feature-oriented Gradle modules, and a native C++/assembly library. The same detectors are also published as a UI-free SDK AAR that other applications can embed. Results are diagnostic signals, not an authoritative statement that a device is secure or compromised.
+## 使用与结果解读
 
-# Quick start
+1. 在本仓库的 Actions 中下载成功运行的 APK artifact，或在 Releases 下载预览版/正式版。
+2. 安装到 Android 10+ 设备，阅读启动说明；可拒绝非必要授权，受影响检查会减少观察范围。
+3. 执行扫描并打开卡片查看证据。需要分享时导出报告，发送前仍应人工检查。
 
-1. **Download** the APK from the [Nightly release](https://github.com/eltavine/Duck-Detector-Refactoring/releases/tag/nightly). Nightly builds are published from `main` and are also posted to the [Telegram channel](https://t.me/duck_detector); there is no stable release yet.
-2. **Install** it on a device running Android 10 or later. Root access is not required.
-3. **Scan.** The first launch asks you to accept the user agreement and to settle a few startup choices: notifications, Live Update, the online revocation refresh used by the TEE check, and package visibility. Scanning then starts by itself, and each card fills in when its detector finishes.
-4. **Read the results** as described below. To report a result or ask for help, [open an issue](https://github.com/eltavine/Duck-Detector-Refactoring/issues) and attach the file saved by **Export Report** at the top of the dashboard; a screenshot of the summary alone is not enough.
+| 结果 | 应如何理解 |
+| --- | --- |
+| Danger / Warning | 观察到模块规则关注的证据，需结合详情、系统版本和设备情况解释。 |
+| All Clear | 本次可执行的探针未观察到相应证据，不能证明设备从未被修改。 |
+| Info / Support | 某些检查不支持或不可用；缺少观察能力不能视为通过。 |
+| Info / Error | 检查执行失败，详情说明原因。 |
+| Info / Context | 描述 VPN、代理和 Private DNS 等已观察到的环境信息，不据此断言 Root 或受攻击；不会单独算作覆盖受限。 |
 
-## Reading the results
+TEE 模块提供设备侧 KeyStore、证书链和证明字段检查。它不等同于独立可信服务端校验，也不提供 Google Play Integrity 官方判定；`Play Integrity Fix` 模块检查的是本地修改迹象。任何本地扫描都不能保证发现隐藏的 Root、Hook 或虚拟环境。
 
-Each card shows one of these statuses:
+## 下载、升级与隐私
 
-| Status | Meaning |
-| :--- | :--- |
-| **Danger**, **Warning** | The detector observed evidence; the card lists what it saw. |
-| **All Clear** | The probes ran and found none of the evidence they look for. This does not prove that the device is unmodified. |
-| **Info** (Support) | A probe was unsupported or unavailable on this device, so the absence of findings says nothing. |
-| **Info** (Error) | The check failed; the card says why. |
+正式版应用 ID 为 `io.github.withite.nsdetector`，测试版为 `io.github.withite.nsdetector.debug`，可以共存。正式版使用独立的长期签名；构建工作流也提供明确标记的未签名导出，仅用于私有离线签名，不能直接安装或当作正式版下载。上游 Duck Detector 与 NS Detector 是不同应用。调试签名可能随构建环境变化，跨构建无法覆盖安装时需先备份需要的报告，再卸载旧测试版。
 
-To see what a detector looks for and why that counts as evidence, open its evidence record from [Detector coverage](#detector-coverage).
+核心扫描在本机执行，首次冷启动不自动检查 GitHub 更新，第三方 GitHub 加速默认关闭。用户显式检查/下载更新或允许 TEE 在线吊销数据刷新时会联网。历史保存在应用私有存储；导出的文件由用户选择保存或分享。详见[隐私与数据处理](docs/ns-detector/privacy.md)。
 
-# Detector coverage
+## 本地构建
 
-Current feature areas, each linked to its evidence record, which explains what the detector looks for, why that counts as evidence, and what it cannot see:
-
-[`ADB Runtime`](./feature/adbruntime/EVIDENCE.md) · [`Bootloader`](./feature/bootloader/EVIDENCE.md) · [`Custom ROM`](./feature/customrom/EVIDENCE.md) · [`Dangerous Apps`](./feature/dangerousapps/EVIDENCE.md) · [`Kernel Check`](./feature/kernelcheck/EVIDENCE.md) · [`LSPosed`](./feature/lsposed/EVIDENCE.md) · [`Memory`](./feature/memory/EVIDENCE.md) · [`Mount`](./feature/mount/EVIDENCE.md) · [`Native Root`](./feature/nativeroot/EVIDENCE.md) · [`Play Integrity Fix`](./feature/playintegrityfix/EVIDENCE.md) · [`Root Managers`](./feature/rootmanagers/EVIDENCE.md) · [`SELinux`](./feature/selinux/EVIDENCE.md) · [`SU`](./feature/su/EVIDENCE.md) · [`System Properties`](./feature/systemproperties/EVIDENCE.md) · [`TEE`](./feature/tee/EVIDENCE.md) · [`Virtualization`](./feature/virtualization/EVIDENCE.md) · [`Zygisk`](./feature/zygisk/EVIDENCE.md)
-
-The SELinux area also retains an app-zygote SID-table query/registration experiment. Repeated discrepancies are supporting warnings; synchronized policy hiding can leave no discrepancy. Controlled privileged-context writes run in a disposable child with malformed/stock controls; recognition and ordinary-app timing are supporting warnings, an app-zygote AVC lookup-count profile is informational only, and negative observations cannot exclude hidden policy. Access failures and incomplete experiments remain explicit coverage states. See the [SELinux evidence record](./feature/selinux/EVIDENCE.md) for source references and device-validation limits.
-
-`Play Integrity Fix` refers to local indicators associated with integrity-spoofing modifications; DuckDetector does not return an official Google Play Integrity API verdict. The TEE area evaluates Android KeyStore and attestation evidence, including certificate chains, security levels, revocation data, and selected KeyMint, StrongBox, and Soter behavior where supported.
-
-Native Root also offers an optional [fsnotify SRCU timing experiment](feature/nativeroot/SRCU_TIMING.md), disabled by default. It requires an explicit choice, uses a temporary private dynamic permission on supported Android 12–14 systems, and reports repeatable contention as supporting evidence. Its thresholds await device calibration; it does not identify KernelSU, and its private-process deadline cannot recover a blocked kernel.
-
-Supporting modules provide the dashboard, device information, settings, update checks, notifications, license information, and common UI infrastructure.
-
-# How it works
-
-- **Feature modules:** each detector owns its collection, judgement rules, report projection, and UI in its own Gradle modules, while collection code that several detectors share lives in capability modules.
-- **Early native capture:** a transparent `NativeActivity` runs before `MainActivity` and records early mount and virtualization evidence.
-- **Native probes:** the shared native library performs checks that require direct system calls, `/proc` inspection, timing measurements, linker/runtime visibility, or architecture-specific assembly.
-- **Process separation:** selected Zygisk, Mount, Native Root, virtualization, SELinux, LSPosed, and TEE checks run in dedicated or isolated services so evidence can be compared across process boundaries.
-- **Evidence correlation:** the dashboard reports individual findings and coverage states instead of treating one heuristic as conclusive.
-
-# Compatibility
-
-| Area | Details |
-| :--- | :--- |
-| **Android** | Android 10 or later (`minSdk 29`); compiled and targeted against Android API 37. |
-| **ABIs** | Native syscall paths are provided for `arm64-v8a`, `armeabi-v7a`, `x86`, and `x86_64`. Some timing and virtualization trap probes are available only on `arm64-v8a`. |
-| **Privileges** | Root access is not required. Android permissions and platform visibility rules still limit what the app can observe. |
-| **Device variance** | OEM changes, kernel configuration, Android version, and sandbox policy may cause a probe to be unsupported, unavailable, or lower-confidence. |
-| **Network use** | Core device scans run locally. TEE revocation checks always include the bundled snapshot; downloading Google's current revocation feed requires user consent. The app also checks GitHub for Nightly updates after a cold start and when requested from Settings. With GitHub acceleration on, which Chinese-language users are asked about and Settings can switch, those checks and the Nightly download go through the third-party [gh-proxy.com](https://gh-proxy.com/docs) service instead. |
-
-# Architecture
-
-```text
-Duck-Detector-Refactoring/
-├─ app/                   # UI composition root: activities, dashboard cards, notifications
-├─ sdk/runtime/           # Headless composition root: detector catalog, scan API, process hooks, native library registry
-├─ sdk/aar/               # The distributable SDK: every headless module fused into one AAR
-├─ core/                  # Contracts and shared infrastructure: evidence, native payloads, platform access, reports, scan lifecycle, detector, UI
-├─ capability/            # Evidence collection shared by several detectors
-├─ feature/               # One detector or supporting feature per directory, split into layers
-├─ samples/sdk-consumer/  # A separate application built from the published AAR alone
-├─ build-logic/           # Convention plugins, module boundary and dependency validation, generated assets
-├─ uihelper/              # Pinned Git submodule: MIUIX / Material UI, included as a separate Gradle build
-├─ docs/                  # Architecture overview, guides, and follow-ups
-├─ .github/policies/      # Module, native, detector touch point, reflection, and text protocol policies
-├─ .github/scripts/       # Repository guards and their self-tests
-├─ gradle/                # Version catalog and Gradle wrapper files
-├─ scripts/               # Detector scaffold and repository maintenance scripts
-├─ build.gradle.kts
-└─ settings.gradle.kts
-```
-
-Each detector is a set of Gradle modules under `feature/<name>/`:
-
-- `domain`: result models, report models, status definitions, and judgement rules (pure JVM)
-- `data`: probes, parsers, repositories, JNI bridges, and Android service access
-- `presentation`: the card model, its mapping from the domain report, and the report projection (pure JVM)
-- `detector`: the one headless `<Name>Detector` object that binds the other layers for the SDK and the app
-- `ui`: the Compose card, the prompts for the detector's consents, and its integration with the dashboard
-
-Dependencies point from `:app` to the SDK, from both to features, from features to capabilities, and from capabilities to core; features never depend on each other. Every module declares exactly the dependencies it uses. The build and CI enforce these rules. See the [architecture overview](./docs/architecture/README.md).
-
-A new detector touches only its own directory and its one line in `DetectorCatalog`, plus one registry line and one policy entry when it has a native unit; the app generates its dashboard cards from the ui modules. One command creates all of it, in a state that builds and reports "Not evaluated" until its probe is written:
+依赖版本由仓库固定，构建前请阅读 [AGENTS.md](AGENTS.md) 和 [CODING_STANDARDS.md](CODING_STANDARDS.md)。
 
 ```bash
-python3 scripts/new_detector.py <name> --description "what it looks for and why that is evidence"
-```
-
-Continue with [Adding a detector](./docs/guides/adding-a-detector.md). To run the detectors inside another application, see [Using the SDK](./docs/guides/sdk-integration.md).
-
-Native sources are organized into units. Each unit lives in `src/main/cpp/<unit>/` of the module that owns it, is compiled as its own object library and is linked into `libduckdetector.so`; Kotlin code reaches native results through the JNI bridges of that same module.
-
-# Build
-
-## Requirements
-
-- Android Studio with Android SDK Platform 37 and Build Tools 37.0.0
-- JDK 17
-- Android NDK 30.0.16138531
-- CMake 4.1.2
-
-Dependency and tool versions are defined in [`gradle.properties`](./gradle.properties) and [`gradle/libs.versions.toml`](./gradle/libs.versions.toml).
-
-Initialize the UI submodule after cloning (or clone with `--recurse-submodules`). It is an
-independent Gradle build; the detector SDK never depends on it:
-
-```bash
-git submodule update --init --recursive
-```
-
-## Commands
-
-```bash
-# macOS / Linux
+git clone --recurse-submodules https://github.com/withite/ns-detector.git
+cd ns-detector
 ./gradlew :app:assembleDebug
-
-# Windows
-gradlew.bat :app:assembleDebug
 ```
 
-For the standard local validation path:
+需要 JDK 17、Android SDK 37、Build Tools 37.0.0、NDK 30.0.16138531 和 CMake 4.1.2；最终以 [gradle.properties](gradle.properties) 为准。Debug 构建无需任何仓库 Secret。签名正式版的四项配置、版本号、产物和 CI 入口见[构建与签名指南](docs/ns-detector/build.md)。
 
-```bash
-./gradlew unitTest :app:assembleDebug :app:lintDebug buildHealth
-for s in .github/scripts/check-*.py; do python3 "$s"; done
-```
+工程继续采用 Kotlin / Compose、C++ / JNI、feature 分层和独立 SDK。内部 Kotlin/JNI 包名及 `libduckdetector.so` 保留，以减少原生符号与多进程入口迁移风险；应用 ID 和用户可见品牌独立。原架构与 SDK 说明见 [架构文档](docs/architecture/README.md) 和 [SDK 集成](docs/guides/sdk-integration.md)。
 
-The same build also produces the headless SDK as one AAR, without any UI, published to `sdk/aar/build/repository` (see [Using the SDK](./docs/guides/sdk-integration.md)):
+## 来源与许可
 
-```bash
-./gradlew :sdk:aar:publish
-```
+本项目以 [Apache License 2.0](LICENSE) 分发，保留原作者版权与许可声明。开发基线为 [Duck-Detector-Refactoring](https://github.com/eltavine/Duck-Detector-Refactoring) 的固定提交 [`b1135897cff4ddf01797f042bdd15f7d7e364e0d`](https://github.com/eltavine/Duck-Detector-Refactoring/tree/b1135897cff4ddf01797f042bdd15f7d7e364e0d)，改动详见本仓库提交记录和 [NOTICE](NOTICE)。
 
-The [Nightly release](https://github.com/eltavine/Duck-Detector-Refactoring/releases/tag/nightly) includes the SDK AAR alongside the APK.
-
-Before contributing, read [`CONTRIBUTING.md`](./CONTRIBUTING.md) and [`CODING_STANDARDS.md`](./CODING_STANDARDS.md).
-
-## Release signing
-
-The build uses the `ciRelease` signing configuration only when all four variables are set:
-
-- `ANDROID_KEYSTORE_PATH`
-- `ANDROID_KEYSTORE_PASSWORD`
-- `ANDROID_KEY_ALIAS`
-- `ANDROID_KEY_PASSWORD`
-
-Without the complete set, the local `release` build is signed with the debug key. Do not treat such an artifact as an official release.
-
-# Privacy and limitations
-
-- Detection is performed on the device. The project does not claim that every modified environment can be detected.
-- Network-capable features are limited to the consented TEE revocation refresh, GitHub update metadata and changelog checks (through gh-proxy.com while GitHub acceleration is on), and links explicitly opened by the user.
-- Results are heuristic and can contain false positives, false negatives, unsupported checks, or incomplete evidence.
-- Hardware-backed KeyStore, StrongBox, Binder behavior, `/proc`, SELinux, mount namespaces, and other low-level interfaces vary by device and OS build.
-
-# Project status
-
-<p align="center">
-  <a href="https://www.star-history.com/?repos=eltavine%2FDuck-Detector-Refactoring&type=date&legend=top-left">
-   <picture>
-     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=eltavine/Duck-Detector-Refactoring&type=date&theme=dark&legend=top-left&sealed_token=z8Kbufd8a78_gJi-_n_U1dbqg3bT3wexECwhrq7Vx1QpfiXBUdPXV5w_rUQSnu86aVeWxIJJENg8tVTng5ul8xki40oK_UhKF3-_gZgvrhWzbtd7OKm9kg" />
-     <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=eltavine/Duck-Detector-Refactoring&type=date&legend=top-left&sealed_token=z8Kbufd8a78_gJi-_n_U1dbqg3bT3wexECwhrq7Vx1QpfiXBUdPXV5w_rUQSnu86aVeWxIJJENg8tVTng5ul8xki40oK_UhKF3-_gZgvrhWzbtd7OKm9kg" />
-     <img alt="Star history chart" src="https://api.star-history.com/chart?repos=eltavine/Duck-Detector-Refactoring&type=date&legend=top-left&sealed_token=z8Kbufd8a78_gJi-_n_U1dbqg3bT3wexECwhrq7Vx1QpfiXBUdPXV5w_rUQSnu86aVeWxIJJENg8tVTng5ul8xki40oK_UhKF3-_gZgvrhWzbtd7OKm9kg" />
-   </picture>
-  </a>
-</p>
-
-# Disclaimer
-
-This software is provided "as is", without warranty of any kind. It is intended for education, diagnostics, and security research. The developers are not liable for damage, data loss, or system instability resulting from its use. Interpret heuristic findings in the context of the device, OS build, and available probe coverage.
-
-# License
-
-DuckDetector is licensed under the [Apache License 2.0](./LICENSE).
+[春秋问题处理文档](https://github.com/mingzun09/Chunqiu-Detector-Problem-solution)仅作为需求与误报场景参考；本项目未从该仓库复制脚本、APK 或其他二进制。详细来源记录及固定版本的上游中英文说明见[上游与归属](docs/ns-detector/upstream.md)。

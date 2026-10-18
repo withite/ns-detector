@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,17 +63,6 @@ import io.github.xiaotong6666.uihelper.mode.UiMode
 
 @Composable
 fun DuckDetectorApp(onUiModeChange: (UiMode) -> Unit) {
-    val blacklistMatch = remember { DeviceBlacklist.matchCurrentDevice() }
-    if (blacklistMatch != null) {
-        Surface {
-            BlockedDeviceScreen(
-                match = blacklistMatch,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-        return
-    }
-
     val context = LocalContext.current
     val appContext = context.applicationContext
     val agreementStore = remember(appContext) { AgreementAcceptanceStore.getInstance(appContext) }

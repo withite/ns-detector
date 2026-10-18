@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +22,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
@@ -37,9 +38,9 @@ import com.eltavine.duckdetector.features.settings.ui.R
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveFilledIconButton
 import com.eltavine.duckdetector.core.ui.components.DuckIcon
 
-private const val ABOUT_WEBSITE = "eltavine.com"
-private const val ABOUT_EMAIL = "me@eltavine.com"
-private const val ABOUT_GITHUB_URL = "https://github.com/eltavine/Duck-Detector-Refactoring"
+private const val ABOUT_WEBSITE = "github.com/withite/ns-detector"
+private const val ABOUT_ISSUES = "https://github.com/withite/ns-detector/issues"
+private const val ABOUT_GITHUB_URL = "https://github.com/withite/ns-detector"
 
 @Composable
 internal fun AboutLinks(modifier: Modifier = Modifier) {
@@ -55,10 +56,10 @@ internal fun AboutLinks(modifier: Modifier = Modifier) {
                 tint = aboutMiuixIconColor(),
             )
         }
-        AboutLinkButton(onClick = { openExternalUri(context, "mailto:$ABOUT_EMAIL") }) {
+        AboutLinkButton(onClick = { openExternalUri(context, ABOUT_ISSUES) }) {
             DuckIcon(
-                imageVector = Icons.Rounded.Email,
-                contentDescription = stringResource(R.string.about_label_email),
+                imageVector = Icons.Rounded.BugReport,
+                contentDescription = stringResource(R.string.about_label_issues),
                 tint = aboutMiuixIconColor(),
             )
         }

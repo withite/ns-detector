@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +46,7 @@ class GitHubAccelerationStore private constructor(context: Context) {
         }
         .map { prefs ->
             when (prefs[KEY_ENABLED]) {
-                null -> GitHubAcceleration.UNDECIDED
+                null -> GitHubAcceleration.DISABLED
                 true -> GitHubAcceleration.ENABLED
                 false -> GitHubAcceleration.DISABLED
             }

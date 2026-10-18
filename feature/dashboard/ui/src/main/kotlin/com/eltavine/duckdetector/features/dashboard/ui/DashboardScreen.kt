@@ -13,14 +13,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Modified 2026 by NS Detector contributors: evidence guidance and independent report naming.
  */
 
 package com.eltavine.duckdetector.features.dashboard.ui
 
-import android.os.Build
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,10 +49,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.eltavine.duckdetector.core.designsystem.components.StatusBarProtection
@@ -66,19 +64,9 @@ import com.eltavine.duckdetector.core.evidence.DetectorId
 import com.eltavine.duckdetector.core.ui.components.LocalDetectorCardExpansionSignal
 import com.eltavine.duckdetector.core.ui.detector.DetectorSession
 import com.eltavine.duckdetector.core.ui.detector.DeviceProfileSession
-import com.eltavine.duckdetector.core.ui.LocalAppBuildInfo
 import com.eltavine.duckdetector.core.ui.components.WrapSafeText
-import com.eltavine.duckdetector.core.ui.presentation.formatBuildTimeUtc
-import com.eltavine.duckdetector.features.dashboard.presentation.export.DashboardExport
-import com.eltavine.duckdetector.features.dashboard.presentation.export.DashboardReportRenderer
-import com.eltavine.duckdetector.features.dashboard.presentation.export.ExportHeader
 import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardFindingModel
-import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardOverviewModel
 import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardUiState
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveCircularProgressIndicator
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveContent
 import io.github.xiaotong6666.uihelper.adaptive.adaptiveContainerContentColor
@@ -109,55 +97,11 @@ fun DashboardScreen(
         miuix = false,
     )
     val layoutDirection = LocalLayoutDirection.current
-    val context = LocalContext.current
-    val resources = LocalResources.current
-    val buildInfo = LocalAppBuildInfo.current
     val orderedDetectors = remember(uiState.cardOrder, detectors) {
         val detectorsById = detectors.associateBy { it.id }
         uiState.cardOrder.mapNotNull { detectorsById[it] }
     }
-    val exportLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("text/plain"),
-    ) { uri ->
-        if (uri != null) {
-            try {
-                val text = DashboardReportRenderer.render(
-                    DashboardExport(
-                        header = ExportHeader(
-                            versionName = buildInfo.versionName,
-                            versionCode = buildInfo.versionCode,
-                            buildHash = buildInfo.buildHash,
-                            buildTime = formatBuildTimeUtc(buildInfo.buildTimeUtc),
-                            reportTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z)", Locale.US).format(Date()),
-                        ),
-                        overview = uiState.overview,
-                        topFindings = uiState.topFindings,
-                        detectors = orderedDetectors.map { it.report() },
-                        device = deviceProfile.report(),
-                    ),
-                )
-                context.contentResolver.openOutputStream(uri)?.use { stream ->
-                    stream.write(text.toByteArray(Charsets.UTF_8))
-                }
-                Toast.makeText(
-                    context,
-                    resources.getString(R.string.dashboard_report_saved),
-                    Toast.LENGTH_SHORT,
-                ).show()
-            } catch (e: Exception) {
-                Toast.makeText(
-                    context,
-                    e.message
-                        ?.takeIf(String::isNotBlank)
-                        ?.let { message ->
-                            resources.getString(R.string.dashboard_report_save_failed, message)
-                        }
-                        ?: resources.getString(R.string.dashboard_report_save_failed_unknown),
-                    Toast.LENGTH_SHORT,
-                ).show()
-            }
-        }
-    }
+    val exportReport = rememberDashboardReportExporter(uiState, orderedDetectors, deviceProfile)
 
     Box(
         modifier = modifier
@@ -198,10 +142,8 @@ fun DashboardScreen(
             }
             item {
                 DashboardSummarySection(
-                    overview = uiState.overview,
-                    findings = uiState.topFindings,
-                    showLoadingOverlay = uiState.isLoading,
-                    onExportReport = { exportLauncher.launch(generateExportReportFileName()) },
+                    uiState = uiState,
+                    onExportReport = exportReport,
                     onFindingClick = { finding ->
                         val detectorId = finding.detectorId ?: return@DashboardSummarySection
                         val detectorIndex = orderedDetectors.indexOfFirst { it.id == detectorId }
@@ -250,13 +192,11 @@ private data class DashboardExpansionRequest(
 
 @Composable
 private fun DashboardSummarySection(
-    overview: DashboardOverviewModel,
-    findings: List<DashboardFindingModel>,
-    showLoadingOverlay: Boolean,
+    uiState: DashboardUiState,
     onExportReport: () -> Unit,
     onFindingClick: (DashboardFindingModel) -> Unit,
 ) {
-    if (showLoadingOverlay) {
+    if (uiState.isLoading) {
         // Do not draw the finished Danger card behind an opaque loading overlay. Its independent
         // Material radius leaked through the MIUIX squircle corners, and made the placeholder
         // inherit the combined height of cards that are not ready yet.
@@ -265,10 +205,20 @@ private fun DashboardSummarySection(
         // The status hero and finding queue already have their own internal spacing.
         // An additional 24dp here produced the empty band between the two cards.
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            DashboardOverviewCard(model = overview, onExportReport = onExportReport)
+            DashboardOverviewCard(model = uiState.overview, onExportReport = onExportReport)
+            DashboardHistoryPanel(uiState = uiState)
+            DashboardSectionHeading(
+                title = stringResource(R.string.dashboard_findings_title),
+                detail = stringResource(R.string.dashboard_findings_hint),
+            )
             DashboardFindingsCard(
-                findings = findings,
+                findings = uiState.topFindings,
                 onFindingClick = onFindingClick,
+            )
+            DashboardEvidenceGuide()
+            DashboardSectionHeading(
+                title = stringResource(R.string.dashboard_modules_title),
+                detail = stringResource(R.string.dashboard_modules_hint),
             )
         }
     }
@@ -280,7 +230,7 @@ private fun DashboardLoadingOverlay(
     modifier: Modifier = Modifier,
 ) {
     DuckPanel(
-        modifier = modifier,
+        modifier = modifier.semantics { liveRegion = LiveRegionMode.Polite },
         contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 44.dp, bottom = 44.dp),
     ) {
         Column(
@@ -310,18 +260,4 @@ private fun DashboardLoadingOverlay(
             )
         }
     }
-}
-
-internal fun generateExportReportFileName(
-    model: String = Build.MODEL,
-    nowEpochMillis: Long = System.currentTimeMillis(),
-): String {
-    val sanitizedModel = model.trim().ifBlank { "unknown" }
-        .replace(Regex("[^a-zA-Z0-9._-]"), "_")
-    // Filenames are machine-readable and must not vary with the device language/locale.
-    val timestampFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT).apply {
-        timeZone = TimeZone.getTimeZone("UTC")
-    }
-    val timestamp = timestampFormat.format(Date(nowEpochMillis))
-    return "duck_detector_report_${sanitizedModel}_$timestamp.txt"
 }

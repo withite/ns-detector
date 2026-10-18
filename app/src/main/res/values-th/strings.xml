@@ -1,5 +1,6 @@
 <!--
 Copyright 2026 Duck Apps Contributor
+Modified 2026 by NS Detector contributors: independent diagnostics product.
 If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,19 +17,19 @@ limitations under the License.
 -->
 
 <resources>
-    <string name="duck_logo_description">โลโก้ Duck Detector</string>
+    <string name="duck_logo_description">โลโก้ NS Detector</string>
     <string name="user_agreement">ข้อตกลงผู้ใช้</string>
     <string name="disclaimer">และข้อจำกัดความรับผิดชอบ</string>
     <string name="please_read_carefully">โปรดอ่านอย่างละเอียดก่อนดำเนินการต่อ</string>
     <string name="agreement_risk_title">คำเตือนการใช้งานที่มีความเสี่ยงสูง</string>
     <string name="agreement_risk_body_emphasis">อย่านำผลลัพธ์เพียงครั้งเดียวไปใช้เป็นข้อสรุปสุดท้ายด้านกฎหมาย การปฏิบัติตามข้อกำหนด การรับประกัน หรือความปลอดภัย</string>
-    <string name="agreement_risk_body_template">Duck Detector ให้เพียงสัญญาณอ้างอิงเท่านั้น %1$s ก่อนตัดสินใจดำเนินการ โปรดพิจารณาร่วมกับการตรวจสอบด้วยตนเอง หลักฐานจากต้นทาง และการประเมินความเสี่ยงของคุณเองเสมอ</string>
+    <string name="agreement_risk_body_template">NS Detector ให้เพียงสัญญาณอ้างอิงเท่านั้น %1$s ก่อนตัดสินใจดำเนินการ โปรดพิจารณาร่วมกับการตรวจสอบด้วยตนเอง หลักฐานจากต้นทาง และการประเมินความเสี่ยงของคุณเองเสมอ</string>
     <string name="user_agreement_title">ข้อตกลงผู้ใช้</string>
-    <string name="user_agreement_content" formatted="false">การใช้งาน Duck Detector ถือว่าคุณยอมรับเงื่อนไขต่อไปนี้:\n\n1. วัตถุประสงค์การใช้งาน\nแอปนี้ออกแบบมาเพื่อการศึกษาและการประเมินความปลอดภัยส่วนบุคคลเท่านั้น โดยช่วยให้ผู้ใช้เข้าใจสถานะความปลอดภัยของอุปกรณ์ตนเอง\n\n2. การไม่รับประกัน\nแอปนี้ให้บริการตามสภาพที่เป็นอยู่ โดยไม่มีการรับประกันใด ๆ ไม่ว่าชัดแจ้งหรือโดยนัย ผู้พัฒนาไม่รับประกันความถูกต้อง ความครบถ้วน หรือความน่าเชื่อถือของผลการตรวจจับ\n\n3. ความรับผิดชอบของผู้ใช้\nคุณต้องรับผิดชอบแต่เพียงผู้เดียวต่อวิธีการใช้งานแอปนี้และผลที่อาจเกิดขึ้นจากการใช้งานนั้น\n\n4. การปฏิบัติตามกฎหมาย\nคุณตกลงที่จะใช้แอปนี้ให้สอดคล้องกับกฎหมายและข้อบังคับระดับท้องถิ่น ระดับประเทศ และระดับสากลที่เกี่ยวข้องทั้งหมด</string>
+    <string name="user_agreement_content" formatted="false">การใช้งาน NS Detector ถือว่าคุณยอมรับเงื่อนไขต่อไปนี้:\n\n1. วัตถุประสงค์การใช้งาน\nแอปนี้ออกแบบมาเพื่อการศึกษาและการประเมินความปลอดภัยส่วนบุคคลเท่านั้น โดยช่วยให้ผู้ใช้เข้าใจสถานะความปลอดภัยของอุปกรณ์ตนเอง\n\n2. การไม่รับประกัน\nแอปนี้ให้บริการตามสภาพที่เป็นอยู่ โดยไม่มีการรับประกันใด ๆ ไม่ว่าชัดแจ้งหรือโดยนัย ผู้พัฒนาไม่รับประกันความถูกต้อง ความครบถ้วน หรือความน่าเชื่อถือของผลการตรวจจับ\n\n3. ความรับผิดชอบของผู้ใช้\nคุณต้องรับผิดชอบแต่เพียงผู้เดียวต่อวิธีการใช้งานแอปนี้และผลที่อาจเกิดขึ้นจากการใช้งานนั้น\n\n4. การปฏิบัติตามกฎหมาย\nคุณตกลงที่จะใช้แอปนี้ให้สอดคล้องกับกฎหมายและข้อบังคับระดับท้องถิ่น ระดับประเทศ และระดับสากลที่เกี่ยวข้องทั้งหมด</string>
     <string name="disclaimer_title">ข้อจำกัดความรับผิดชอบ</string>
-    <string name="disclaimer_content" formatted="false">ประกาศสำคัญ:\n\n1. ข้อจำกัดของการตรวจจับ\nDuck Detector ใช้วิธีหลายแบบในการประเมินสถานะความปลอดภัยของอุปกรณ์ แต่ไม่มีวิธีใดที่แม่นยำ 100&#37; ผลลัพธ์ควรถูกมองว่าเป็นสัญญาณประกอบ ไม่ใช่ข้อสรุปสุดท้าย\n\n2. การแจ้งเตือนผิดพลาดและการพลาดตรวจ\nแอปนี้อาจให้ผลลวงหรือพลาดตรวจได้ โปรดใช้ร่วมกับเครื่องมือความปลอดภัยแบบมืออาชีพและการตรวจสอบด้วยตนเองเพื่อการประเมินที่ครบถ้วน\n\n3. การจำกัดความรับผิด\nผู้พัฒนา ผู้มีส่วนร่วม และผู้จัดจำหน่าย Duck Detector จะไม่รับผิดชอบต่อความเสียหายใด ๆ ทั้งโดยตรง โดยอ้อม โดยบังเอิญ เป็นกรณีพิเศษ หรือเป็นผลสืบเนื่องจากการใช้งานหรือการไม่สามารถใช้งานแอปนี้ได้\n\n4. บริการของบุคคลที่สาม\nการตรวจสอบการเพิกถอน TEE ใช้ snapshot ที่ฝังในแอปเป็นค่าเริ่มต้น หากคุณอนุญาตการอัปเดตข้อมูลการเพิกถอนออนไลน์ แอปอาจเชื่อมต่อกับ Google attestation revocation endpoint การสแกนความปลอดภัยยังคงทำงานภายในอุปกรณ์ของคุณ และผลการตรวจจับจะไม่ถูกอัปโหลดเป็น telemetry ของการสแกนโดยเจตนา</string>
+    <string name="disclaimer_content" formatted="false">ประกาศสำคัญ:\n\n1. ข้อจำกัดของการตรวจจับ\nNS Detector ใช้วิธีหลายแบบในการประเมินสถานะความปลอดภัยของอุปกรณ์ แต่ไม่มีวิธีใดที่แม่นยำ 100&#37; ผลลัพธ์ควรถูกมองว่าเป็นสัญญาณประกอบ ไม่ใช่ข้อสรุปสุดท้าย\n\n2. การแจ้งเตือนผิดพลาดและการพลาดตรวจ\nแอปนี้อาจให้ผลลวงหรือพลาดตรวจได้ โปรดใช้ร่วมกับเครื่องมือความปลอดภัยแบบมืออาชีพและการตรวจสอบด้วยตนเองเพื่อการประเมินที่ครบถ้วน\n\n3. การจำกัดความรับผิด\nผู้พัฒนา ผู้มีส่วนร่วม และผู้จัดจำหน่าย NS Detector จะไม่รับผิดชอบต่อความเสียหายใด ๆ ทั้งโดยตรง โดยอ้อม โดยบังเอิญ เป็นกรณีพิเศษ หรือเป็นผลสืบเนื่องจากการใช้งานหรือการไม่สามารถใช้งานแอปนี้ได้\n\n4. บริการของบุคคลที่สาม\nการตรวจสอบการเพิกถอน TEE ใช้ snapshot ที่ฝังในแอปเป็นค่าเริ่มต้น หากคุณอนุญาตการอัปเดตข้อมูลการเพิกถอนออนไลน์ แอปอาจเชื่อมต่อกับ Google attestation revocation endpoint การสแกนความปลอดภัยยังคงทำงานภายในอุปกรณ์ของคุณ และผลการตรวจจับจะไม่ถูกอัปโหลดเป็น telemetry ของการสแกนโดยเจตนา</string>
     <string name="privacy_notice_title">ประกาศความเป็นส่วนตัว</string>
-    <string name="privacy_notice_content" formatted="false">สรุปความเป็นส่วนตัว: การตรวจสอบความปลอดภัยทำงานภายในอุปกรณ์และจะไม่อัปโหลดผลการตรวจจับเป็น telemetry การตรวจสอบการเพิกถอน TEE ใช้ snapshot ในตัวเป็นค่าเริ่มต้น หลังจากตั้งค่าการเริ่มต้นเสร็จ แอปจะเชื่อมต่อ GitHub หนึ่งครั้งต่อการเปิดแบบ cold start เพื่อตรวจสอบข้อมูลอัปเดต Nightly หากเปิดเร่งความเร็ว GitHub คำขอเหล่านี้จะส่งผ่านบริการ gh-proxy.com ของบุคคลที่สาม</string>
+    <string name="privacy_notice_content" formatted="false">Security checks run locally on your device. Findings are not uploaded as telemetry. Update checks start only when you choose Check for updates in Settings. GitHub is contacted directly by default; the optional third-party proxy is off. TEE revocation uses a bundled snapshot unless you explicitly allow online refresh.</string>
     <string name="timer_elapsed">ครบ 30 วินาที</string>
     <string name="timer_waiting">โปรดรอ %1$d วินาที</string>
     <string name="fully_reviewed">ตรวจครบแล้ว</string>
@@ -57,7 +58,7 @@ limitations under the License.
     <string name="startup_status_review_later">ตรวจภายหลัง</string>
     <string name="startup_notifications_title">การแจ้งเตือน</string>
     <string name="startup_notifications_ready_headline">เปิดการแจ้งเตือนการสแกนแล้ว</string>
-    <string name="startup_notifications_ready_detail">Duck Detector สามารถส่งการแจ้งเตือนความคืบหน้าการสแกนได้ในขณะที่การ์ด detector กำลังเก็บหลักฐาน</string>
+    <string name="startup_notifications_ready_detail">NS Detector สามารถส่งการแจ้งเตือนความคืบหน้าการสแกนได้ในขณะที่การ์ด detector กำลังเก็บหลักฐาน</string>
     <string name="startup_notifications_prompt_headline">เลือกว่าจะอนุญาตให้ความคืบหน้าการสแกนส่งการแจ้งเตือนหรือไม่</string>
     <string name="startup_notifications_prompt_detail_api33">Android %1$d ต้องใช้สิทธิ์การแจ้งเตือนขณะทำงาน การสแกนตอนเริ่มต้นจะยังถูกบล็อกจนกว่าคุณจะอนุญาตหรือเลือกดำเนินการต่อโดยไม่เปิดใช้</string>
     <string name="startup_notifications_prompt_detail_legacy">Android เวอร์ชันนี้ไม่ต้องแสดงคำขอสิทธิ์การแจ้งเตือนขณะทำงาน แต่ยังคงต้องบันทึกการตัดสินใจของคุณไว้ในนโยบายการเริ่มต้น</string>
@@ -67,13 +68,13 @@ limitations under the License.
     <string name="startup_notifications_skipped_detail">ความคืบหน้าการสแกนจะแสดงอยู่ในแอปเท่านั้นจนกว่าคุณจะอนุญาตสิทธิ์การแจ้งเตือนภายหลัง</string>
     <string name="startup_live_update_title">Live Update</string>
     <string name="startup_live_update_unsupported_headline">การแจ้งเตือนต่อเนื่องแบบ promoted ไม่พร้อมใช้งานบน Android เวอร์ชันนี้</string>
-    <string name="startup_live_update_unsupported_detail">Duck Detector จะใช้เส้นทางการแจ้งเตือนปกติเมื่อมีสิทธิ์การแจ้งเตือน</string>
+    <string name="startup_live_update_unsupported_detail">NS Detector จะใช้เส้นทางการแจ้งเตือนปกติเมื่อมีสิทธิ์การแจ้งเตือน</string>
     <string name="startup_live_update_waiting_headline">Live Update ขึ้นอยู่กับเส้นทางการแจ้งเตือน</string>
     <string name="startup_live_update_waiting_detail">โปรดอนุญาตสิทธิ์การแจ้งเตือนก่อน หากคุณยังปิดการแจ้งเตือนไว้ การ์ดนี้จะถอยกลับไปใช้เพียงความคืบหน้าในแอป</string>
     <string name="startup_live_update_ready_headline">อนุญาตการแจ้งเตือนต่อเนื่องแบบ promoted แล้ว</string>
     <string name="startup_live_update_ready_detail">บน Android เวอร์ชันที่รองรับ ความคืบหน้าการสแกนสามารถแสดงผ่านเส้นทาง Live Update ที่สมบูรณ์กว่าได้</string>
     <string name="startup_live_update_prompt_headline">เลือกว่าจะใช้เส้นทาง Live Update ของ Android หรือไม่</string>
-    <string name="startup_live_update_prompt_detail">Duck Detector สามารถเปิดหน้าระบบสำหรับการแจ้งเตือนต่อเนื่องแบบ promoted ได้ หากคุณข้าม ความคืบหน้าการสแกนจะถอยกลับไปใช้การแจ้งเตือนปกติ</string>
+    <string name="startup_live_update_prompt_detail">NS Detector สามารถเปิดหน้าระบบสำหรับการแจ้งเตือนต่อเนื่องแบบ promoted ได้ หากคุณข้าม ความคืบหน้าการสแกนจะถอยกลับไปใช้การแจ้งเตือนปกติ</string>
     <string name="startup_live_update_open_settings">เปิดการตั้งค่า</string>
     <string name="startup_live_update_use_regular">ใช้การแจ้งเตือนปกติ</string>
     <string name="startup_live_update_regular_headline">เลือกการแจ้งเตือนปกติแล้ว</string>
@@ -93,7 +94,7 @@ limitations under the License.
     <string name="navigation_home">หน้าหลัก</string>
     <string name="navigation_settings">การตั้งค่า</string>
     <string name="update_download_failed">ไม่สามารถดาวน์โหลดหรือตรวจสอบการอัปเดตได้</string>
-    <string name="update_install_permission_required">อนุญาตให้ติดตั้งจาก Duck Detector แล้วแตะติดตั้งอีกครั้ง</string>
+    <string name="update_install_permission_required">อนุญาตให้ติดตั้งจาก NS Detector แล้วแตะติดตั้งอีกครั้ง</string>
     <string name="update_install_failed">ไม่สามารถเปิดตัวติดตั้งได้</string>
     <string name="update_apk_unavailable">ไฟล์อัปเดตที่ดาวน์โหลดใช้ไม่ได้ โปรดดาวน์โหลดอีกครั้ง</string>
 </resources>

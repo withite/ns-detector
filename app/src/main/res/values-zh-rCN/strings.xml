@@ -1,5 +1,6 @@
 <!--
 Copyright 2026 Duck Apps Contributor
+Modified 2026 by NS Detector contributors: independent diagnostics product.
 If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,19 +17,19 @@ limitations under the License.
 -->
 
 <resources>
-    <string name="duck_logo_description">Duck Detector 标志</string>
+    <string name="duck_logo_description">NS Detector 标志</string>
     <string name="user_agreement">用户协议</string>
     <string name="disclaimer">及免责声明</string>
     <string name="please_read_carefully">请在继续前仔细阅读</string>
     <string name="agreement_risk_title">高风险使用提醒</string>
     <string name="agreement_risk_body_emphasis">请勿将任何单次结果视为最终的法律、合规、保修或安全结论。</string>
-    <string name="agreement_risk_body_template">Duck Detector 仅提供参考性信号。%1$s在采取行动前，请务必结合人工核验、上游证据以及您自己的风险判断进行综合评估。</string>
+    <string name="agreement_risk_body_template">NS Detector 仅提供参考性信号。%1$s在采取行动前，请务必结合人工核验、上游证据以及您自己的风险判断进行综合评估。</string>
     <string name="user_agreement_title">用户协议</string>
-    <string name="user_agreement_content" formatted="false">使用 Duck Detector 即表示您同意以下条款：\n\n1. 使用目的\n本应用仅用于教育用途和个人安全评估，帮助用户了解其本人设备的安全状态。\n\n2. 不提供担保\n本应用按“现状”提供，不附带任何明示或暗示担保。开发者不保证检测结果的准确性、完整性或可靠性。\n\n3. 用户责任\n您需自行对本应用的使用方式及由此产生的任何后果负责。\n\n4. 法律合规\n您同意按照所有适用的地方法律、国家法律及国际法规使用本应用。</string>
+    <string name="user_agreement_content" formatted="false">使用 NS Detector 即表示您同意以下条款：\n\n1. 使用目的\n本应用仅用于教育用途和个人安全评估，帮助用户了解其本人设备的安全状态。\n\n2. 不提供担保\n本应用按“现状”提供，不附带任何明示或暗示担保。开发者不保证检测结果的准确性、完整性或可靠性。\n\n3. 用户责任\n您需自行对本应用的使用方式及由此产生的任何后果负责。\n\n4. 法律合规\n您同意按照所有适用的地方法律、国家法律及国际法规使用本应用。</string>
     <string name="disclaimer_title">免责声明</string>
-    <string name="disclaimer_content" formatted="false">重要提示：\n\n1. 检测局限性\nDuck Detector 使用多种方法检测设备安全状态，但没有任何检测方法能做到 100&#37; 准确。结果应视为提示信息，而非最终定论。\n\n2. 误报与漏报\n本应用可能出现误报或漏报。请始终结合专业安全工具与您自己的核验进行全面判断。\n\n3. 免责条款\n对于因使用或无法使用本应用而导致的任何直接、间接、附带、特殊或后果性损失，Duck Detector 的开发者、贡献者和分发者概不承担责任。\n\n4. 第三方服务\nTEE 吊销检查默认使用应用内置快照。如果您允许在线吊销库更新，应用可能会访问 Google 的 attestation revocation endpoint。安全扫描本身仍在您的设备本地执行，检测结果也不会被有意上传为扫描遥测。</string>
+    <string name="disclaimer_content" formatted="false">重要提示：\n\n1. 检测局限性\nNS Detector 使用多种方法检测设备安全状态，但没有任何检测方法能做到 100&#37; 准确。结果应视为提示信息，而非最终定论。\n\n2. 误报与漏报\n本应用可能出现误报或漏报。请始终结合专业安全工具与您自己的核验进行全面判断。\n\n3. 免责条款\n对于因使用或无法使用本应用而导致的任何直接、间接、附带、特殊或后果性损失，NS Detector 的开发者、贡献者和分发者概不承担责任。\n\n4. 第三方服务\nTEE 吊销检查默认使用应用内置快照。如果您允许在线吊销库更新，应用可能会访问 Google 的 attestation revocation endpoint。安全扫描本身仍在您的设备本地执行，检测结果也不会被有意上传为扫描遥测。</string>
     <string name="privacy_notice_title">隐私说明</string>
-    <string name="privacy_notice_content" formatted="false">隐私摘要：安全检查在您的设备本地执行，检测结果不会被有意上传为扫描遥测。TEE 吊销检查默认使用应用内置快照；如果您允许在线刷新，应用可能会访问 Google 的 attestation revocation endpoint。完成启动选项后，应用会在每次冷启动时访问一次 GitHub，以检查 Nightly 更新元数据。如果您开启 GitHub 加速，这些请求将改由第三方服务 gh-proxy.com 中转。</string>
+    <string name="privacy_notice_content" formatted="false">检测在设备本地运行，不会作为遥测上传检测结果。仅当您在设置中主动检查更新时才访问 GitHub，默认直接连接，第三方代理默认关闭。TEE 吊销检查使用内置快照，只有明确允许后才在线刷新。</string>
     <string name="timer_elapsed">已等待 30 秒</string>
     <string name="timer_waiting">请等待 %1$d 秒</string>
     <string name="fully_reviewed">已完整阅读</string>
@@ -56,12 +57,12 @@ limitations under the License.
     <string name="startup_status_acknowledged">已确认</string>
     <string name="startup_status_review_later">稍后检查</string>
     <string name="startup_ui_style_title">UI 风格</string>
-    <string name="startup_ui_style_detail">选择 Duck Detector 使用的界面引擎。之后仍可在设置中随时切换。</string>
+    <string name="startup_ui_style_detail">选择 NS Detector 使用的界面引擎。之后仍可在设置中随时切换。</string>
     <string name="startup_ui_style_material">Material 3</string>
     <string name="startup_ui_style_miuix">MIUIX</string>
     <string name="startup_notifications_title">通知</string>
     <string name="startup_notifications_ready_headline">扫描通知已启用。</string>
-    <string name="startup_notifications_ready_detail">Duck Detector 可以在检测卡片收集证据时发布扫描进度通知。</string>
+    <string name="startup_notifications_ready_detail">NS Detector 可以在检测卡片收集证据时发布扫描进度通知。</string>
     <string name="startup_notifications_prompt_headline">请选择是否允许扫描进度发送通知。</string>
     <string name="startup_notifications_prompt_detail_api33">Android %1$d 需要运行时通知权限。在您允许或明确选择不启用之前，启动扫描会保持阻塞。</string>
     <string name="startup_notifications_prompt_detail_legacy">当前 Android 版本不需要运行时通知弹窗，但启动策略仍需要记录您的选择。</string>
@@ -71,13 +72,13 @@ limitations under the License.
     <string name="startup_notifications_skipped_detail">在您稍后授予通知权限之前，扫描进度都只会显示在应用内。</string>
     <string name="startup_live_update_title">Live Update</string>
     <string name="startup_live_update_unsupported_headline">当前 Android 版本不支持提升型持续通知。</string>
-    <string name="startup_live_update_unsupported_detail">在拥有通知权限时，Duck Detector 将改用常规通知路径。</string>
+    <string name="startup_live_update_unsupported_detail">在拥有通知权限时，NS Detector 将改用常规通知路径。</string>
     <string name="startup_live_update_waiting_headline">Live Update 依赖通知路径。</string>
     <string name="startup_live_update_waiting_detail">请先授予通知权限。如果你保持禁用通知，此卡片将退回到仅在应用内显示进度。</string>
     <string name="startup_live_update_ready_headline">已允许提升型持续通知。</string>
     <string name="startup_live_update_ready_detail">在支持的 Android 版本上，扫描进度可以通过更丰富的 Live Update 路径显示。</string>
     <string name="startup_live_update_prompt_headline">请选择是否使用 Android Live Update 路径。</string>
-    <string name="startup_live_update_prompt_detail">Duck Detector 可以打开系统中的提升型持续通知设置页。如果跳过，扫描进度将退回到常规通知。</string>
+    <string name="startup_live_update_prompt_detail">NS Detector 可以打开系统中的提升型持续通知设置页。如果跳过，扫描进度将退回到常规通知。</string>
     <string name="startup_live_update_open_settings">打开设置</string>
     <string name="startup_live_update_use_regular">使用常规通知</string>
     <string name="startup_live_update_regular_headline">已选择常规通知。</string>
@@ -97,7 +98,7 @@ limitations under the License.
     <string name="navigation_home">主页</string>
     <string name="navigation_settings">设置</string>
     <string name="update_download_failed">无法下载或验证更新</string>
-    <string name="update_install_permission_required">请允许 Duck Detector 安装应用，然后再次点击“安装”</string>
+    <string name="update_install_permission_required">请允许 NS Detector 安装应用，然后再次点击“安装”</string>
     <string name="update_install_failed">无法打开安装程序</string>
     <string name="update_apk_unavailable">下载的更新文件已失效，请重新下载</string>
 </resources>

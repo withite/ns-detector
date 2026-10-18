@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,6 +63,10 @@ class DuckDetectorApkArtifactsConventionPlugin : Plugin<Project> {
 
                 renameTask.configure {
                     transformationRequest.set(apkTransformationRequest)
+                    unsignedExport.set(
+                        providers.gradleProperty("nsdetector.externalSigning")
+                            .map { it.toBooleanStrict() }.orElse(false)
+                    )
                     gitHash.set(
                         providers.environmentVariable("GITHUB_SHA")
                             .map { it.take(8) }
@@ -91,6 +96,9 @@ abstract class RenameApkTask : DefaultTask() {
     @get:Input
     abstract val gitHash: Property<String>
 
+    @get:Input
+    abstract val unsignedExport: Property<Boolean>
+
     @TaskAction
     fun renameArtifacts() {
         transformationRequest.get().submit(this) { builtArtifact ->
@@ -105,18 +113,19 @@ abstract class RenameApkTask : DefaultTask() {
     private fun buildApkFileName(builtArtifact: BuiltArtifact): String {
         val apkVersionName = builtArtifact.versionName?.takeIf { it.isNotBlank() } ?: "unknown"
         val shortGitHash = gitHash.get().ifBlank { "unknown" }
-        val versionedName = buildVersionedName(apkVersionName, shortGitHash)
+        val versionedName = buildVersionedName(apkVersionName, shortGitHash) +
+            if (unsignedExport.get()) "-unsigned" else ""
         return when (builtArtifact.outputType) {
             VariantOutputConfiguration.OutputType.ONE_OF_MANY -> {
                 val filterSuffix = builtArtifact.filters.joinToString("-") { filter ->
                     "${filter.filterType.name.lowercase()}-${filter.identifier}"
                 }
-                "Duck Detector-$versionedName-$filterSuffix.apk"
+                "NS-Detector-$versionedName-$filterSuffix.apk"
             }
 
             VariantOutputConfiguration.OutputType.SINGLE,
             VariantOutputConfiguration.OutputType.UNIVERSAL -> {
-                "Duck Detector-$versionedName.apk"
+                "NS-Detector-$versionedName.apk"
             }
         }
     }

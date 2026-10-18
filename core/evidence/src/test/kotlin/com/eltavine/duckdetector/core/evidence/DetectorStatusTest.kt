@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,9 +37,22 @@ class DetectorStatusTest {
     @Test
     fun `only info status may carry an info kind`() {
         DetectionSeverity.entries.filter { it != DetectionSeverity.INFO }.forEach { severity ->
-            assertThrows(IllegalArgumentException::class.java) {
-                DetectorStatus(severity, InfoKind.SUPPORT)
+            InfoKind.entries.forEach { kind ->
+                assertThrows(IllegalArgumentException::class.java) {
+                    DetectorStatus(severity, kind)
+                }
             }
         }
+    }
+
+    @Test
+    fun `observed context is distinct from limited coverage and errors`() {
+        val context = DetectorStatus.info(InfoKind.CONTEXT)
+
+        assertEquals(DetectionSeverity.INFO, context.severity)
+        assertEquals(InfoKind.CONTEXT, context.infoKind)
+        assertEquals(0, InfoKind.ERROR.ordinal)
+        assertEquals(1, InfoKind.SUPPORT.ordinal)
+        assertEquals(2, InfoKind.CONTEXT.ordinal)
     }
 }

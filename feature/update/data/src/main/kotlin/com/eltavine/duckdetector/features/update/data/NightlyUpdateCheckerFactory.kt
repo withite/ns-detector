@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +25,11 @@ import kotlinx.coroutines.flow.first
 fun createNightlyUpdateChecker(appContext: Context): NightlyUpdateChecker {
     val accelerationStore = GitHubAccelerationStore.getInstance(appContext)
     return UpdateRepository(
+        httpClient = GitHubReleaseManifestClient(channel = releaseUpdateChannel(appContext)),
         cache = UpdateCacheStore.getInstance(appContext),
         currentRoute = { GitHubRoute.of(accelerationStore.acceleration.first()) },
     )
 }
+
+internal fun releaseUpdateChannel(context: Context): ReleaseUpdateChannel =
+    if (context.packageName.endsWith(".debug")) ReleaseUpdateChannel.PREVIEW else ReleaseUpdateChannel.STABLE

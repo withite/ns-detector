@@ -1,5 +1,6 @@
 <!--
 Copyright 2026 Duck Apps Contributor
+Modified 2026 by NS Detector contributors: independent diagnostics product.
 If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +17,7 @@ limitations under the License.
 -->
 
 <resources>
-    <string name="author_wall_title">貢獻者</string>
+    <string name="author_wall_title">上游贡献者</string>
     <string name="author_wall_hint">拖動瀏覽 · 雙指縮放 · 點擊頭像查看詳細資料</string>
     <string name="author_wordmark_hint">雙指放大查看貢獻者姓名中的字元</string>
     <string name="author_view_details">查看詳細資料</string>
@@ -24,7 +25,7 @@ limitations under the License.
     <string name="author_details_close">關閉</string>
     <string name="about_clipboard_build_hash_line">建置雜湊：%1$s</string>
     <string name="about_clipboard_build_time_line">建置時間（UTC）：%1$s UTC</string>
-    <string name="about_clipboard_label">Duck Detector 建置資訊</string>
+    <string name="about_clipboard_label">NS Detector 建置資訊</string>
     <string name="about_clipboard_version_line">版本：%1$s (%2$d)</string>
     <string name="about_copy_build_info_summary">複製版本、建置時間與建置雜湊</string>
     <string name="about_copy_toast">建置資訊已複製</string>
@@ -35,7 +36,7 @@ limitations under the License.
     <string name="about_label_privacy">隱私 / 資料使用</string>
     <string name="about_label_version">版本</string>
     <string name="about_label_website">網站</string>
-    <string name="about_privacy_summary">檢查在裝置本地執行，不會上傳檢測結果。應用會在每次冷啟動時存取一次 GitHub 取得 Nightly 更新中繼資料（開啟 GitHub 加速後經由 gh-proxy.com）；線上 CRL 重新整理仍為可選功能。</string>
+    <string name="about_privacy_summary">检测在设备本地运行，不会作为遥测上传检测结果。仅当您在设置中主动检查更新时才访问 GitHub，默认直接连接，第三方代理默认关闭。TEE 吊销检查使用内置快照，只有明确允许后才在线刷新。</string>
     <string name="about_subtitle">專案連結與建置中繼資料。</string>
     <string name="about_title">關於</string>
     <string name="about_value_build_time">%1$s UTC</string>
@@ -71,6 +72,8 @@ limitations under the License.
     <string name="update_status_checking">正在檢查 GitHub…</string>
     <string name="update_status_current">目前已是最新 Nightly 建置</string>
     <string name="update_status_failed">無法檢查 GitHub，輕觸重試</string>
-    <string name="update_status_idle">冷啟動後會檢查 GitHub Main Nightly，輕觸可立即檢查</string>
+    <string name="update_status_idle">仅在点击此处后联网检查更新</string>
     <string name="settings_section_appearance">外觀</string>
+    <string name="ns_project_attribution">NS Detector 是基于 Duck Detector 的独立衍生项目。上游作者和贡献者保留原有版权；完整许可证与第三方声明见开源许可。</string>
+    <string name="about_label_issues">问题反馈</string>
 </resources>

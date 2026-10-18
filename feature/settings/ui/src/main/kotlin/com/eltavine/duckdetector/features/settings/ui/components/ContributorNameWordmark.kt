@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -134,7 +135,7 @@ fun ContributorNameWordmark(modifier: Modifier = Modifier) {
                     Log.d("DuckSettingsScroll", "wordmark viewport=${it.width}x${it.height}")
                 }
                 .transformable(state = transformState, canPan = { zoom > 1f })
-                .semantics { contentDescription = "Duck Detector" },
+                .semantics { contentDescription = "NS Detector" },
         ) {
             if (size.width <= 0f || size.height <= 0f) return@Canvas
             val resolvedLayout = layout ?: return@Canvas
@@ -162,7 +163,7 @@ private data class WordmarkLayout(val characters: Path)
 
 private fun buildWordmarkLayout(names: List<String>): WordmarkLayout {
     val letters = Path().apply {
-        addWord("DUCK", RectF(60f, 20f, 940f, 180f))
+        addWord("NS", RectF(60f, 20f, 940f, 180f))
         addWord("DETECTOR", RectF(40f, 200f, 960f, 345f))
     }
     val region = Region().apply {

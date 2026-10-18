@@ -1,5 +1,6 @@
 <!--
 Copyright 2026 Duck Apps Contributor
+Modified 2026 by NS Detector contributors: independent diagnostics product.
 If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +17,7 @@ limitations under the License.
 -->
 
 <resources>
-    <string name="author_wall_title">기여자</string>
+    <string name="author_wall_title">Upstream contributors</string>
     <string name="author_wall_hint">드래그하여 이동 · 두 손가락으로 확대 및 축소 · 눌러서 상세 정보 보기</string>
     <string name="author_wordmark_hint">두 손가락으로 확대해 기여자 이름의 글자를 살펴보세요</string>
     <string name="author_view_details">상세 정보 보기</string>
@@ -24,7 +25,7 @@ limitations under the License.
     <string name="author_details_close">닫기</string>
     <string name="about_clipboard_build_hash_line">빌드 해시: %1$s</string>
     <string name="about_clipboard_build_time_line">빌드 시간 (UTC): %1$s UTC</string>
-    <string name="about_clipboard_label">Duck Detector 빌드 정보</string>
+    <string name="about_clipboard_label">NS Detector 빌드 정보</string>
     <string name="about_clipboard_version_line">버전: %1$s (%2$d)</string>
     <string name="about_copy_build_info_summary">버전, 빌드 시간 및 빌드 해시 복사</string>
     <string name="about_copy_toast">빌드 정보가 복사되었습니다</string>
@@ -35,7 +36,7 @@ limitations under the License.
     <string name="about_label_privacy">개인정보 / 데이터 사용</string>
     <string name="about_label_version">버전</string>
     <string name="about_label_website">웹사이트</string>
-    <string name="about_privacy_summary">검사는 기기에서 실행되며 탐지 결과는 업로드되지 않습니다. 콜드 스타트마다 GitHub에 한 번 연결해 Nightly 업데이트 메타데이터를 가져옵니다(GitHub 가속이 켜져 있으면 gh-proxy.com 경유). 온라인 CRL 새로고침은 선택 사항입니다.</string>
+    <string name="about_privacy_summary">Security checks run locally on your device. Findings are not uploaded as telemetry. Update checks start only when you choose Check for updates in Settings. GitHub is contacted directly by default; the optional third-party proxy is off. TEE revocation uses a bundled snapshot unless you explicitly allow online refresh.</string>
     <string name="about_subtitle">프로젝트 링크와 빌드 메타데이터입니다.</string>
     <string name="about_title">정보</string>
     <string name="about_value_build_time">%1$s UTC</string>
@@ -68,6 +69,8 @@ limitations under the License.
     <string name="update_status_checking">GitHub 확인 중…</string>
     <string name="update_status_current">최신 Nightly 빌드입니다</string>
     <string name="update_status_failed">GitHub를 확인하지 못했습니다. 다시 시도하려면 탭하세요</string>
-    <string name="update_status_idle">콜드 스타트 후 GitHub Main Nightly를 확인합니다. 지금 확인하려면 탭하세요</string>
+    <string name="update_status_idle">Updates are checked only when you tap here</string>
     <string name="settings_section_appearance">모양</string>
+    <string name="ns_project_attribution">NS Detector is an independent derivative of Duck Detector. Original authors and contributors retain their copyright. See open-source licenses for notices and terms.</string>
+    <string name="about_label_issues">Report an issue</string>
 </resources>

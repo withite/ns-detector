@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +39,7 @@ class UpdateManifestParser {
         }
 
         val channel = root.requireNonBlankString("channel")
-        if (channel != EXPECTED_CHANNEL) {
+        if (channel !in EXPECTED_CHANNELS) {
             throw UpdateManifestValidationException("Unexpected update channel: $channel")
         }
         val branch = root.requireNonBlankString("branch")
@@ -106,18 +107,23 @@ class UpdateManifestParser {
         ) {
             throw UpdateManifestValidationException("APK download URL must use the official GitHub host.")
         }
-        if (uri.path != "$EXPECTED_DOWNLOAD_PATH_PREFIX$apkName") {
+        val releasePath = uri.path.removePrefix(EXPECTED_DOWNLOAD_PATH_PREFIX)
+        val tag = releasePath.substringBefore('/')
+        if (!uri.path.startsWith(EXPECTED_DOWNLOAD_PATH_PREFIX) ||
+            !SAFE_RELEASE_TAG.matches(tag) || releasePath != "$tag/$apkName"
+        ) {
             throw UpdateManifestValidationException("APK download URL is outside the Nightly release.")
         }
     }
 
     private companion object {
         private const val SUPPORTED_SCHEMA_VERSION = 1
-        private const val EXPECTED_CHANNEL = "nightly"
+        private val EXPECTED_CHANNELS = setOf("preview", "stable", "nightly")
         private val EXPECTED_BRANCHES = setOf("main", "master")
         private const val EXPECTED_DOWNLOAD_HOST = "github.com"
         private const val EXPECTED_DOWNLOAD_PATH_PREFIX =
-            "/eltavine/Duck-Detector-Refactoring/releases/download/nightly/"
+            "/withite/ns-detector/releases/download/"
+        private val SAFE_RELEASE_TAG = Regex("^[A-Za-z0-9._-]{1,100}$")
         private const val MAX_ASSET_NAME_LENGTH = 255
         private val FULL_SHA_REGEX = Regex("^[0-9a-f]{40}$")
         private val SHA256_REGEX = Regex("^[0-9a-f]{64}$")

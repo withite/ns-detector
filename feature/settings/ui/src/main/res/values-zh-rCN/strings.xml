@@ -1,5 +1,6 @@
 <!--
 Copyright 2026 Duck Apps Contributor
+Modified 2026 by NS Detector contributors: independent diagnostics product.
 If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +18,10 @@ limitations under the License.
 
 <resources>
     <string name="settings_ui_style_title">UI 风格</string>
-    <string name="settings_ui_style_description">选择 Duck Detector 的界面风格</string>
+    <string name="settings_ui_style_description">选择 NS Detector 的界面风格</string>
     <string name="settings_style_miuix">MIUIX</string>
     <string name="settings_style_material">Material 3</string>
-    <string name="author_wall_title">贡献者</string>
+    <string name="author_wall_title">上游贡献者</string>
     <string name="author_wall_hint">拖动浏览 · 双指缩放 · 点击头像查看详情</string>
     <string name="author_wordmark_hint">双指放大查看贡献者姓名中的字符</string>
     <string name="author_view_details">查看详情</string>
@@ -28,7 +29,7 @@ limitations under the License.
     <string name="author_details_close">关闭</string>
     <string name="about_clipboard_build_hash_line">构建哈希：%1$s</string>
     <string name="about_clipboard_build_time_line">构建时间（UTC）：%1$s UTC</string>
-    <string name="about_clipboard_label">Duck Detector 构建信息</string>
+    <string name="about_clipboard_label">NS Detector 构建信息</string>
     <string name="about_clipboard_version_line">版本：%1$s (%2$d)</string>
     <string name="about_copy_build_info_summary">复制版本、构建时间和构建哈希</string>
     <string name="about_copy_toast">构建信息已复制</string>
@@ -39,7 +40,7 @@ limitations under the License.
     <string name="about_label_privacy">隐私 / 数据使用</string>
     <string name="about_label_version">版本</string>
     <string name="about_label_website">网站</string>
-    <string name="about_privacy_summary">检查在设备本地运行，不会上传检测结果。应用会在每次冷启动时访问一次 GitHub 获取 Nightly 更新元数据（开启 GitHub 加速后经由 gh-proxy.com）；在线 CRL 刷新仍为可选功能。</string>
+    <string name="about_privacy_summary">检测在设备本地运行，不会作为遥测上传检测结果。仅当您在设置中主动检查更新时才访问 GitHub，默认直接连接，第三方代理默认关闭。TEE 吊销检查使用内置快照，只有明确允许后才在线刷新。</string>
     <string name="about_subtitle">项目链接与构建元数据。</string>
     <string name="about_title">关于</string>
     <string name="about_value_build_time">%1$s UTC</string>
@@ -76,6 +77,8 @@ limitations under the License.
     <string name="update_status_checking">正在检查 GitHub…</string>
     <string name="update_status_current">当前已是最新 Nightly 构建</string>
     <string name="update_status_failed">无法检查 GitHub，点按重试</string>
-    <string name="update_status_idle">冷启动后会检查 GitHub Main Nightly，点按可立即检查</string>
+    <string name="update_status_idle">仅在点击此处后联网检查更新</string>
     <string name="settings_section_appearance">外观</string>
+    <string name="ns_project_attribution">NS Detector 是基于 Duck Detector 的独立衍生项目。上游作者和贡献者保留原有版权；完整许可证与第三方声明见开源许可。</string>
+    <string name="about_label_issues">问题反馈</string>
 </resources>

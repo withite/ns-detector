@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +66,15 @@ class SectionSeverityTest {
         assertEquals(
             null,
             highestSectionSeverity(listOf(DetectorStatus.info(InfoKind.SUPPORT), DetectorStatus.allClear())),
+        )
+    }
+
+    @Test
+    fun `observed context does not flag a section as a failed probe`() {
+        assertEquals(null, highestSectionSeverity(listOf(DetectorStatus.info(InfoKind.CONTEXT))))
+        assertEquals(
+            SectionSeverity.PROBE_ERROR,
+            highestSectionSeverity(listOf(DetectorStatus.info(InfoKind.CONTEXT), DetectorStatus.info(InfoKind.ERROR))),
         )
     }
 

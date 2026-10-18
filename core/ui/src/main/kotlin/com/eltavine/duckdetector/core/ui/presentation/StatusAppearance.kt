@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,7 +62,11 @@ public fun rememberStatusAppearance(status: DetectorStatus): StatusAppearance {
 
             StatusAppearance(
                 label = infoLabel,
-                metaLabel = if (isError) infoErrorLabel else infoSupportLabel,
+                metaLabel = when (status.infoKind) {
+                    InfoKind.ERROR -> infoErrorLabel
+                    InfoKind.CONTEXT -> null
+                    else -> infoSupportLabel
+                },
                 icon = if (isError) Icons.Rounded.ErrorOutline else Icons.Rounded.TipsAndUpdates,
                 iconTint = if (isError) palette.critical else palette.neutral,
             )

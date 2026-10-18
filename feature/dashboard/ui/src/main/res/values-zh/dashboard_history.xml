@@ -1,0 +1,18 @@
+<resources>
+    <string name="dashboard_history_title">本地扫描历史</string>
+    <string name="dashboard_history_clear">清除</string>
+    <string name="dashboard_history_privacy">仅保留最近 20 次完整扫描的状态与脱敏摘要，存储在本机。历史不包含原始证据。</string>
+    <string name="dashboard_history_storage_failed">历史读取或保存失败。可以清除历史后重新扫描。</string>
+    <string name="dashboard_history_empty">完成一次扫描后将在这里建立比较基线。</string>
+    <string name="dashboard_history_selected">扫描：%1$s</string>
+    <string name="dashboard_history_baseline">这是当前保留的最早基线，没有更早的扫描可供比较。</string>
+    <string name="dashboard_history_show">查看 %1$d 次扫描</string>
+    <string name="dashboard_history_hide">收起扫描列表</string>
+    <string name="dashboard_history_scan_details">%1$d 个模块 · %2$d 毫秒</string>
+    <string name="dashboard_history_unchanged">与上一次完整扫描相比，模块状态没有变化。</string>
+    <string name="dashboard_history_new_finding">新增迹象 · %1$s：%2$s</string>
+    <string name="dashboard_history_resolved_finding">未再观察到 · %1$s：%2$s</string>
+    <string name="dashboard_history_changed">状态变化 · %1$s：%2$s</string>
+    <string name="dashboard_history_module_added">新增模块 · %1$s：%2$s</string>
+    <string name="dashboard_history_module_removed">覆盖移除 · %1$s：%2$s</string>
+</resources>

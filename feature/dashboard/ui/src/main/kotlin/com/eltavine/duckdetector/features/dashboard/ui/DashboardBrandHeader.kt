@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Modified 2026 by NS Detector contributors: independent branding and project navigation.
  */
 
 package com.eltavine.duckdetector.features.dashboard.ui
@@ -28,6 +29,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import com.eltavine.duckdetector.core.ui.components.DuckIcon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Code
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,7 +65,7 @@ internal fun BrandHeader(showTitle: Boolean = true) {
         ) {
             MaterialAppIcon()
             Spacer(modifier = Modifier.weight(1f))
-            DashboardTelegramAction()
+            DashboardProjectAction()
         }
         if (showTitle) {
             WrapSafeText(
@@ -78,8 +81,7 @@ internal fun BrandHeader(showTitle: Boolean = true) {
     }
 }
 
-// The logo is a one-color glyph tinted with the text color, so it inverts with the theme: black on
-// the light tile, white on the dark one.
+// A single-color mark remains legible in both native theme implementations.
 @Composable
 private fun MaterialAppIcon(modifier: Modifier = Modifier, size: androidx.compose.ui.unit.Dp = 56.dp) {
     Box(
@@ -90,7 +92,7 @@ private fun MaterialAppIcon(modifier: Modifier = Modifier, size: androidx.compos
         contentAlignment = Alignment.Center,
     ) {
         DuckIcon(
-            painter = painterResource(R.drawable.ic_duck_logo),
+            painter = painterResource(R.drawable.ic_ns_mark),
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.size(size * (34f / 56f)),
@@ -98,13 +100,13 @@ private fun MaterialAppIcon(modifier: Modifier = Modifier, size: androidx.compos
     }
 }
 
-/** App-owned top bar mark: preserve Material's tile and use only the duck line art on MIUIX. */
+/** App-owned top bar mark with a compact glyph for MIUIX. */
 @Composable
 public fun DashboardTopBarBrandIcon() {
     AdaptiveContent(
         miuix = {
             DuckIcon(
-                painter = painterResource(R.drawable.ic_duck_logo),
+                painter = painterResource(R.drawable.ic_ns_mark),
                 contentDescription = null,
                 tint = adaptiveOnSurfaceColor(),
                 modifier = Modifier.size(30.dp),
@@ -114,11 +116,14 @@ public fun DashboardTopBarBrandIcon() {
     )
 }
 
-/** Telegram's existing circle/plane glyph without a second background in MIUIX mode. */
+/** Kept for older shell integrations; the independent project action opens this fork. */
 @Composable
-public fun DashboardTelegramAction() {
+public fun DashboardTelegramAction() = DashboardProjectAction()
+
+@Composable
+public fun DashboardProjectAction() {
     val context = LocalContext.current
-    val onClick: () -> Unit = { openExternalUri(context, "https://t.me/duck_detector"); Unit }
+    val onClick: () -> Unit = { openExternalUri(context, "https://github.com/withite/ns-detector"); Unit }
     AdaptiveFilledIconButton(
         onClick = onClick,
         materialContainerColor = DuckTheme.palette.groupedSurface,
@@ -127,8 +132,8 @@ public fun DashboardTelegramAction() {
         miuixContentColor = adaptiveOnSurfaceColor(),
     ) {
         DuckIcon(
-            painter = painterResource(CoreUiR.drawable.ic_telegram),
-            contentDescription = stringResource(CoreUiR.string.social_telegram),
+            imageVector = Icons.Rounded.Code,
+            contentDescription = stringResource(R.string.dashboard_project_source),
             modifier = Modifier.size(adaptiveValue(material = 20.dp, miuix = 26.dp)),
         )
     }

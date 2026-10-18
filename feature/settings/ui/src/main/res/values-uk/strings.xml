@@ -1,5 +1,6 @@
 <!--
 Copyright 2026 Duck Apps Contributor
+Modified 2026 by NS Detector contributors: independent diagnostics product.
 If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +17,7 @@ limitations under the License.
 -->
 
 <resources>
-    <string name="author_wall_title">Учасники</string>
+    <string name="author_wall_title">Upstream contributors</string>
     <string name="author_wall_hint">Перетягуйте для переміщення · Змінюйте масштаб двома пальцями · Торкніться для подробиць</string>
     <string name="author_wordmark_hint">Збільшіть двома пальцями, щоб роздивитися літери з імен учасників</string>
     <string name="author_view_details">Переглянути подробиці</string>
@@ -24,7 +25,7 @@ limitations under the License.
     <string name="author_details_close">Закрити</string>
     <string name="about_clipboard_build_hash_line">Хеш збірки: %1$s</string>
     <string name="about_clipboard_build_time_line">Час збірки (UTC): %1$s UTC</string>
-    <string name="about_clipboard_label">Інформація про збірку Duck Detector</string>
+    <string name="about_clipboard_label">Інформація про збірку NS Detector</string>
     <string name="about_clipboard_version_line">Версія: %1$s (%2$d)</string>
     <string name="about_copy_build_info_summary">Копіювати версію, час збірки та хеш збірки</string>
     <string name="about_copy_toast">Інформацію про збірку скопійовано</string>
@@ -35,7 +36,7 @@ limitations under the License.
     <string name="about_label_privacy">Конфіденційність / Використання даних</string>
     <string name="about_label_version">Версія</string>
     <string name="about_label_website">Веб-сайт</string>
-    <string name="about_privacy_summary">Перевірки виконуються локально, результати не надсилаються. Застосунок один раз за холодного запуску звертається до GitHub по метадані Nightly (через gh-proxy.com, коли ввімкнено прискорення GitHub). Онлайн-оновлення CRL залишається необов’язковим.</string>
+    <string name="about_privacy_summary">Security checks run locally on your device. Findings are not uploaded as telemetry. Update checks start only when you choose Check for updates in Settings. GitHub is contacted directly by default; the optional third-party proxy is off. TEE revocation uses a bundled snapshot unless you explicitly allow online refresh.</string>
     <string name="about_subtitle">Посилання на проект та метадані збірки.</string>
     <string name="about_title">Про програму</string>
     <string name="about_value_build_time">%1$s UTC</string>
@@ -73,6 +74,8 @@ limitations under the License.
     <string name="update_status_checking">Перевірка GitHub…</string>
     <string name="update_status_current">У вас найновіша збірка Nightly</string>
     <string name="update_status_failed">Не вдалося перевірити GitHub; торкніться, щоб повторити</string>
-    <string name="update_status_idle">GitHub Main Nightly перевіряється після холодного запуску; торкніться, щоб перевірити зараз</string>
+    <string name="update_status_idle">Updates are checked only when you tap here</string>
     <string name="settings_section_appearance">Вигляд</string>
+    <string name="ns_project_attribution">NS Detector is an independent derivative of Duck Detector. Original authors and contributors retain their copyright. See open-source licenses for notices and terms.</string>
+    <string name="about_label_issues">Report an issue</string>
 </resources>

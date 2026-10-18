@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,4 +28,7 @@ public enum class DetectionSeverity {
 public enum class InfoKind {
     ERROR,
     SUPPORT,
+
+    /** Successfully observed context that does not imply a finding or reduced coverage. */
+    CONTEXT,
 }

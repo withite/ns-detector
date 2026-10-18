@@ -1,5 +1,6 @@
 <!--
 Copyright 2026 Duck Apps Contributor
+Modified 2026 by NS Detector contributors: independent diagnostics product.
 If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,19 +17,19 @@ limitations under the License.
 -->
 
 <resources>
-    <string name="duck_logo_description">Biểu trưng Duck Detector</string>
+    <string name="duck_logo_description">Biểu trưng NS Detector</string>
     <string name="user_agreement">Thỏa thuận người dùng</string>
     <string name="disclaimer">và tuyên bố miễn trừ</string>
     <string name="please_read_carefully">Vui lòng đọc kỹ trước khi tiếp tục</string>
     <string name="agreement_risk_title">Lưu ý sử dụng có rủi ro cao</string>
     <string name="agreement_risk_body_emphasis">Không nên coi bất kỳ kết quả đơn lẻ nào là kết luận cuối cùng về pháp lý, tuân thủ, bảo hành hoặc an toàn bảo mật.</string>
-    <string name="agreement_risk_body_template">Duck Detector chỉ cung cấp các tín hiệu tham khảo. %1$s Trước khi đưa ra hành động, hãy luôn kết hợp đầu ra của ứng dụng với việc kiểm tra thủ công, bằng chứng từ dự án nguồn và đánh giá rủi ro của chính bạn.</string>
+    <string name="agreement_risk_body_template">NS Detector chỉ cung cấp các tín hiệu tham khảo. %1$s Trước khi đưa ra hành động, hãy luôn kết hợp đầu ra của ứng dụng với việc kiểm tra thủ công, bằng chứng từ dự án nguồn và đánh giá rủi ro của chính bạn.</string>
     <string name="user_agreement_title">Thỏa thuận người dùng</string>
-    <string name="user_agreement_content" formatted="false">Bằng việc sử dụng Duck Detector, bạn đồng ý với các điều khoản sau:\n\n1. Mục đích sử dụng\nỨng dụng này chỉ được thiết kế cho mục đích giáo dục và đánh giá an toàn cá nhân, giúp người dùng hiểu rõ trạng thái bảo mật của chính thiết bị mình.\n\n2. Không bảo hành\nỨng dụng này được cung cấp theo hiện trạng, không kèm theo bất kỳ bảo đảm rõ ràng hay ngụ ý nào. Nhà phát triển không đảm bảo tính chính xác, đầy đủ hay độ tin cậy của kết quả phát hiện.\n\n3. Trách nhiệm của người dùng\nBạn tự chịu trách nhiệm về cách sử dụng ứng dụng này và mọi hậu quả có thể phát sinh từ việc sử dụng đó.\n\n4. Tuân thủ pháp luật\nBạn đồng ý sử dụng ứng dụng này phù hợp với mọi quy định pháp luật địa phương, quốc gia và quốc tế có liên quan.</string>
+    <string name="user_agreement_content" formatted="false">Bằng việc sử dụng NS Detector, bạn đồng ý với các điều khoản sau:\n\n1. Mục đích sử dụng\nỨng dụng này chỉ được thiết kế cho mục đích giáo dục và đánh giá an toàn cá nhân, giúp người dùng hiểu rõ trạng thái bảo mật của chính thiết bị mình.\n\n2. Không bảo hành\nỨng dụng này được cung cấp theo hiện trạng, không kèm theo bất kỳ bảo đảm rõ ràng hay ngụ ý nào. Nhà phát triển không đảm bảo tính chính xác, đầy đủ hay độ tin cậy của kết quả phát hiện.\n\n3. Trách nhiệm của người dùng\nBạn tự chịu trách nhiệm về cách sử dụng ứng dụng này và mọi hậu quả có thể phát sinh từ việc sử dụng đó.\n\n4. Tuân thủ pháp luật\nBạn đồng ý sử dụng ứng dụng này phù hợp với mọi quy định pháp luật địa phương, quốc gia và quốc tế có liên quan.</string>
     <string name="disclaimer_title">Tuyên bố miễn trừ</string>
-    <string name="disclaimer_content" formatted="false">LƯU Ý QUAN TRỌNG:\n\n1. Giới hạn phát hiện\nDuck Detector sử dụng nhiều phương pháp để đánh giá trạng thái bảo mật của thiết bị, nhưng không có phương pháp nào đạt độ chính xác 100&#37;. Kết quả chỉ nên được xem là dấu hiệu tham khảo, không phải kết luận cuối cùng.\n\n2. Báo động sai và bỏ sót\nỨng dụng có thể tạo ra báo động sai hoặc bỏ sót. Hãy luôn kết hợp công cụ bảo mật chuyên nghiệp và việc tự xác minh của bạn để có đánh giá đầy đủ.\n\n3. Miễn trừ trách nhiệm\nCác nhà phát triển, người đóng góp và bên phân phối Duck Detector sẽ không chịu trách nhiệm đối với mọi thiệt hại trực tiếp, gián tiếp, ngẫu nhiên, đặc biệt hoặc hậu quả phát sinh từ việc sử dụng hoặc không thể sử dụng ứng dụng này.\n\n4. Dịch vụ bên thứ ba\nKiểm tra thu hồi TEE mặc định dùng ảnh chụp tích hợp trong ứng dụng. Nếu bạn cho phép cập nhật dữ liệu thu hồi trực tuyến, ứng dụng có thể truy cập Google attestation revocation endpoint. Bản thân quá trình quét vẫn được thực hiện cục bộ trên thiết bị của bạn, và các kết quả phát hiện không được cố ý tải lên dưới dạng telemetry quét.</string>
+    <string name="disclaimer_content" formatted="false">LƯU Ý QUAN TRỌNG:\n\n1. Giới hạn phát hiện\nNS Detector sử dụng nhiều phương pháp để đánh giá trạng thái bảo mật của thiết bị, nhưng không có phương pháp nào đạt độ chính xác 100&#37;. Kết quả chỉ nên được xem là dấu hiệu tham khảo, không phải kết luận cuối cùng.\n\n2. Báo động sai và bỏ sót\nỨng dụng có thể tạo ra báo động sai hoặc bỏ sót. Hãy luôn kết hợp công cụ bảo mật chuyên nghiệp và việc tự xác minh của bạn để có đánh giá đầy đủ.\n\n3. Miễn trừ trách nhiệm\nCác nhà phát triển, người đóng góp và bên phân phối NS Detector sẽ không chịu trách nhiệm đối với mọi thiệt hại trực tiếp, gián tiếp, ngẫu nhiên, đặc biệt hoặc hậu quả phát sinh từ việc sử dụng hoặc không thể sử dụng ứng dụng này.\n\n4. Dịch vụ bên thứ ba\nKiểm tra thu hồi TEE mặc định dùng ảnh chụp tích hợp trong ứng dụng. Nếu bạn cho phép cập nhật dữ liệu thu hồi trực tuyến, ứng dụng có thể truy cập Google attestation revocation endpoint. Bản thân quá trình quét vẫn được thực hiện cục bộ trên thiết bị của bạn, và các kết quả phát hiện không được cố ý tải lên dưới dạng telemetry quét.</string>
     <string name="privacy_notice_title">Thông báo quyền riêng tư</string>
-    <string name="privacy_notice_content" formatted="false">Tóm tắt quyền riêng tư: các kiểm tra bảo mật chạy cục bộ trên thiết bị và kết quả không được tải lên dưới dạng telemetry. Kiểm tra thu hồi TEE mặc định dùng dữ liệu tích hợp. Sau khi hoàn tất lựa chọn khởi động, ứng dụng kết nối GitHub một lần mỗi lần khởi động lạnh để kiểm tra siêu dữ liệu bản Nightly. Nếu bật Tăng tốc GitHub, các yêu cầu này sẽ đi qua dịch vụ bên thứ ba gh-proxy.com.</string>
+    <string name="privacy_notice_content" formatted="false">Security checks run locally on your device. Findings are not uploaded as telemetry. Update checks start only when you choose Check for updates in Settings. GitHub is contacted directly by default; the optional third-party proxy is off. TEE revocation uses a bundled snapshot unless you explicitly allow online refresh.</string>
     <string name="timer_elapsed">Đã chờ 30 giây</string>
     <string name="timer_waiting">Vui lòng chờ %1$d giây</string>
     <string name="fully_reviewed">Đã xem hết</string>
@@ -57,7 +58,7 @@ limitations under the License.
     <string name="startup_status_review_later">Xem lại sau</string>
     <string name="startup_notifications_title">Thông báo</string>
     <string name="startup_notifications_ready_headline">Thông báo quét đã được bật.</string>
-    <string name="startup_notifications_ready_detail">Duck Detector có thể phát thông báo tiến trình quét trong khi các thẻ detector thu thập bằng chứng.</string>
+    <string name="startup_notifications_ready_detail">NS Detector có thể phát thông báo tiến trình quét trong khi các thẻ detector thu thập bằng chứng.</string>
     <string name="startup_notifications_prompt_headline">Chọn xem tiến trình quét có được phép đăng thông báo hay không.</string>
     <string name="startup_notifications_prompt_detail_api33">Android %1$d yêu cầu quyền thông báo thời gian chạy. Quá trình quét khi khởi động sẽ tiếp tục bị chặn cho đến khi bạn cho phép hoặc chủ động tiếp tục mà không bật.</string>
     <string name="startup_notifications_prompt_detail_legacy">Phiên bản Android này không yêu cầu hộp thoại quyền thông báo thời gian chạy, nhưng chính sách khởi động vẫn cần ghi nhận lựa chọn của bạn.</string>
@@ -67,13 +68,13 @@ limitations under the License.
     <string name="startup_notifications_skipped_detail">Tiến trình quét sẽ chỉ hiển thị trong ứng dụng cho đến khi bạn cấp quyền thông báo sau này.</string>
     <string name="startup_live_update_title">Live Update</string>
     <string name="startup_live_update_unsupported_headline">Thông báo đang diễn ra được quảng bá không khả dụng trên phiên bản Android này.</string>
-    <string name="startup_live_update_unsupported_detail">Duck Detector sẽ dùng đường thông báo thông thường khi có quyền thông báo.</string>
+    <string name="startup_live_update_unsupported_detail">NS Detector sẽ dùng đường thông báo thông thường khi có quyền thông báo.</string>
     <string name="startup_live_update_waiting_headline">Live Update phụ thuộc vào đường thông báo.</string>
     <string name="startup_live_update_waiting_detail">Hãy cấp quyền thông báo trước. Nếu bạn tiếp tục tắt thông báo, thẻ này sẽ quay về chỉ hiển thị tiến trình trong ứng dụng.</string>
     <string name="startup_live_update_ready_headline">Thông báo đang diễn ra được quảng bá đã được cho phép.</string>
     <string name="startup_live_update_ready_detail">Trên các phiên bản Android được hỗ trợ, tiến trình quét có thể xuất hiện qua đường Live Update phong phú hơn.</string>
     <string name="startup_live_update_prompt_headline">Chọn xem có dùng đường Live Update của Android hay không.</string>
-    <string name="startup_live_update_prompt_detail">Duck Detector có thể mở trang hệ thống cho thông báo đang diễn ra được quảng bá. Nếu bạn bỏ qua, tiến trình quét sẽ quay về thông báo thường.</string>
+    <string name="startup_live_update_prompt_detail">NS Detector có thể mở trang hệ thống cho thông báo đang diễn ra được quảng bá. Nếu bạn bỏ qua, tiến trình quét sẽ quay về thông báo thường.</string>
     <string name="startup_live_update_open_settings">Mở cài đặt</string>
     <string name="startup_live_update_use_regular">Dùng thông báo thường</string>
     <string name="startup_live_update_regular_headline">Đã chọn thông báo thường.</string>
@@ -93,7 +94,7 @@ limitations under the License.
     <string name="navigation_home">Trang chủ</string>
     <string name="navigation_settings">Cài đặt</string>
     <string name="update_download_failed">Không thể tải xuống hoặc xác minh bản cập nhật</string>
-    <string name="update_install_permission_required">Cho phép cài đặt từ Duck Detector, rồi nhấn Cài đặt lần nữa</string>
+    <string name="update_install_permission_required">Cho phép cài đặt từ NS Detector, rồi nhấn Cài đặt lần nữa</string>
     <string name="update_install_failed">Không thể mở trình cài đặt</string>
     <string name="update_apk_unavailable">Tệp cập nhật đã tải xuống không còn hợp lệ. Hãy tải xuống lại</string>
 </resources>

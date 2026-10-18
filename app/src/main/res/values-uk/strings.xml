@@ -1,5 +1,6 @@
 <!--
 Copyright 2026 Duck Apps Contributor
+Modified 2026 by NS Detector contributors: independent diagnostics product.
 If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,19 +17,19 @@ limitations under the License.
 -->
 
 <resources>
-    <string name="duck_logo_description">Логотип Duck Detector</string>
+    <string name="duck_logo_description">Логотип NS Detector</string>
     <string name="user_agreement">Угода користувача</string>
     <string name="disclaimer">&amp; Відмова від відповідальності</string>
     <string name="please_read_carefully">Уважно прочитайте, перш ніж продовжити</string>
     <string name="agreement_risk_title">Нагадування про небезпечне використання</string>
     <string name="agreement_risk_body_emphasis">Не розглядайте окремий результат як остаточний юридичний висновок, висновок щодо відповідності, гарантії чи безпеки.</string>
-    <string name="agreement_risk_body_template">Duck Detector забезпечує лише опорні сигнали. %1$s Завжди поєднуйте результати програми з перевіркою вручну, попередніми доказами та власною оцінкою ризику, перш ніж вживати заходів.</string>
+    <string name="agreement_risk_body_template">NS Detector забезпечує лише опорні сигнали. %1$s Завжди поєднуйте результати програми з перевіркою вручну, попередніми доказами та власною оцінкою ризику, перш ніж вживати заходів.</string>
     <string name="user_agreement_title">Угода користувача</string>
-    <string name="user_agreement_content" formatted="false">Використовуючи Duck Detector, ви погоджуєтеся з такими умовами:\n\n1. Мета використання\nЦя програма призначена виключно для освітніх цілей та оцінки особистої безпеки. Це допомагає користувачам зрозуміти стан безпеки їхніх власних пристроїв.\n\n2. Без гарантії\nЦя програма надається \"як є\" без будь-яких гарантій, явних чи непрямих. Розробники не гарантують точність, повноту або достовірність результатів виявлення.\n\n3. Відповідальність користувача\nВи несете повну відповідальність за те, як ви використовуєте цю програму, і будь-які наслідки, які можуть виникнути внаслідок її використання.\n\n4. Дотримання законів\nВи погоджуєтеся використовувати цю програму відповідно до всіх відповідних місцевих, національних і міжнародних законів і правил.</string>
+    <string name="user_agreement_content" formatted="false">Використовуючи NS Detector, ви погоджуєтеся з такими умовами:\n\n1. Мета використання\nЦя програма призначена виключно для освітніх цілей та оцінки особистої безпеки. Це допомагає користувачам зрозуміти стан безпеки їхніх власних пристроїв.\n\n2. Без гарантії\nЦя програма надається \"як є\" без будь-яких гарантій, явних чи непрямих. Розробники не гарантують точність, повноту або достовірність результатів виявлення.\n\n3. Відповідальність користувача\nВи несете повну відповідальність за те, як ви використовуєте цю програму, і будь-які наслідки, які можуть виникнути внаслідок її використання.\n\n4. Дотримання законів\nВи погоджуєтеся використовувати цю програму відповідно до всіх відповідних місцевих, національних і міжнародних законів і правил.</string>
     <string name="disclaimer_title">Відмова від відповідальності</string>
-    <string name="disclaimer_content" formatted="false">ВАЖЛИВЕ ПОВІДОМЛЕННЯ:\n\n1. Обмеження виявлення\nDuck Detector використовує різні методи для виявлення стану безпеки пристрою, але жоден метод виявлення не є на 100&#37; точним. Результати слід вважати індикаторами, а не остаточними оцінками.\n\n2. Помилкові спрацьовування та помилкові негативи\nПрограма може давати хибно-позитивні або хибно-негативні результати. Завжди використовуйте професійні інструменти безпеки та власну перевірку для комплексної оцінки.\n\n3. Жодної відповідальності\nРозробники, учасники та розповсюджувачі Duck Detector не несуть відповідальності за будь-які прямі, непрямі, випадкові, спеціальні чи непрямі збитки, спричинені використанням або неможливістю використання цієї програми.\n\n4. Сторонні послуги\nПеревірки відкликання TEE за замовчуванням використовують вбудований у застосунок знімок. Якщо ви дозволите онлайн-оновлення даних відкликання, програма може зв’язатися з кінцевою точкою відкликання атестації Google. Самі сканування безпеки все ще виконуються локально на вашому пристрої, а результати детектора навмисно не завантажуються як телеметрія сканування.</string>
+    <string name="disclaimer_content" formatted="false">ВАЖЛИВЕ ПОВІДОМЛЕННЯ:\n\n1. Обмеження виявлення\nNS Detector використовує різні методи для виявлення стану безпеки пристрою, але жоден метод виявлення не є на 100&#37; точним. Результати слід вважати індикаторами, а не остаточними оцінками.\n\n2. Помилкові спрацьовування та помилкові негативи\nПрограма може давати хибно-позитивні або хибно-негативні результати. Завжди використовуйте професійні інструменти безпеки та власну перевірку для комплексної оцінки.\n\n3. Жодної відповідальності\nРозробники, учасники та розповсюджувачі NS Detector не несуть відповідальності за будь-які прямі, непрямі, випадкові, спеціальні чи непрямі збитки, спричинені використанням або неможливістю використання цієї програми.\n\n4. Сторонні послуги\nПеревірки відкликання TEE за замовчуванням використовують вбудований у застосунок знімок. Якщо ви дозволите онлайн-оновлення даних відкликання, програма може зв’язатися з кінцевою точкою відкликання атестації Google. Самі сканування безпеки все ще виконуються локально на вашому пристрої, а результати детектора навмисно не завантажуються як телеметрія сканування.</string>
     <string name="privacy_notice_title">Повідомлення про конфіденційність</string>
-    <string name="privacy_notice_content" formatted="false">Короткий опис конфіденційності: перевірки безпеки виконуються локально, а результати не надсилаються як телеметрія. Перевірки відкликання TEE за замовчуванням використовують вбудований знімок. Після завершення початкових налаштувань застосунок один раз за кожного холодного запуску звертається до GitHub для перевірки метаданих Nightly. Якщо ввімкнути прискорення GitHub, ці запити йтимуть через сторонній сервіс gh-proxy.com.</string>
+    <string name="privacy_notice_content" formatted="false">Security checks run locally on your device. Findings are not uploaded as telemetry. Update checks start only when you choose Check for updates in Settings. GitHub is contacted directly by default; the optional third-party proxy is off. TEE revocation uses a bundled snapshot unless you explicitly allow online refresh.</string>
     <string name="timer_elapsed">Минуло 30 секунд</string>
     <string name="timer_waiting">Будь ласка, зачекайте %1$ds</string>
     <string name="fully_reviewed">Повністю переглянуто</string>
@@ -62,7 +63,7 @@ limitations under the License.
 
     <string name="startup_notifications_title">Сповіщення</string>
     <string name="startup_notifications_ready_headline">Сповіщення сканування увімкнено.</string>
-    <string name="startup_notifications_ready_detail">Duck Detector може публікувати сповіщення про хід сканування, поки картки детектора збирають докази.</string>
+    <string name="startup_notifications_ready_detail">NS Detector може публікувати сповіщення про хід сканування, поки картки детектора збирають докази.</string>
     <string name="startup_notifications_prompt_headline">Виберіть, чи може хід сканування надсилати сповіщення.</string>
     <string name="startup_notifications_prompt_detail_api33">Android %1$d вимагає дозвіл на сповіщення під час виконання. Сканування при запуску заблоковано, доки ви не дозволите це або явно не продовжите без нього.</string>
     <string name="startup_notifications_prompt_detail_legacy">Ця версія Android не вимагає запиту на дозвіл сповіщень, але політика запуску все одно має зафіксувати ваш вибір.</string>
@@ -73,13 +74,13 @@ limitations under the License.
 
     <string name="startup_live_update_title">Live Update</string>
     <string name="startup_live_update_unsupported_headline">Пріоритетні постійні сповіщення недоступні в цій версії Android.</string>
-    <string name="startup_live_update_unsupported_detail">Duck Detector використовуватиме звичайний шлях сповіщень, коли буде доступний дозвіл на сповіщення.</string>
+    <string name="startup_live_update_unsupported_detail">NS Detector використовуватиме звичайний шлях сповіщень, коли буде доступний дозвіл на сповіщення.</string>
     <string name="startup_live_update_waiting_headline">Live Update залежить від шляху сповіщень.</string>
     <string name="startup_live_update_waiting_detail">Спочатку надайте дозвіл на сповіщення. Якщо ви залишите сповіщення вимкненими, ця картка повернеться до режиму лише внутрішнього прогресу програми.</string>
     <string name="startup_live_update_ready_headline">Пріоритетні постійні сповіщення дозволені.</string>
     <string name="startup_live_update_ready_detail">У підтримуваних версіях Android прогрес сканування може відображатися через розширений шлях Live Update.</string>
     <string name="startup_live_update_prompt_headline">Виберіть, чи використовувати шлях Android Live Update.</string>
-    <string name="startup_live_update_prompt_detail">Duck Detector може відкрити системну сторінку для пріоритетних постійних сповіщень. Якщо ви пропустите це, прогрес сканування повернеться до звичайного сповіщення.</string>
+    <string name="startup_live_update_prompt_detail">NS Detector може відкрити системну сторінку для пріоритетних постійних сповіщень. Якщо ви пропустите це, прогрес сканування повернеться до звичайного сповіщення.</string>
     <string name="startup_live_update_open_settings">Відкрити налаштування</string>
     <string name="startup_live_update_use_regular">Використовувати звичайні</string>
     <string name="startup_live_update_regular_headline">Вибрано звичайні сповіщення.</string>
@@ -101,7 +102,7 @@ limitations under the License.
     <string name="navigation_home">Головна</string>
     <string name="navigation_settings">Налаштування</string>
     <string name="update_download_failed">Не вдалося завантажити або перевірити оновлення</string>
-    <string name="update_install_permission_required">Дозвольте встановлення з Duck Detector, а потім знову натисніть «Встановити»</string>
+    <string name="update_install_permission_required">Дозвольте встановлення з NS Detector, а потім знову натисніть «Встановити»</string>
     <string name="update_install_failed">Не вдалося відкрити інсталятор</string>
     <string name="update_apk_unavailable">Завантажений файл оновлення недоступний. Завантажте його знову</string>
 </resources>

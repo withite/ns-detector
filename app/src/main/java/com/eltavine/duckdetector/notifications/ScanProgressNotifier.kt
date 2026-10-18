@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -162,7 +163,7 @@ class ScanProgressNotifier(
                 "Scan progress",
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
-                description = "Overall Duck Detector scan progress and final dashboard verdict."
+                description = "Overall NS Detector scan progress and final dashboard verdict."
                 setShowBadge(false)
             },
         )

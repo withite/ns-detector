@@ -1,8 +1,12 @@
 # Nightly 更新的下载与安装边界
 
-更新发现和变更列表可使用用户选择的 GitHub 代理。下载前，下载器必须通过官方
-`https://github.com/eltavine/Duck-Detector-Refactoring/releases/download/nightly/update.json`
-独立获取清单，并核对 APK 的名称、官方 URL、大小及 SHA-256。该请求不使用代理路由。
+NS Detector 不在冷启动检查更新。用户在设置中主动检查后，客户端从
+`https://api.github.com/repos/withite/ns-detector/releases?per_page=20`
+选择首个非 draft 且包含 `update.json` 的版本化发布，支持 preview 预发布。
+清单与 APK 必须来自 `withite/ns-detector` 同一个发布标签；清单解析器拒绝外部仓库地址。
+第三方 GitHub 代理默认关闭，仅由用户显式选择开启。
+下载前，下载器通过直连 GitHub 再次独立获取官方清单，并核对 APK 名称、URL、大小与 SHA-256。
+该独立请求不使用代理路由。
 官方请求失败、清单格式无效或元数据不一致时，下载失败；不会仅凭代理提供的摘要继续。
 这仍依赖系统 TLS 信任、GitHub 及发布账户的安全，不提供对发布账户失陷的保证。
 官方地址无法直连时，应用内下载也无法完成，即使代理本身可达。

@@ -1,0 +1,143 @@
+# NS Detector release signing is independent from upstream distribution.
+name: NS Detector Release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: Release version, for example 1.0.0
+        default: '1.0.0'
+        required: true
+        type: string
+      version_code:
+        description: Monotonically increasing Android version code
+        default: '10000'
+        required: true
+        type: string
+      external_signing:
+        description: Export an UNSIGNED APK for private offline signing; never publish it
+        default: false
+        type: boolean
+concurrency:
+  group: ns-release-${{ github.ref }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  release:
+    name: Compile release and verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      NS_EXTERNAL_SIGNING: ${{ inputs.external_signing || false }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          persist-credentials: false
+      - name: Validate release metadata
+        env:
+          INPUT_VERSION_NAME: ${{ inputs.version_name }}
+          INPUT_VERSION_CODE: ${{ inputs.version_code }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          version = os.environ.get('INPUT_VERSION_NAME') or os.environ['GITHUB_REF_NAME'].removeprefix('v')
+          code = os.environ.get('INPUT_VERSION_CODE') or str(10000 + int(os.environ['GITHUB_RUN_NUMBER']))
+          if not re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', version):
+              raise SystemExit('Version must be major.minor.patch')
+          if not code.isdigit() or not 1 <= int(code) <= 2100000000:
+              raise SystemExit('Invalid Android version code')
+          with open(os.environ['GITHUB_ENV'], 'a') as out:
+              out.write(f'NS_VERSION_NAME={version}\nNS_VERSION_CODE={code}\nNS_RELEASE_TAG=v{version}\nNS_CHANNEL=stable\n')
+          PY
+      - name: Prepare private signing identity
+        if: env.NS_EXTERNAL_SIGNING != 'true'
+        env:
+          NS_KEYSTORE_BASE64: ${{ secrets.NS_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.NS_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.NS_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.NS_KEY_PASSWORD }}
+        run: |
+          python3 - <<'PY'
+          import base64, os
+          from pathlib import Path
+          required = ['NS_KEYSTORE_BASE64', 'ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_KEY_PASSWORD']
+          if any(not os.environ.get(key) for key in required):
+              raise SystemExit('Configure the four NS_* signing Secrets, or explicitly choose an unsigned external-signing export.')
+          key = Path(os.environ['RUNNER_TEMP']) / 'ns-release.keystore'
+          key.write_bytes(base64.b64decode(os.environ['NS_KEYSTORE_BASE64'], validate=True))
+          key.chmod(0o600)
+          with open(os.environ['GITHUB_ENV'], 'a') as out:
+              out.write(f'ANDROID_KEYSTORE_PATH={key}\n')
+          PY
+      - uses: ./.github/actions/setup-android-build
+        with:
+          cache-read-only: 'false'
+      - name: Check original detector coverage and architecture
+        run: |
+          python3 scripts/ns_check_upstream_coverage.py
+          for checker in .github/scripts/check-*.py; do python3 "$checker"; done
+      - name: Build minified release and run unit tests
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.NS_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.NS_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.NS_KEY_PASSWORD }}
+        run: |
+          ./gradlew --stacktrace unitTest checkPublicApi :app:assembleRelease \
+            -Pnsdetector.versionName="$NS_VERSION_NAME" \
+            -Pnsdetector.versionCode="$NS_VERSION_CODE" \
+            -Pnsdetector.externalSigning="$NS_EXTERNAL_SIGNING"
+          ./gradlew --stop
+          ./gradlew --stacktrace :app:lintRelease \
+            -Pnsdetector.versionName="$NS_VERSION_NAME" \
+            -Pnsdetector.versionCode="$NS_VERSION_CODE" \
+            -Pnsdetector.externalSigning="$NS_EXTERNAL_SIGNING"
+      - name: Collect unsigned export
+        if: env.NS_EXTERNAL_SIGNING == 'true'
+        run: python3 scripts/ns_prepare_artifacts.py --variant release --unsigned
+      - name: Verify and collect signed release
+        if: env.NS_EXTERNAL_SIGNING != 'true'
+        run: python3 scripts/ns_prepare_artifacts.py --variant release
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: ns-detector-release-${{ env.NS_EXTERNAL_SIGNING == 'true' && 'unsigned' || 'signed' }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload release validation reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: ns-detector-release-validation
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
+            app/build/reports/lint-results-release.*
+            app/build/outputs/mapping/release/
+          if-no-files-found: ignore
+      - name: Remove private signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/ns-release.keystore"
+  publish:
+    name: Publish signed version
+    needs: release
+    if: inputs.external_signing != true
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: ns-detector-release-signed
+          path: dist/
+      - name: Publish immutable signed release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          version=$(python3 -c 'import json; print(json.load(open("dist/build-info.json"))["versionName"])')
+          gh release create "v$version" dist/* --target "$GITHUB_SHA" --title "NS Detector $version" \
+            --notes 'NS Detector 签名版本。包含 Duck 的全部 18 项检测及新增模块。检查 SHA256SUMS 和构建记录；跨厂商真机准确率验证仍需持续进行。'

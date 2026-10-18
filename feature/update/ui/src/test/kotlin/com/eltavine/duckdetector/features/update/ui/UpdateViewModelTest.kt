@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,6 +55,21 @@ class UpdateViewModelTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `construction does not contact the network before an explicit action`() = runTest(dispatcher) {
+        var calls = 0
+        val model = viewModel(checker = NightlyUpdateChecker { _, _ ->
+            calls += 1
+            UpdateCheckResult.Current(testManifest)
+        })
+        advanceUntilIdle()
+        assertEquals(0, calls)
+        assertEquals(UpdateCheckStatus.IDLE, model.uiState.value.status)
+        model.onSettingsUpdateAction()
+        advanceUntilIdle()
+        assertEquals(1, calls)
     }
 
     @Test
@@ -175,9 +191,9 @@ class UpdateViewModelTest {
                 versionCode = 501,
                 commit = testManifest.commit.copy(sha = NEWER_HEAD_SHA),
                 apk = testManifest.apk.copy(
-                    name = "Duck.Detector-newer.apk",
+                    name = "NS.Detector-newer.apk",
                     downloadUrl =
-                        "https://github.com/eltavine/Duck-Detector-Refactoring/releases/download/nightly/Duck.Detector-newer.apk",
+                        "https://github.com/withite/ns-detector/releases/download/nightly/NS.Detector-newer.apk",
                 ),
             )
             var calls = 0

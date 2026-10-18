@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 NS Detector contributors. Licensed under Apache-2.0. -->
+<resources>
+    <string name="ns_welcome_subtitle">Understand your device through traceable evidence</string>
+    <string name="ns_agreement_scope">Use this tool to inspect your own device or one you are authorized to assess. Results are diagnostic evidence and may contain false positives or missed signals. Review the evidence and visibility limits before acting. The software is provided under its open-source licenses without warranties. Tapping Agree accepts these terms; network access and experimental probes require separate choices.</string>
+    <string name="ns_optional_title">Optional checks stay off until you choose</string>
+    <string name="ns_optional_risks">Online certificate-revocation refresh and experimental checks are optional. Some experimental probes deliberately exercise unusual system paths and may cause a temporary stall, app crash or device restart on affected firmware. Each option explains its scope before you enable it. Declining still permits the ordinary local scan.</string>
+    <string name="ns_exit">Exit</string>
+</resources>

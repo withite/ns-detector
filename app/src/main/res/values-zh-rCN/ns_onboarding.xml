@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 NS Detector contributors. Licensed under Apache-2.0. -->
+<resources>
+    <string name="ns_welcome_subtitle">以可追溯的证据，了解设备环境</string>
+    <string name="ns_agreement_scope">请仅检测您自己的设备或已获得授权的设备。结果属于诊断线索，可能存在误报、漏报和观测限制，请结合证据核验后再采取行动。软件按开源许可证提供，不附带准确性或适用性担保。点击同意即接受这些条款；联网和实验探针另行选择，不会随本次同意自动启用。</string>
+    <string name="ns_optional_title">可选检测默认关闭</string>
+    <string name="ns_optional_risks">在线证书吊销刷新与实验检测均为可选。一些实验探针会主动触发特殊系统路径，在特定固件上可能造成短暂卡顿、应用崩溃或设备重启。每个选项会在启用前说明范围与风险。拒绝可选项仍可执行常规本地扫描。</string>
+    <string name="ns_exit">退出</string>
+</resources>

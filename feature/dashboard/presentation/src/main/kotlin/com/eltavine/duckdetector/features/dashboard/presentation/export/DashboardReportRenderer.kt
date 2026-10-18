@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Modified 2026 by NS Detector contributors: explicit coverage, private history and redacted exports.
  */
 
 package com.eltavine.duckdetector.features.dashboard.presentation.export
@@ -52,7 +54,7 @@ data class DashboardExport(
  */
 object DashboardReportRenderer {
 
-    fun render(export: DashboardExport): String = buildString {
+    fun render(export: DashboardExport): String = ReportRedactor.redact(buildString {
         appendBanner(export)
         appendExecutiveSummary(export.overview)
         appendTopFindings(export.topFindings)
@@ -60,13 +62,13 @@ object DashboardReportRenderer {
         appendLine()
         appendDeviceReport(export.device)
         appendFooter()
-    }
+    })
 
     private fun StringBuilder.appendBanner(export: DashboardExport) {
         val identity = export.device.identity
         val header = export.header
         appendLine("================================================================================")
-        appendLine("                      DUCK DETECTOR — SECURITY SCAN REPORT                      ")
+        appendLine("                      NS DETECTOR — ENVIRONMENT SCAN REPORT")
         appendLine("================================================================================")
         if (!identity.brand.isNullOrBlank() && !identity.model.isNullOrBlank()) {
             val osStr = if (!identity.androidRelease.isNullOrBlank()) {
@@ -80,6 +82,7 @@ object DashboardReportRenderer {
         appendLine("  Build Commit   : ${header.buildHash}")
         appendLine("  Build Time     : ${header.buildTime} (UTC)")
         appendLine("  Report Time    : ${header.reportTime}")
+        appendLine("  Privacy        : Common identifiers redacted; review before sharing.")
         appendLine()
     }
 
@@ -96,8 +99,10 @@ object DashboardReportRenderer {
             val icon = when (metric.metric) {
                 DashboardOverviewMetric.DANGER -> "[✖]"
                 DashboardOverviewMetric.WARNING -> "[▲]"
-                DashboardOverviewMetric.READY -> "[✔]"
+                DashboardOverviewMetric.READY -> "[·]"
                 DashboardOverviewMetric.PENDING -> "[·]"
+                DashboardOverviewMetric.COVERAGE_LIMITED -> "[ℹ]"
+                DashboardOverviewMetric.ERROR -> "[!]"
             }
             appendLine("    $icon ${metric.label.padEnd(9)}: ${metric.value}")
         }
@@ -109,7 +114,7 @@ object DashboardReportRenderer {
         appendLine("  TOP FINDINGS")
         appendLine("--------------------------------------------------------------------------------")
         if (findings.isEmpty()) {
-            appendLine("  (No security threats or warnings detected)")
+            appendLine("  (No priority findings reported; inspect coverage and detector evidence)")
         } else {
             findings.forEach { finding ->
                 val badge = severityBadge(finding.status.severity)
@@ -143,7 +148,7 @@ object DashboardReportRenderer {
 
     private fun StringBuilder.appendQuickFacts(facts: List<ReportFact>) {
         if (facts.isEmpty()) return
-        val formatted = facts.joinToString("  |  ") { "${it.label}: ${it.value}" }
+        val formatted = facts.joinToString("  |  ") { "${it.label}: ${ReportRedactor.redactField(it.label, it.value)}" }
         appendLine("  Quick Facts  : $formatted")
     }
 
@@ -155,9 +160,9 @@ object DashboardReportRenderer {
     }
 
     private fun StringBuilder.appendRow(row: ReportRow) {
-        val trimmedValue = row.value.trim()
+        val trimmedValue = ReportRedactor.redactField(row.label, row.value).trim()
         val hasValue = trimmedValue.isNotBlank()
-        val trimmedDetail = row.detail?.trim()
+        val trimmedDetail = row.detail?.let { ReportRedactor.redactField(row.label, it).trim() }
         val hasDetail = !trimmedDetail.isNullOrBlank() && trimmedDetail != trimmedValue
 
         if (!hasValue && !hasDetail) {

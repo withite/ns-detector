@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Modified 2026 by NS Detector contributors: responsive evidence metrics and accessibility.
  */
 
 package com.eltavine.duckdetector.features.dashboard.ui
@@ -20,14 +21,12 @@ package com.eltavine.duckdetector.features.dashboard.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -49,6 +48,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.eltavine.duckdetector.core.designsystem.components.DuckPanel
@@ -230,13 +231,21 @@ private fun OverviewTitle(model: DashboardOverviewModel) {
 private fun OverviewMetrics(
     metrics: List<DashboardOverviewMetricModel>,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min),
-    ) {
-        metrics.forEach { metric ->
-            OverviewMetric(metric = metric, modifier = Modifier.weight(1f))
+    val fontScale = LocalDensity.current.fontScale
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        // Keep labels readable at large system font sizes without shrinking the text.
+        val columns = if (maxWidth < 320.dp || fontScale > 1.3f) 2 else 3
+        Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            metrics.chunked(columns).forEach { row ->
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    row.forEach { metric ->
+                        OverviewMetric(metric = metric, modifier = Modifier.weight(1f))
+                    }
+                    repeat(columns - row.size) {
+                        Box(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
         }
     }
 }
@@ -248,7 +257,7 @@ private fun OverviewMetric(
 ) {
     val appearance = rememberStatusAppearance(metric.status)
     Column(
-        modifier = modifier,
+        modifier = modifier.semantics(mergeDescendants = true) {},
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {

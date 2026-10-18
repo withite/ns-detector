@@ -15,14 +15,6 @@
   ],
   "allowed": [
     {
-      "path": "app/src/main/java/com/eltavine/duckdetector/startup/legal/AgreementScreen.kt",
-      "reason": "Compares what the user typed with the agreement's shortcut answer; the text is user input."
-    },
-    {
-      "path": "app/src/main/java/com/eltavine/duckdetector/ui/DeviceBlacklist.kt",
-      "reason": "Matches the platform's Build.MANUFACTURER and Build.BRAND values against the blocked vendor."
-    },
-    {
       "path": "core/native/src/main/kotlin/com/eltavine/duckdetector/core/native/NativePayloadCodec.kt",
       "reason": "Decodes the native payload's wire format, whose flags are spelt 1 or true."
     },

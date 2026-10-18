@@ -1,0 +1,10 @@
+<!-- Copyright 2026 NS Detector contributors. Licensed under Apache-2.0. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:fillColor="#000000"
+        android:pathData="M3,10 L8,10 L18,29 L18,10 L23,10 L23,38 L18,38 L8,19 L8,38 L3,38 Z M43,10 L43,15 L33,15 L33,21.5 L39,21.5 C43,21.5 45,24 45,28 L45,31 C45,35 42,38 38,38 L28,38 L28,33 L38,33 C39.4,33 40,32.3 40,31 L40,29 C40,27.4 39.5,26.5 38,26.5 L33,26.5 C29.8,26.5 28,24.2 28,21 L28,16 C28,12.4 30.3,10 34,10 Z" />
+</vector>

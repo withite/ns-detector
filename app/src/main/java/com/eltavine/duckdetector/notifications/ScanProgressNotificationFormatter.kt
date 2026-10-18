@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,7 +51,7 @@ class ScanProgressNotificationFormatter {
             ScanProgressNotificationModel(
                 title = "Scanning $clampedReady/$clampedTotal",
                 text = "${overview.headline} \u00b7 ${overview.summary}",
-                subText = "Duck Detector",
+                subText = "NS Detector",
                 shortCriticalText = "$clampedReady/$clampedTotal",
                 progressPercent = progressPercent,
             )

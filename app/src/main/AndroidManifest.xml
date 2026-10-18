@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 Copyright 2026 Duck Apps Contributor
+Modified 2026 by NS Detector contributors: independent diagnostics product.
 If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,6 +56,10 @@ limitations under the License.
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="duckdetector" />
+            <!-- NS Detector keeps the upstream JNI namespace while using an independent app ID. -->
+            <meta-data
+                android:name="com.eltavine.duckdetector.launch_activity"
+                android:value="com.eltavine.duckdetector.MainActivity" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -62,7 +67,7 @@ limitations under the License.
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name="com.eltavine.duckdetector.MainActivity"
             android:exported="true" />
 
     </application>

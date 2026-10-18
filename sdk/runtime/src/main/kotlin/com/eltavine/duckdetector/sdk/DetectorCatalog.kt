@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +29,7 @@ import com.eltavine.duckdetector.features.lsposed.detector.LSPosedDetector
 import com.eltavine.duckdetector.features.memory.detector.MemoryDetector
 import com.eltavine.duckdetector.features.mount.detector.MountDetector
 import com.eltavine.duckdetector.features.nativeroot.detector.NativeRootDetector
+import com.eltavine.duckdetector.features.networkenvironment.detector.NetworkEnvironmentDetector
 import com.eltavine.duckdetector.features.playintegrityfix.detector.PlayIntegrityFixDetector
 import com.eltavine.duckdetector.features.rootmanagers.detector.RootManagersDetector
 import com.eltavine.duckdetector.features.selinux.detector.SelinuxDetector
@@ -58,6 +60,7 @@ public object DetectorCatalog {
         MemoryDetector,
         MountDetector,
         NativeRootDetector,
+        NetworkEnvironmentDetector,
         PlayIntegrityFixDetector,
         RootManagersDetector,
         SelinuxDetector,

@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -229,7 +230,7 @@ class HttpUpdateApkDownloaderTest {
     )
 
     private fun apk(size: Long, sha256: String) = NightlyUpdateApk(
-        name = "Duck.Detector-test.apk",
+        name = "NS.Detector-test.apk",
         downloadUrl = url(),
         sizeBytes = size,
         sha256 = sha256,

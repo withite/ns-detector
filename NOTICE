@@ -1,0 +1,24 @@
+NS Detector
+Copyright 2026 NS Detector contributors
+
+This product includes software derived from Duck Detector / Duck-Detector-Refactoring.
+Upstream: https://github.com/eltavine/Duck-Detector-Refactoring
+Pinned development baseline: b1135897cff4ddf01797f042bdd15f7d7e364e0d
+Copyright 2026 Duck Apps Contributor
+Original contact: Eltavine <me@eltavine.com>
+Licensed under the Apache License, Version 2.0; see LICENSE.
+Original source copyright and license notices are retained.
+
+NS Detector modifications include independent application identity and distribution,
+local scan history and comparison, report redaction, network environment context,
+product presentation, and project-specific build and verification workflows.
+See the repository commit history for exact changes.
+
+The UI helper remains a separately pinned dependency/submodule maintained by its
+respective authors. Its own license and bundled third-party notices remain applicable.
+
+The Chunqiu-Detector-Problem-solution repository is referenced for requirements and
+false-positive scenarios only. NS Detector does not copy scripts, APKs, or other
+binaries from that repository.
+
+Use of upstream names identifies provenance and does not imply endorsement.

@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,13 +20,13 @@ package com.eltavine.duckdetector.buildlogic
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.eltavine.duckdetector.buildlogic.assets.registerGeneratedAssets
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 
-private const val VERSION_CODE_BASE = 300
-private const val VERSION_NAME_ZONE_ID = "Asia/Singapore"
-private const val isAlphaVersion = true
+private const val DEFAULT_VERSION_CODE = 10000
+private const val DEFAULT_VERSION_NAME = "1.0.0"
 
 class DuckDetectorAndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
@@ -51,17 +52,13 @@ class DuckDetectorAndroidApplicationConventionPlugin : Plugin<Project> {
                 }
             )
             .orElse("unknown")
-        val versionCode = providers.of(GitCommitCountValueSource::class.java) {
-            parameters.repositoryRoot.set(rootDir.absolutePath)
-        }.map { commitCount ->
-            VERSION_CODE_BASE + commitCount
-        }
-        val versionNameDate = providers.of(CurrentDateVersionNameValueSource::class.java) {
-            parameters.zoneId.set(VERSION_NAME_ZONE_ID)
-        }
-        val versionName = providers.provider {
-            "${versionNameDate.get()}-${buildHash.get()}"
-        }
+        val versionCode = providers.gradleProperty("nsdetector.versionCode")
+            .orElse(providers.environmentVariable("VERSION_CODE"))
+            .map(::parseNsVersionCode)
+            .orElse(DEFAULT_VERSION_CODE)
+        val versionName = providers.gradleProperty("nsdetector.versionName")
+            .orElse(providers.environmentVariable("VERSION_NAME"))
+            .orElse(DEFAULT_VERSION_NAME)
 
         val releaseKeystorePath = providers.environmentVariable("ANDROID_KEYSTORE_PATH")
         val releaseStorePassword = providers.environmentVariable("ANDROID_KEYSTORE_PASSWORD")
@@ -88,7 +85,7 @@ class DuckDetectorAndroidApplicationConventionPlugin : Plugin<Project> {
                 this.versionName = versionName.get()
                 buildConfigField("String", "BUILD_TIME_UTC", "\"${buildTimeUtc.get()}\"")
                 buildConfigField("String", "BUILD_HASH", "\"${buildHash.get()}\"")
-                buildConfigField("boolean", "isAlphaVersion", isAlphaVersion.toString())
+                buildConfigField("boolean", "isAlphaVersion", "false")
             }
 
             signingConfigs {
@@ -103,6 +100,10 @@ class DuckDetectorAndroidApplicationConventionPlugin : Plugin<Project> {
             }
 
             buildTypes {
+                debug {
+                    applicationIdSuffix = ".debug"
+                    versionNameSuffix = "-debug"
+                }
                 release {
                     isMinifyEnabled = true
                     isShrinkResources = true
@@ -113,7 +114,7 @@ class DuckDetectorAndroidApplicationConventionPlugin : Plugin<Project> {
                     signingConfig = if (hasReleaseSigning.get()) {
                          signingConfigs.getByName("ciRelease")
                     } else {
-                         signingConfigs.getByName("debug")
+                         null
                     }
                 }
             }
@@ -130,6 +131,34 @@ class DuckDetectorAndroidApplicationConventionPlugin : Plugin<Project> {
             }
         }
 
+        val externalSigning = providers.gradleProperty("nsdetector.externalSigning")
+            .map { it.toBooleanStrict() }.orElse(false)
+        // Explicit external signing exports an unsigned APK; every ordinary release requires a key.
+        val verifyReleaseSigning = tasks.register("verifyReleaseSigning") {
+            group = "verification"
+            description = "Requires the independent NS Detector release signing identity."
+            val signingAvailable = hasReleaseSigning.get()
+            val permitsUnsignedExport = externalSigning.get()
+            doLast {
+                if (!signingAvailable && !permitsUnsignedExport) {
+                    throw GradleException(
+                        "Release signing is required. Configure ANDROID_KEYSTORE_PATH, " +
+                            "ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD.",
+                    )
+                }
+            }
+        }
+        tasks.matching { it.name == "preReleaseBuild" || it.name == "validateSigningRelease" }
+            .configureEach { dependsOn(verifyReleaseSigning) }
+
         registerGeneratedAssets()
     }
+}
+
+internal fun parseNsVersionCode(value: String): Int {
+    val code = value.toIntOrNull()
+    require(code != null && code in 1..2_100_000_000) {
+        "NS Detector versionCode must be an integer between 1 and 2100000000."
+    }
+    return code
 }

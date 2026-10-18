@@ -1,5 +1,6 @@
 <!--
 Copyright 2026 Duck Apps Contributor
+Modified 2026 by NS Detector contributors: independent diagnostics product.
 If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,19 +19,19 @@ limitations under the License.
 <resources>
     <string name="navigation_home">Home</string>
     <string name="navigation_settings">Settings</string>
-    <string name="duck_logo_description">Duck Detector logo</string>
+    <string name="duck_logo_description">NS Detector logo</string>
     <string name="user_agreement">User Agreement</string>
     <string name="disclaimer">&amp; Disclaimer</string>
     <string name="please_read_carefully">Please read carefully before continuing</string>
     <string name="agreement_risk_title">High-risk use reminder</string>
     <string name="agreement_risk_body_emphasis">Do not treat any single result as a final legal, compliance, warranty, or security conclusion.</string>
-    <string name="agreement_risk_body_template">Duck Detector provides reference signals only. %1$s Always combine the app\'s output with manual verification, upstream evidence, and your own risk assessment before taking action.</string>
+    <string name="agreement_risk_body_template">NS Detector provides reference signals only. %1$s Always combine the app\'s output with manual verification, upstream evidence, and your own risk assessment before taking action.</string>
     <string name="user_agreement_title">User Agreement</string>
-    <string name="user_agreement_content" formatted="false">By using Duck Detector, you agree to the following terms:\n\n1. Purpose of use\nThis application is designed solely for educational and personal security-assessment purposes. It helps users understand the security status of their own devices.\n\n2. No warranty\nThis application is provided \"as is\" without any warranties, express or implied. The developers do not guarantee the accuracy, completeness, or reliability of detection results.\n\n3. User responsibility\nYou are solely responsible for how you use this application and any consequences that may arise from its use.\n\n4. Compliance with laws\nYou agree to use this application in compliance with all applicable local, national, and international laws and regulations.</string>
+    <string name="user_agreement_content" formatted="false">By using NS Detector, you agree to the following terms:\n\n1. Purpose of use\nThis application is designed solely for educational and personal security-assessment purposes. It helps users understand the security status of their own devices.\n\n2. No warranty\nThis application is provided \"as is\" without any warranties, express or implied. The developers do not guarantee the accuracy, completeness, or reliability of detection results.\n\n3. User responsibility\nYou are solely responsible for how you use this application and any consequences that may arise from its use.\n\n4. Compliance with laws\nYou agree to use this application in compliance with all applicable local, national, and international laws and regulations.</string>
     <string name="disclaimer_title">Disclaimer</string>
-    <string name="disclaimer_content" formatted="false">IMPORTANT NOTICE:\n\n1. Detection limitations\nDuck Detector uses various methods to detect device security status, but no detection method is 100&#37; accurate. Results should be considered indicators rather than definitive assessments.\n\n2. False positives and false negatives\nThe application may produce false positives or false negatives. Always use professional security tools and your own verification for comprehensive assessment.\n\n3. No liability\nThe developers, contributors, and distributors of Duck Detector shall not be held liable for any direct, indirect, incidental, special, or consequential damages arising from the use or inability to use this application.\n\n4. Third-party services\nTEE revocation checks use a built-in snapshot by default. If you allow online revocation refresh, the app may contact the Google attestation revocation endpoint. Security scans themselves still run locally on your device, and detector findings are not intentionally uploaded as scan telemetry.</string>
+    <string name="disclaimer_content" formatted="false">IMPORTANT NOTICE:\n\n1. Detection limitations\nNS Detector uses various methods to detect device security status, but no detection method is 100&#37; accurate. Results should be considered indicators rather than definitive assessments.\n\n2. False positives and false negatives\nThe application may produce false positives or false negatives. Always use professional security tools and your own verification for comprehensive assessment.\n\n3. No liability\nThe developers, contributors, and distributors of NS Detector shall not be held liable for any direct, indirect, incidental, special, or consequential damages arising from the use or inability to use this application.\n\n4. Third-party services\nTEE revocation checks use a built-in snapshot by default. If you allow online revocation refresh, the app may contact the Google attestation revocation endpoint. Security scans themselves still run locally on your device, and detector findings are not intentionally uploaded as scan telemetry.</string>
     <string name="privacy_notice_title">Privacy Notice</string>
-    <string name="privacy_notice_content" formatted="false">Privacy summary: Security checks run locally on your device. Detector findings are not intentionally uploaded as scan telemetry. TEE revocation checks use a built-in snapshot by default; if you allow online revocation refresh, the app may contact the Google attestation revocation endpoint. After startup choices are complete, the app contacts GitHub once per cold start to check Nightly update metadata. If you turn on GitHub acceleration, these requests go through the third-party gh-proxy.com service instead.</string>
+    <string name="privacy_notice_content" formatted="false">Security checks run locally on your device. Findings are not uploaded as telemetry. Update checks start only when you choose Check for updates in Settings. GitHub is contacted directly by default; the optional third-party proxy is off. TEE revocation uses a bundled snapshot unless you explicitly allow online refresh.</string>
     <string name="timer_elapsed">30 seconds elapsed</string>
     <string name="timer_waiting">Please wait %1$ds</string>
     <string name="fully_reviewed">Fully reviewed</string>
@@ -40,7 +41,7 @@ limitations under the License.
     <string name="agreement_acknowledgement">By continuing, you acknowledge that you have read and agree to these terms.</string>
     <string name="update_open_failed">No browser is available to open GitHub</string>
     <string name="update_download_failed">The update could not be downloaded or verified</string>
-    <string name="update_install_permission_required">Allow installs from Duck Detector, then tap Install again</string>
+    <string name="update_install_permission_required">Allow installs from NS Detector, then tap Install again</string>
     <string name="update_install_failed">Could not open the package installer</string>
     <string name="startup_review_label">Startup policy review</string>
     <string name="startup_preparing_title">Preparing startup</string>
@@ -62,12 +63,12 @@ limitations under the License.
     <string name="startup_status_acknowledged">Acknowledged</string>
     <string name="startup_status_review_later">Review later</string>
     <string name="startup_ui_style_title">UI style</string>
-    <string name="startup_ui_style_detail">Choose the interface engine used by Duck Detector. You can switch it later in Settings.</string>
+    <string name="startup_ui_style_detail">Choose the interface engine used by NS Detector. You can switch it later in Settings.</string>
     <string name="startup_ui_style_material">Material 3</string>
     <string name="startup_ui_style_miuix">MIUIX</string>
     <string name="startup_notifications_title">Notifications</string>
     <string name="startup_notifications_ready_headline">Scan notifications are enabled.</string>
-    <string name="startup_notifications_ready_detail">Duck Detector can publish scan-progress notifications while detector cards collect evidence.</string>
+    <string name="startup_notifications_ready_detail">NS Detector can publish scan-progress notifications while detector cards collect evidence.</string>
     <string name="startup_notifications_prompt_headline">Choose whether scan progress may post notifications.</string>
     <string name="startup_notifications_prompt_detail_api33">Android %1$d requires runtime notification permission. Startup scanning stays blocked until you allow it or explicitly continue without it.</string>
     <string name="startup_notifications_prompt_detail_legacy">This Android version does not require a runtime notification prompt, but the startup policy still needs to record your choice.</string>
@@ -77,13 +78,13 @@ limitations under the License.
     <string name="startup_notifications_skipped_detail">Scan progress will stay inside the app until you grant notification permission later.</string>
     <string name="startup_live_update_title">Live Update</string>
     <string name="startup_live_update_unsupported_headline">Promoted ongoing notifications are not available on this Android version.</string>
-    <string name="startup_live_update_unsupported_detail">Duck Detector will use a regular notification path when notification permission is available.</string>
+    <string name="startup_live_update_unsupported_detail">NS Detector will use a regular notification path when notification permission is available.</string>
     <string name="startup_live_update_waiting_headline">Live Update depends on the notification path.</string>
     <string name="startup_live_update_waiting_detail">Grant notification permission first. If you keep notifications disabled, this card will fall back to regular in-app progress only.</string>
     <string name="startup_live_update_ready_headline">Promoted ongoing notifications are allowed.</string>
     <string name="startup_live_update_ready_detail">On supported Android versions, scan progress can surface through the richer Live Update path.</string>
     <string name="startup_live_update_prompt_headline">Choose whether to use the Android Live Update path.</string>
-    <string name="startup_live_update_prompt_detail">Duck Detector can open the system page for promoted ongoing notifications. If you skip this, scan progress falls back to a regular notification.</string>
+    <string name="startup_live_update_prompt_detail">NS Detector can open the system page for promoted ongoing notifications. If you skip this, scan progress falls back to a regular notification.</string>
     <string name="startup_live_update_open_settings">Open settings</string>
     <string name="startup_live_update_use_regular">Use regular</string>
     <string name="startup_live_update_regular_headline">Regular notifications were selected.</string>

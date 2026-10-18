@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 NS Detector contributors. Licensed under Apache-2.0. -->
+<resources>
+    <string name="ns_welcome_subtitle">以可追溯的證據，了解裝置環境</string>
+    <string name="ns_agreement_scope">請僅檢測自己的裝置或已取得授權的裝置。結果屬於診斷線索，可能存在誤報、漏報及觀測限制，請核驗證據後再採取行動。軟體依開源授權提供，不附帶準確性或適用性擔保。點選同意即接受條款；連網與實驗探針另行選擇，不會自動啟用。</string>
+    <string name="ns_optional_title">可選檢測預設關閉</string>
+    <string name="ns_optional_risks">線上憑證撤銷更新與實驗檢測均可選。一些實驗探針會觸發特殊系統路徑，在特定韌體上可能造成暫時停頓、應用程式崩潰或裝置重新啟動。每個選項會在啟用前說明範圍與風險。拒絕可選項仍可執行一般本機掃描。</string>
+    <string name="ns_exit">離開</string>
+</resources>

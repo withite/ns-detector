@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Modified 2026 by NS Detector contributors: explicit evidence actions and accessibility.
  */
 
 package com.eltavine.duckdetector.features.dashboard.ui
@@ -23,6 +24,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
@@ -30,14 +34,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.eltavine.duckdetector.core.designsystem.components.DuckPanel
 import com.eltavine.duckdetector.core.designsystem.theme.DuckTypography
 import com.eltavine.duckdetector.core.evidence.DetectionSeverity
-import com.eltavine.duckdetector.core.evidence.DetectorStatus
 import com.eltavine.duckdetector.core.ui.components.AdaptiveSeverityTag
 import com.eltavine.duckdetector.core.ui.components.DetectorHairline
+import com.eltavine.duckdetector.core.ui.components.DuckIcon
 import com.eltavine.duckdetector.core.ui.components.WrapSafeText
 import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardFindingModel
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveContent
@@ -125,12 +130,13 @@ private fun DashboardFindingRow(
     finding: DashboardFindingModel,
     onClick: (() -> Unit)?,
 ) {
+    val actionLabel = stringResource(R.string.dashboard_inspect_evidence)
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .then(
                 if (onClick != null) {
-                    Modifier.clickable(onClick = onClick)
+                    Modifier.clickable(role = Role.Button, onClickLabel = actionLabel, onClick = onClick)
                 } else {
                     Modifier
                 },
@@ -181,6 +187,24 @@ private fun DashboardFindingContent(
             maxLines = FINDING_DETAIL_MAX_LINES,
             overflow = TextOverflow.Ellipsis,
         )
+        if (finding.detectorId != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                WrapSafeText(
+                    text = stringResource(R.string.dashboard_inspect_evidence),
+                    style = DuckTypography.ReportAction,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                DuckIcon(
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
+        }
     }
 }
 

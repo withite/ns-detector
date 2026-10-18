@@ -1,10 +1,11 @@
 ================================================================================
-                      DUCK DETECTOR — SECURITY SCAN REPORT                      
+                      NS DETECTOR — ENVIRONMENT SCAN REPORT
 ================================================================================
   App Version    : 2026.01.02-0123456789ab (Build 321)
   Build Commit   : 0123456789ab
   Build Time     : 2026-01-02 03:04:05 (UTC)
   Report Time    : 2026-01-02 03:04:05 (UTC)
+  Privacy        : Common identifiers redacted; review before sharing.
 
 --------------------------------------------------------------------------------
   EXECUTIVE SUMMARY
@@ -15,8 +16,10 @@
   Scan Statistics:
     [✖] Danger   : 2
     [▲] Warning  : 0
-    [✔] Ready    : 12
+    [·] Ready    : 12
     [·] Pending  : 3
+    [ℹ] Limited  : 0
+    [!] Error    : 8
 
 --------------------------------------------------------------------------------
   TOP FINDINGS
@@ -538,7 +541,7 @@ Line two 38
     • Certificate 1       : Unicode ✓ détail 21
         Subject           :    
         Issuer            : Value 23
-        Serial Number     : A long detail line that deliberately exceeds sixty characters in length 24
+        Serial Number     : [REDACTED]
         Validity          :  to Value 26
         Signature          :   Padded value 27  
         Public Key        : Line one 28
@@ -548,7 +551,7 @@ Line two 28
     • Certificate 2       : key = value 29
         Subject           : A long detail line that deliberately exceeds sixty characters in length 30
         Issuer            : key = value 31
-        Serial Number     : left | right 32
+        Serial Number     : [REDACTED]
         Validity          : Line one 33
 Line two 33
 
@@ -661,13 +664,14 @@ Line two 7
 
 # ---- next scenario ----
 ================================================================================
-                      DUCK DETECTOR — SECURITY SCAN REPORT                      
+                      NS DETECTOR — ENVIRONMENT SCAN REPORT
 ================================================================================
   Target Device  : Duck Pond 7 (Android 17, API 37)
   App Version    : 2026.01.02-0123456789ab (Build 321)
   Build Commit   : 0123456789ab
   Build Time     : 2026-01-02 03:04:05 (UTC)
   Report Time    : 2026-01-02 03:04:05 (UTC)
+  Privacy        : Common identifiers redacted; review before sharing.
 
 --------------------------------------------------------------------------------
   EXECUTIVE SUMMARY
@@ -678,8 +682,10 @@ Line two 7
   Scan Statistics:
     [✖] Danger   : 3
     [▲] Warning  : 4
-    [✔] Ready    : 12
+    [·] Ready    : 12
     [·] Pending  : 3
+    [ℹ] Limited  : 0
+    [!] Error    : 4
 
 --------------------------------------------------------------------------------
   TOP FINDINGS
@@ -1418,14 +1424,14 @@ Line two 7
     • Certificate 1       : Value 33
         Subject           : Unicode ✓ détail 34
         Issuer            : key = value 35
-        Serial Number     :    
+        Serial Number     :   [REDACTED]
         Validity          : key = value 37 to 
         Signature          : left | right 39
         Public Key        : Value 40
     • Certificate 2       : 
         Subject           : A long detail line that deliberately exceeds sixty characters in length 42
         Issuer            :   Padded value 43  
-        Serial Number     : Value 44
+        Serial Number     : [REDACTED]
         Validity          :     to Value 46
         Signature          : Line one 47
 Line two 47
@@ -1438,7 +1444,7 @@ Line two 48
     • Certificate 3       : Unicode ✓ détail 49
         Subject           : A long detail line that deliberately exceeds sixty characters in length 50
         Issuer            : A long detail line that deliberately exceeds sixty characters in length 51
-        Serial Number     : Line one 52
+        Serial Number     : [REDACTED]
 Line two 52
 
   Line three  
@@ -1608,13 +1614,14 @@ Line two 19
 
 # ---- next scenario ----
 ================================================================================
-                      DUCK DETECTOR — SECURITY SCAN REPORT                      
+                      NS DETECTOR — ENVIRONMENT SCAN REPORT
 ================================================================================
   Target Device  : Duck Pond 7 (Android 17, API unknown)
   App Version    : 2026.01.02-0123456789ab (Build 321)
   Build Commit   : 0123456789ab
   Build Time     : 2026-01-02 03:04:05 (UTC)
   Report Time    : 2026-01-02 03:04:05 (UTC)
+  Privacy        : Common identifiers redacted; review before sharing.
 
 --------------------------------------------------------------------------------
   EXECUTIVE SUMMARY
@@ -1625,8 +1632,10 @@ Line two 19
   Scan Statistics:
     [✖] Danger   : 1
     [▲] Warning  : 3
-    [✔] Ready    : 12
+    [·] Ready    : 12
     [·] Pending  : 3
+    [ℹ] Limited  : 0
+    [!] Error    : 10
 
 --------------------------------------------------------------------------------
   TOP FINDINGS
@@ -2253,12 +2262,13 @@ Line two 13
 
 # ---- next scenario ----
 ================================================================================
-                      DUCK DETECTOR — SECURITY SCAN REPORT                      
+                      NS DETECTOR — ENVIRONMENT SCAN REPORT
 ================================================================================
   App Version    : 2026.01.02-0123456789ab (Build 321)
   Build Commit   : 0123456789ab
   Build Time     : 2026-01-02 03:04:05 (UTC)
   Report Time    : 2026-01-02 03:04:05 (UTC)
+  Privacy        : Common identifiers redacted; review before sharing.
 
 --------------------------------------------------------------------------------
   EXECUTIVE SUMMARY
@@ -2272,8 +2282,10 @@ Line two 0
   Scan Statistics:
     [✖] Danger   : 5
     [▲] Warning  : 1
-    [✔] Ready    : 12
+    [·] Ready    : 12
     [·] Pending  : 3
+    [ℹ] Limited  : 0
+    [!] Error    : 6
 
 --------------------------------------------------------------------------------
   TOP FINDINGS
@@ -3090,7 +3102,7 @@ Line two 29
     • Certificate 1       :   Padded value 40  
         Subject           : Unicode ✓ détail 41
         Issuer            : Value 42
-        Serial Number     : left | right 43
+        Serial Number     : [REDACTED]
         Validity          : left | right 44 to left | right 45
         Signature          : left | right 46
         Public Key        :   Padded value 47  
@@ -3100,7 +3112,7 @@ Line two 29
 Line two 50
 
   Line three  
-        Serial Number     : A long detail line that deliberately exceeds sixty characters in length 51
+        Serial Number     : [REDACTED]
         Validity          :  to left | right 53
         Signature          : 
         Public Key        : key = value 55

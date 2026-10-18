@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 NS Detector contributors. Licensed under the Apache License, Version 2.0. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#36DFBF" android:pathData="M54,20 L82,31 L82,52 C82,70 71,82 54,90 C37,82 26,70 26,52 L26,31 Z" />
+    <path android:fillColor="#0B192C" android:pathData="M36,62 L36,43 L41,43 L49,55 L49,43 L54,43 L54,62 L49,62 L41,50 L41,62 Z M71,43 L59,43 L56,47 L56,52 L60,56 L66,56 L66,58 L56,58 L56,62 L68,62 L72,58 L72,53 L68,49 L61,49 L61,47 L71,47 Z" />
+</vector>

@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -80,6 +81,11 @@ internal fun AboutSection(
         SettingsFootnote(
             title = stringResource(R.string.about_label_privacy),
             text = stringResource(R.string.about_privacy_summary),
+            icon = Icons.Rounded.PrivacyTip,
+        )
+        SettingsFootnote(
+            title = "NS Detector",
+            text = stringResource(R.string.ns_project_attribution),
             icon = Icons.Rounded.PrivacyTip,
         )
         AboutLinks()

@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,8 +44,8 @@ internal val testManifest = NightlyUpdateManifest(
     ),
     builtAtUtc = "2026-08-08T12:30:00Z",
     apk = NightlyUpdateApk(
-        name = "Duck.Detector-test.apk",
-        downloadUrl = "https://github.com/eltavine/Duck-Detector-Refactoring/releases/download/nightly/Duck.Detector-test.apk",
+        name = "NS.Detector-test.apk",
+        downloadUrl = "https://github.com/withite/ns-detector/releases/download/nightly/NS.Detector-test.apk",
         sizeBytes = 12_345_678L,
         sha256 = "c".repeat(64),
     ),
@@ -81,7 +82,7 @@ internal fun availableUpdate(
         remainingCommitCount = 0,
         downloadUrl = downloadUrl,
         compareUrl =
-            "https://github.com/eltavine/Duck-Detector-Refactoring/compare/$TEST_BASE_SHA...${updateManifest.commit.sha}",
+            "https://github.com/withite/ns-detector/compare/$TEST_BASE_SHA...${updateManifest.commit.sha}",
     )
 }
 

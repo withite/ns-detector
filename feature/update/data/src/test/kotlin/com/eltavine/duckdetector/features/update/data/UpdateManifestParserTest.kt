@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +42,7 @@ class UpdateManifestParserTest {
         assertEquals("master", manifest.branch)
         assertEquals(TEST_HEAD_SHA, manifest.commit.sha)
         assertEquals(500, manifest.versionCode)
-        assertEquals("Duck.Detector-test.apk", manifest.apk.name)
+        assertEquals("NS.Detector-test.apk", manifest.apk.name)
     }
 
     @Test
@@ -81,7 +82,7 @@ class UpdateManifestParserTest {
         assertThrows(UpdateManifestValidationException::class.java) {
             parser.parse(
                 validUpdateManifestJson(
-                    downloadUrl = "https://example.com/Duck.Detector-test.apk",
+                    downloadUrl = "https://example.com/NS.Detector-test.apk",
                 ),
             )
         }
@@ -93,7 +94,7 @@ class UpdateManifestParserTest {
             parser.parse(
                 validUpdateManifestJson(
                     downloadUrl =
-                        "https://github.com/eltavine/Duck-Detector-Refactoring/releases/download/nightly/another.apk",
+                        "https://github.com/withite/ns-detector/releases/download/nightly/another.apk",
                 ),
             )
         }
@@ -114,7 +115,7 @@ class UpdateManifestParserTest {
     fun `rejects unsafe APK asset names`() {
         val json = JSONObject(validUpdateManifestJson())
         json.getJSONObject("apk")
-            .put("name", "../Duck.Detector-test.apk")
+            .put("name", "../NS.Detector-test.apk")
 
         assertThrows(UpdateManifestValidationException::class.java) {
             parser.parse(json.toString())

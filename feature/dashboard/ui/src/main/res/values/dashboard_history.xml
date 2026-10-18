@@ -1,0 +1,18 @@
+<resources>
+    <string name="dashboard_history_title">Local scan history</string>
+    <string name="dashboard_history_clear">Clear</string>
+    <string name="dashboard_history_privacy">The last 20 completed scans retain only outcomes and redacted headlines on this device. Raw evidence is excluded.</string>
+    <string name="dashboard_history_storage_failed">History could not be read or saved. Clear history and scan again.</string>
+    <string name="dashboard_history_empty">Complete a scan to establish a comparison baseline.</string>
+    <string name="dashboard_history_selected">Scan: %1$s</string>
+    <string name="dashboard_history_baseline">This is the oldest retained baseline. No earlier scan is available.</string>
+    <string name="dashboard_history_show">View %1$d scans</string>
+    <string name="dashboard_history_hide">Hide scan list</string>
+    <string name="dashboard_history_scan_details">%1$d modules · %2$d ms</string>
+    <string name="dashboard_history_unchanged">Module outcomes are unchanged from the previous completed scan.</string>
+    <string name="dashboard_history_new_finding">New evidence · %1$s: %2$s</string>
+    <string name="dashboard_history_resolved_finding">No longer observed · %1$s: %2$s</string>
+    <string name="dashboard_history_changed">Outcome changed · %1$s: %2$s</string>
+    <string name="dashboard_history_module_added">Module added · %1$s: %2$s</string>
+    <string name="dashboard_history_module_removed">Coverage removed · %1$s: %2$s</string>
+</resources>

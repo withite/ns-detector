@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class UpdateRepository internal constructor(
-    private val httpClient: UpdateHttpClient = HttpUrlConnectionUpdateClient(),
+    private val httpClient: UpdateHttpClient = GitHubReleaseManifestClient(),
     private val cache: UpdateCompareCache,
     private val currentRoute: suspend () -> GitHubRoute,
     private val manifestParser: UpdateManifestParser = UpdateManifestParser(),
@@ -156,12 +157,12 @@ class UpdateRepository internal constructor(
 
     companion object {
         const val MANIFEST_URL =
-            "https://github.com/eltavine/Duck-Detector-Refactoring/releases/download/nightly/update.json"
+            "https://api.github.com/repos/withite/ns-detector/releases?per_page=20"
 
         private const val GITHUB_API_REPOSITORY =
-            "https://api.github.com/repos/eltavine/Duck-Detector-Refactoring"
+            "https://api.github.com/repos/withite/ns-detector"
         private const val GITHUB_WEB_REPOSITORY =
-            "https://github.com/eltavine/Duck-Detector-Refactoring"
+            "https://github.com/withite/ns-detector"
         private const val JSON_ACCEPT = "application/json"
         private const val GITHUB_JSON_ACCEPT = "application/vnd.github+json"
         private const val COMPARE_PAGE_SIZE = 100

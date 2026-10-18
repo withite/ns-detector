@@ -1,5 +1,6 @@
 <!--
 Copyright 2026 Duck Apps Contributor
+Modified 2026 by NS Detector contributors: independent diagnostics product.
 If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,19 +17,19 @@ limitations under the License.
 -->
 
 <resources>
-    <string name="duck_logo_description">Duck Detector 標誌</string>
+    <string name="duck_logo_description">NS Detector 標誌</string>
     <string name="user_agreement">使用者協議</string>
     <string name="disclaimer">及免責聲明</string>
     <string name="please_read_carefully">請在繼續前仔細閱讀</string>
     <string name="agreement_risk_title">高風險使用提醒</string>
     <string name="agreement_risk_body_emphasis">請勿將任何單次結果視為最終的法律、合規、保固或安全結論。</string>
-    <string name="agreement_risk_body_template">Duck Detector 僅提供參考性訊號。%1$s在採取行動前，請務必結合人工核驗、上游證據以及您自己的風險判斷進行綜合評估。</string>
+    <string name="agreement_risk_body_template">NS Detector 僅提供參考性訊號。%1$s在採取行動前，請務必結合人工核驗、上游證據以及您自己的風險判斷進行綜合評估。</string>
     <string name="user_agreement_title">使用者協議</string>
-    <string name="user_agreement_content" formatted="false">使用 Duck Detector 即表示您同意以下條款：\n\n1. 使用目的\n本應用僅用於教育用途及個人安全評估，幫助使用者了解其本人裝置的安全狀態。\n\n2. 不提供保證\n本應用按「現況」提供，不附帶任何明示或暗示保證。開發者不保證檢測結果的準確性、完整性或可靠性。\n\n3. 使用者責任\n您需自行對本應用的使用方式及由此產生的任何後果負責。\n\n4. 法律遵循\n您同意依照所有適用的地方法律、國家法律及國際法規使用本應用。</string>
+    <string name="user_agreement_content" formatted="false">使用 NS Detector 即表示您同意以下條款：\n\n1. 使用目的\n本應用僅用於教育用途及個人安全評估，幫助使用者了解其本人裝置的安全狀態。\n\n2. 不提供保證\n本應用按「現況」提供，不附帶任何明示或暗示保證。開發者不保證檢測結果的準確性、完整性或可靠性。\n\n3. 使用者責任\n您需自行對本應用的使用方式及由此產生的任何後果負責。\n\n4. 法律遵循\n您同意依照所有適用的地方法律、國家法律及國際法規使用本應用。</string>
     <string name="disclaimer_title">免責聲明</string>
-    <string name="disclaimer_content" formatted="false">重要提示：\n\n1. 檢測侷限性\nDuck Detector 使用多種方法檢測裝置安全狀態，但沒有任何檢測方法能做到 100&#37; 準確。結果應視為提示資訊，而非最終定論。\n\n2. 誤報與漏報\n本應用可能出現誤報或漏報。請務必結合專業安全工具與您自己的核驗進行全面判斷。\n\n3. 免責條款\n對於因使用或無法使用本應用而導致的任何直接、間接、附帶、特殊或後果性損失，Duck Detector 的開發者、貢獻者和散佈者概不承擔責任。\n\n4. 第三方服務\nTEE 吊銷檢查預設使用應用內建快照。如果您允許線上吊銷庫更新，應用可能會存取 Google 的 attestation revocation endpoint。安全掃描本身仍在您的裝置本地執行，檢測結果也不會被刻意上傳為掃描遙測。</string>
+    <string name="disclaimer_content" formatted="false">重要提示：\n\n1. 檢測侷限性\nNS Detector 使用多種方法檢測裝置安全狀態，但沒有任何檢測方法能做到 100&#37; 準確。結果應視為提示資訊，而非最終定論。\n\n2. 誤報與漏報\n本應用可能出現誤報或漏報。請務必結合專業安全工具與您自己的核驗進行全面判斷。\n\n3. 免責條款\n對於因使用或無法使用本應用而導致的任何直接、間接、附帶、特殊或後果性損失，NS Detector 的開發者、貢獻者和散佈者概不承擔責任。\n\n4. 第三方服務\nTEE 吊銷檢查預設使用應用內建快照。如果您允許線上吊銷庫更新，應用可能會存取 Google 的 attestation revocation endpoint。安全掃描本身仍在您的裝置本地執行，檢測結果也不會被刻意上傳為掃描遙測。</string>
     <string name="privacy_notice_title">隱私說明</string>
-    <string name="privacy_notice_content" formatted="false">隱私摘要：安全檢查在您的裝置本地執行，檢測結果不會被刻意上傳為掃描遙測。TEE 吊銷檢查預設使用應用內建快照；如果您允許線上重新整理，應用可能會存取 Google 的 attestation revocation endpoint。完成啟動選項後，應用會在每次冷啟動時存取一次 GitHub，以檢查 Nightly 更新中繼資料。如果您開啟 GitHub 加速，這些請求將改由第三方服務 gh-proxy.com 轉送。</string>
+    <string name="privacy_notice_content" formatted="false">检测在设备本地运行，不会作为遥测上传检测结果。仅当您在设置中主动检查更新时才访问 GitHub，默认直接连接，第三方代理默认关闭。TEE 吊销检查使用内置快照，只有明确允许后才在线刷新。</string>
     <string name="timer_elapsed">已等待 30 秒</string>
     <string name="timer_waiting">請等待 %1$d 秒</string>
     <string name="fully_reviewed">已完整閱讀</string>
@@ -57,7 +58,7 @@ limitations under the License.
     <string name="startup_status_review_later">稍後檢查</string>
     <string name="startup_notifications_title">通知</string>
     <string name="startup_notifications_ready_headline">掃描通知已啟用。</string>
-    <string name="startup_notifications_ready_detail">Duck Detector 可在偵測卡片蒐集證據時發佈掃描進度通知。</string>
+    <string name="startup_notifications_ready_detail">NS Detector 可在偵測卡片蒐集證據時發佈掃描進度通知。</string>
     <string name="startup_notifications_prompt_headline">請選擇是否允許掃描進度發送通知。</string>
     <string name="startup_notifications_prompt_detail_api33">Android %1$d 需要執行時通知權限。在您允許或明確選擇不啟用之前，啟動掃描會保持阻擋。</string>
     <string name="startup_notifications_prompt_detail_legacy">目前 Android 版本不需要執行時通知提示，但啟動策略仍需記錄您的選擇。</string>
@@ -67,13 +68,13 @@ limitations under the License.
     <string name="startup_notifications_skipped_detail">在您稍後授予通知權限之前，掃描進度都只會顯示在應用內。</string>
     <string name="startup_live_update_title">Live Update</string>
     <string name="startup_live_update_unsupported_headline">目前 Android 版本不支援提升型持續通知。</string>
-    <string name="startup_live_update_unsupported_detail">在擁有通知權限時，Duck Detector 將改用一般通知路徑。</string>
+    <string name="startup_live_update_unsupported_detail">在擁有通知權限時，NS Detector 將改用一般通知路徑。</string>
     <string name="startup_live_update_waiting_headline">Live Update 依賴通知路徑。</string>
     <string name="startup_live_update_waiting_detail">請先授予通知權限。如果您持續停用通知，此卡片將退回為僅在應用內顯示進度。</string>
     <string name="startup_live_update_ready_headline">已允許提升型持續通知。</string>
     <string name="startup_live_update_ready_detail">在支援的 Android 版本上，掃描進度可透過更豐富的 Live Update 路徑顯示。</string>
     <string name="startup_live_update_prompt_headline">請選擇是否使用 Android Live Update 路徑。</string>
-    <string name="startup_live_update_prompt_detail">Duck Detector 可以開啟系統中的提升型持續通知設定頁。如果跳過，掃描進度將退回到一般通知。</string>
+    <string name="startup_live_update_prompt_detail">NS Detector 可以開啟系統中的提升型持續通知設定頁。如果跳過，掃描進度將退回到一般通知。</string>
     <string name="startup_live_update_open_settings">開啟設定</string>
     <string name="startup_live_update_use_regular">使用一般通知</string>
     <string name="startup_live_update_regular_headline">已選擇一般通知。</string>
@@ -93,7 +94,7 @@ limitations under the License.
     <string name="navigation_home">首頁</string>
     <string name="navigation_settings">設定</string>
     <string name="update_download_failed">無法下載或驗證更新</string>
-    <string name="update_install_permission_required">請允許 Duck Detector 安裝應用程式，然後再次點選「安裝」</string>
+    <string name="update_install_permission_required">請允許 NS Detector 安裝應用程式，然後再次點選「安裝」</string>
     <string name="update_install_failed">無法開啟安裝程式</string>
     <string name="update_apk_unavailable">下載的更新檔案已失效，請重新下載</string>
 </resources>

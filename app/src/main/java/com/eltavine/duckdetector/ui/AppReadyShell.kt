@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: independent diagnostics product.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,18 +49,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -83,7 +80,7 @@ import com.eltavine.duckdetector.features.dashboard.presentation.model.buildDash
 import com.eltavine.duckdetector.features.dashboard.presentation.model.buildDashboardOverview
 import com.eltavine.duckdetector.features.dashboard.presentation.model.dashboardCardOrder
 import com.eltavine.duckdetector.features.dashboard.ui.DashboardScreen
-import com.eltavine.duckdetector.features.dashboard.ui.DashboardTelegramAction
+import com.eltavine.duckdetector.features.dashboard.ui.DashboardProjectAction
 import com.eltavine.duckdetector.features.dashboard.ui.DashboardTopBarBrandIcon
 import com.eltavine.duckdetector.features.settings.presentation.model.SettingsUiState
 import com.eltavine.duckdetector.features.settings.ui.ConsentToggle
@@ -94,8 +91,6 @@ import com.eltavine.duckdetector.features.update.domain.GitHubAcceleration
 import com.eltavine.duckdetector.features.update.domain.AvailableNightlyUpdate
 import com.eltavine.duckdetector.features.update.domain.UpdateInstallResult
 import com.eltavine.duckdetector.features.update.presentation.UpdateDownloadState
-import com.eltavine.duckdetector.features.update.presentation.shouldOfferGitHubAcceleration
-import com.eltavine.duckdetector.features.update.ui.GitHubAccelerationDialog
 import com.eltavine.duckdetector.features.update.ui.NightlyUpdateDialog
 import com.eltavine.duckdetector.features.update.ui.UpdateViewModel
 import com.eltavine.duckdetector.notifications.ScanProgressNotificationSnapshot
@@ -132,10 +127,6 @@ internal fun AppReadyShell(
     val updateViewModel: UpdateViewModel = viewModel(factory = updateFactory)
     val accelerationStore = remember(appContext) { GitHubAccelerationStore.getInstance(appContext) }
     val gitHubAcceleration by accelerationStore.acceleration.collectAsState(initial = null)
-    var accelerationOfferDismissed by rememberSaveable { mutableStateOf(false) }
-    val appLocale = LocalConfiguration.current.locales[0]
-    val offerGitHubAcceleration = !accelerationOfferDismissed &&
-        gitHubAcceleration?.let { shouldOfferGitHubAcceleration(it, appLocale) } == true
     // Every detector session starts scanning when it is created, so the catalog order is the order
     // in which detector scans begin.
     val detectorSessions = DetectorFeatures.all.map { feature -> key(feature.id) { feature.rememberSession() } }
@@ -146,12 +137,7 @@ internal fun AppReadyShell(
     val visibleUpdate = updateUiState.availableUpdate.takeIf { updateUiState.isDialogVisible }
     val updateDialogPayload = rememberRetainedDialogPayload(visibleUpdate)
 
-    val automaticUpdateCheckReady = gitHubAcceleration != null && !offerGitHubAcceleration
-    LaunchedEffect(updateViewModel, automaticUpdateCheckReady) {
-        if (automaticUpdateCheckReady) {
-            updateViewModel.checkAutomatically()
-        }
-    }
+    // Update networking starts only from an explicit Settings action.
     LaunchedEffect(updateUiState.download) {
         if (updateUiState.download is UpdateDownloadState.Failed) {
             Toast.makeText(context, updateDownloadFailedMessage, Toast.LENGTH_SHORT).show()
@@ -181,6 +167,7 @@ internal fun AppReadyShell(
             topFindings = buildDashboardFindings(detectorSummaries),
             cardOrder = dashboardCardOrder(detectorSummaries),
             isLoading = isDashboardLoading,
+            detectorSummaries = detectorSummaries,
         )
     }
     val settingsState = remember(updateUiState.status, gitHubAcceleration) {
@@ -247,8 +234,8 @@ internal fun AppReadyShell(
                     items = listOf(
                         NavigationShellItem(
                             title = stringResource(R.string.navigation_home),
-                            topBarTitle = "Duck Detector",
-                            compactTopBarTitle = "Duck Detector",
+                            topBarTitle = "NS Detector",
+                            compactTopBarTitle = "NS Detector",
                             icon = Icons.Outlined.HomeOutline,
                             selectedIcon = Icons.Rounded.Home,
                             leadingContent = { DashboardTopBarBrandIcon() },
@@ -257,10 +244,10 @@ internal fun AppReadyShell(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     DashboardTopBarBrandIcon()
                                     Spacer(modifier = Modifier.size(10.dp))
-                                    Text("Duck Detector", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    Text("NS Detector", maxLines = 1, overflow = TextOverflow.Ellipsis)
                                 }
                             },
-                            trailingContent = { DashboardTelegramAction() },
+                            trailingContent = { DashboardProjectAction() },
                         ),
                         NavigationShellItem(
                             title = stringResource(R.string.navigation_settings),
@@ -353,12 +340,5 @@ internal fun AppReadyShell(
             )
         }
 
-        if (offerGitHubAcceleration) {
-            GitHubAccelerationDialog(
-                onEnable = { scope.launch { accelerationStore.setEnabled(true) } },
-                onDecline = { scope.launch { accelerationStore.setEnabled(false) } },
-                onDismiss = { accelerationOfferDismissed = true },
-            )
-        }
     }
 }
