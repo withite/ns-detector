@@ -13,6 +13,7 @@ PACKAGE = os.environ.get("NS_SMOKE_PACKAGE", "io.github.withite.nsdetector.debug
 OUTPUT = Path("smoke-output")
 OUTPUT.mkdir(exist_ok=True)
 EXPECTED_MODULE_COUNT = 20
+EMULATOR_RECOVERIES = []
 
 
 def window_text(root):
@@ -38,18 +39,38 @@ def adb(*args, binary=False, check=True, deadline=None):
 
 
 def hierarchy(deadline=None):
-    adb("shell", "uiautomator", "dump", "/sdcard/ns-window.xml", deadline=deadline)
-    raw = adb("shell", "cat", "/sdcard/ns-window.xml", deadline=deadline)
-    (OUTPUT / "latest-window.xml").write_text(raw)
-    root = ET.fromstring(raw)
-    text = window_text(root).casefold()
-    if any(word in text for word in (
+    failure_phrases = (
         "keeps stopping", "isn't responding", "isn’t responding", "is not responding", "has stopped",
         "无响应", "未响应", "没有响应", "已停止运行", "屡次停止运行",
         "沒有回應", "無回應", "未回應", "已停止運作", "持續停止運作",
-    )):
-        raise RuntimeError("Android reported a crash or ANR; see latest-window.xml")
-    return root
+    )
+    while True:
+        adb("shell", "uiautomator", "dump", "/sdcard/ns-window.xml", deadline=deadline)
+        raw = adb("shell", "cat", "/sdcard/ns-window.xml", deadline=deadline)
+        (OUTPUT / "latest-window.xml").write_text(raw)
+        root = ET.fromstring(raw)
+        failures = [n for n in root.iter("node") if any(phrase in
+                    (n.attrib.get("text", "") + " " + n.attrib.get("content-desc", "")).casefold()
+                    for phrase in failure_phrases)]
+        if not failures:
+            return root
+        title = failures[0].attrib
+        quickstep = (len(failures) == 1 and title.get("package") == "android"
+                     and title.get("resource-id") == "android:id/alertTitle"
+                     and title.get("text") in ("Quickstep isn't responding", "Quickstep isn’t responding"))
+        close = next((n for n in root.iter("node") if n.attrib.get("package") == "android"
+                      and n.attrib.get("resource-id") == "android:id/aerr_close"
+                      and n.attrib.get("text") == "Close app" and n.attrib.get("enabled") == "true"), None)
+        if not quickstep or close is None or len(EMULATOR_RECOVERIES) >= 2:
+            raise RuntimeError("Android reported a crash or ANR; see latest-window.xml")
+        name = f"launcher-anr-recovery-{len(EMULATOR_RECOVERIES) + 1}"
+        (OUTPUT / f"{name}.xml").write_text(raw)
+        screenshot(name)
+        if not tap(close):
+            raise RuntimeError("Quickstep ANR close button is clipped; see latest-window.xml")
+        EMULATOR_RECOVERIES.append({"dialogTitle": title["text"], "action": "Close app", "evidence": name})
+        (OUTPUT / "emulator-recoveries.json").write_text(json.dumps(EMULATOR_RECOVERIES, indent=2))
+        time.sleep(1)
 
 
 def wait_for_completed_scan(timeout=180):
@@ -268,6 +289,9 @@ def main():
     if len(apks) != 1:
         raise RuntimeError("Expected exactly one APK for installation smoke testing")
     apk = apks[0]
+    # Let the AOSP launcher settle after emulator boot before installing the application.
+    adb("shell", "input", "keyevent", "KEYCODE_HOME")
+    time.sleep(3)
     adb("install", "-r", str(apk))
     adb("logcat", "-c")
     launch()
@@ -334,6 +358,7 @@ def main():
               "completedModuleCount": completed_count, "expectedModuleCount": EXPECTED_MODULE_COUNT,
               "emulatorCompletionWaitSeconds": completion_wait_seconds,
               "browserInteractions": browser_interactions, "exportInteractions": export_interactions,
+              "emulatorRecoveryCount": len(EMULATOR_RECOVERIES), "emulatorRecoveries": EMULATOR_RECOVERIES,
               "scope": "Android API 35 x86_64 emulator installation, launcher, dashboard, full module return and restart; not physical-device accuracy or performance validation."}
     (OUTPUT / "smoke-result.json").write_text(json.dumps(result, indent=2))
     print(json.dumps(result))
