@@ -63,14 +63,17 @@ def sign(args):
                        env=env, check=True)
     verification = subprocess.check_output([str(tools / "apksigner"), "verify", "--verbose", "--print-certs", str(target)], text=True)
     subprocess.run([str(tools / "zipalign"), "-c", "-P", "16", "4", str(target)], check=True)
-    fingerprint = re.search(r"Signer #1 certificate SHA-256 digest: ([0-9a-fA-F]+)", verification)
-    if not fingerprint:
-        raise SystemExit("Could not verify the signing certificate")
+    # Build Tools 37 labels scheme-specific signers as e.g. "V3.0 Signer".
+    fingerprints = {value.lower() for value in re.findall(
+        r"certificate SHA-256 digest: ([0-9a-fA-F]{64})", verification)}
+    if len(fingerprints) != 1 or not re.search(r"Number of signers: 1\b", verification):
+        raise SystemExit("Expected exactly one verified release signing certificate")
+    fingerprint = fingerprints.pop()
     (destination / "apk-signature.txt").write_text(verification)
     info["signed"] = True
     info["abis"] = sorted(actual)
     info["signing"] = {"method": "private external signing after GitHub compilation",
-                       "certificateSha256": fingerprint.group(1).lower()}
+                       "certificateSha256": fingerprint}
     (destination / "build-info.json").write_text(json.dumps(info, indent=2) + "\n")
     manifest["channel"] = "stable"
     manifest["apk"] = {"name": target.name, "sizeBytes": target.stat().st_size, "sha256": sha256(target),
@@ -84,7 +87,7 @@ def sign(args):
     (destination / "SHA256SUMS").write_text("\n".join(
         f"{sha256(path)}  {path.name}" for path in sorted(destination.iterdir()) if path.is_file()) + "\n")
     print(f"Signed and verified {target.name}; all four native ABIs retained.")
-    print(f"Release certificate SHA-256: {fingerprint.group(1).lower()}")
+    print(f"Release certificate SHA-256: {fingerprint}")
 
 
 if __name__ == "__main__":
