@@ -1,0 +1,18 @@
+<!-- Copyright 2026 NS Detector contributors. Licensed under Apache-2.0. -->
+<resources>
+    <string name="dashboard_console_eyebrow">NS DETECTOR · LOCAL EVIDENCE</string>
+    <string name="dashboard_console_title">Device console</string>
+    <string name="dashboard_console_percentage">%1$d%%</string>
+    <string name="dashboard_console_progress">%1$d / %2$d modules returned</string>
+    <string name="dashboard_console_progress_scope">Collection progress, not a security score</string>
+    <string name="dashboard_console_collecting">Collecting</string>
+    <string name="dashboard_console_returned">Scan returned</string>
+    <string name="dashboard_console_attention">Needs review</string>
+    <string name="dashboard_console_limited">Limited</string>
+    <string name="dashboard_console_errors">Errors</string>
+    <string name="dashboard_console_observed">Other observations</string>
+    <string name="dashboard_console_result_title">Current observations</string>
+    <string name="dashboard_console_result_pending">Results are arriving</string>
+    <string name="dashboard_console_result_pending_detail">Counts and module details update as evidence is returned. The final overview appears when this scan finishes.</string>
+    <string name="dashboard_console_supporting_title">Report and scan history</string>
+</resources>

@@ -41,9 +41,11 @@ fun NightlyUpdateDialog(
     onViewChanges: () -> Unit,
     onConfirm: () -> Unit,
     onDismissFinished: () -> Unit = {},
+    installing: Boolean = false,
 ) {
     val downloading = downloadState as? UpdateDownloadState.Downloading
     val confirmLabel = when {
+        installing -> stringResource(R.string.update_verifying_apk)
         downloading != null -> stringResource(
             R.string.update_download_progress,
             (downloading.progress.fraction * 100f).roundToInt(),
@@ -94,7 +96,7 @@ fun NightlyUpdateDialog(
         onViewAll = onViewChanges,
         dismissLabel = stringResource(R.string.update_later),
         confirmLabel = confirmLabel,
-        confirmEnabled = downloading == null,
+        confirmEnabled = downloading == null && !installing,
         onDismiss = onDismiss,
         onConfirm = onConfirm,
         onDismissFinished = onDismissFinished,

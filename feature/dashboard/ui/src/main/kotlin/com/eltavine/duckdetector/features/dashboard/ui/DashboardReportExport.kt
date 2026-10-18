@@ -17,11 +17,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FileDownload
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.eltavine.duckdetector.core.ui.LocalAppBuildInfo
@@ -35,10 +37,13 @@ import com.eltavine.duckdetector.features.dashboard.presentation.export.ExportHe
 import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardUiState
 import io.github.xiaotong6666.uihelper.dialog.AdaptiveDecisionDialog
 import java.text.SimpleDateFormat
+import java.io.File
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -52,60 +57,84 @@ internal fun rememberDashboardReportExporter(
     val context = LocalContext.current
     val buildInfo = LocalAppBuildInfo.current
     val coroutineScope = rememberCoroutineScope()
-    var showFormatPicker by remember { mutableStateOf(false) }
-    var pendingExport by remember { mutableStateOf<DashboardExport?>(null) }
-    val save: (Uri?, Boolean) -> Unit = { uri, json ->
-        val snapshot = pendingExport
-        pendingExport = null
-        if (uri != null) {
-            coroutineScope.launch {
-                val saved = withContext(Dispatchers.IO) {
+    val appContext = context.applicationContext
+    val cache = remember(appContext) { DashboardReportCache(File(appContext.noBackupFilesDir, "report_exports")) }
+    var showFormatPicker by rememberSaveable { mutableStateOf(false) }
+    var pendingCacheName by rememberSaveable { mutableStateOf<String?>(null) }
+    var preparing by remember { mutableStateOf(false) }
+    val activeNameForCleanup = pendingCacheName
+    LaunchedEffect(cache) {
+        withContext(Dispatchers.IO) { cache.cleanupExpired(System.currentTimeMillis(), activeNameForCleanup) }
+    }
+    val save: (Uri?) -> Unit = { uri ->
+        val cacheName = pendingCacheName
+        pendingCacheName = null
+        coroutineScope.launch {
+            try {
+                val saved = if (uri == null) false else withContext(Dispatchers.IO) {
                     runCatching {
-                        val export = requireNotNull(snapshot)
-                        val content = if (json) DashboardJsonReportRenderer.render(export)
-                        else DashboardReportRenderer.render(export)
                         // Some document providers return null without throwing; this is a failure.
                         requireNotNull(context.contentResolver.openOutputStream(uri)).use { stream ->
-                            stream.write(content.toByteArray(Charsets.UTF_8))
+                            cache.copyTo(requireNotNull(cacheName), stream)
                         }
                     }.isSuccess
                 }
-                Toast.makeText(
+                if (uri != null) Toast.makeText(
                     context,
                     if (saved) R.string.dashboard_report_saved else R.string.dashboard_report_save_failed_unknown,
                     Toast.LENGTH_SHORT,
                 ).show()
+            } finally {
+                // Also runs when the user cancels SAF or this composition is disposed during a write.
+                withContext(NonCancellable + Dispatchers.IO) { cacheName?.let(cache::delete) }
             }
         }
     }
     val textLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) {
-        save(it, false)
+        save(it)
     }
     val jsonLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) {
-        save(it, true)
+        save(it)
     }
     val launchExport: (Boolean) -> Unit = { json ->
         showFormatPicker = false
         // Freeze the same scan before opening another app's document picker.
-        runCatching {
-            pendingExport = DashboardExport(
-                header = ExportHeader(
-                    versionName = buildInfo.versionName,
-                    versionCode = buildInfo.versionCode,
-                    buildHash = buildInfo.buildHash,
-                    buildTime = formatBuildTimeUtc(buildInfo.buildTimeUtc),
-                    reportTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z)", Locale.US).format(Date()),
-                ),
-                overview = uiState.overview,
-                topFindings = uiState.topFindings,
-                detectors = detectors.map { it.report() },
-                device = deviceProfile.report(),
-            )
-            val filename = generateExportReportFileName(json = json)
-            if (json) jsonLauncher.launch(filename) else textLauncher.launch(filename)
-        }.onFailure {
-            pendingExport = null
-            Toast.makeText(context, R.string.dashboard_report_save_failed_unknown, Toast.LENGTH_SHORT).show()
+        coroutineScope.launch {
+            preparing = true
+            val cacheName = cache.newName(json)
+            var launched = false
+            try {
+                val snapshot = DashboardExport(
+                    header = ExportHeader(
+                        versionName = buildInfo.versionName,
+                        versionCode = buildInfo.versionCode,
+                        buildHash = buildInfo.buildHash,
+                        buildTime = formatBuildTimeUtc(buildInfo.buildTimeUtc),
+                        reportTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss (z)", Locale.US).format(Date()),
+                    ),
+                    overview = uiState.overview,
+                    topFindings = uiState.topFindings,
+                    detectors = detectors.map { it.report() },
+                    device = deviceProfile.report(),
+                )
+                withContext(Dispatchers.IO) {
+                    val content = if (json) DashboardJsonReportRenderer.render(snapshot)
+                    else DashboardReportRenderer.render(snapshot)
+                    cache.write(cacheName, content)
+                }
+                pendingCacheName = cacheName
+                val filename = generateExportReportFileName(json = json)
+                if (json) jsonLauncher.launch(filename) else textLauncher.launch(filename)
+                launched = true
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                pendingCacheName = null
+                Toast.makeText(context, R.string.dashboard_report_save_failed_unknown, Toast.LENGTH_SHORT).show()
+            } finally {
+                preparing = false
+                if (!launched) withContext(NonCancellable + Dispatchers.IO) { cache.delete(cacheName) }
+            }
         }
     }
     AdaptiveDecisionDialog(
@@ -119,7 +148,7 @@ internal fun rememberDashboardReportExporter(
         onDismissRequest = { showFormatPicker = false },
         icon = Icons.Rounded.FileDownload,
     )
-    return { showFormatPicker = true }
+    return { if (!preparing) showFormatPicker = true }
 }
 
 internal fun generateExportReportFileName(

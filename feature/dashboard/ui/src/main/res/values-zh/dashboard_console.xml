@@ -1,0 +1,18 @@
+<!-- Copyright 2026 NS Detector contributors. Licensed under Apache-2.0. -->
+<resources>
+    <string name="dashboard_console_eyebrow">NS DETECTOR · 本地证据</string>
+    <string name="dashboard_console_title">设备环境控制台</string>
+    <string name="dashboard_console_percentage">%1$d%%</string>
+    <string name="dashboard_console_progress">%1$d / %2$d 个模块已返回</string>
+    <string name="dashboard_console_progress_scope">采集进度，不代表安全评分</string>
+    <string name="dashboard_console_collecting">采集中</string>
+    <string name="dashboard_console_returned">本轮已返回</string>
+    <string name="dashboard_console_attention">需核查</string>
+    <string name="dashboard_console_limited">覆盖受限</string>
+    <string name="dashboard_console_errors">执行失败</string>
+    <string name="dashboard_console_observed">其他观察</string>
+    <string name="dashboard_console_result_title">本轮观察结果</string>
+    <string name="dashboard_console_result_pending">证据正在陆续返回</string>
+    <string name="dashboard_console_result_pending_detail">统计与模块详情随证据返回更新。本轮扫描结束后显示最终总览。</string>
+    <string name="dashboard_console_supporting_title">报告与扫描历史</string>
+</resources>

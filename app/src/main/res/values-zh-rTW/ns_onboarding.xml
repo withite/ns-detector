@@ -6,4 +6,5 @@
     <string name="ns_optional_title">可選檢測預設關閉</string>
     <string name="ns_optional_risks">線上憑證撤銷更新與實驗檢測均可選。一些實驗探針會觸發特殊系統路徑，在特定韌體上可能造成暫時停頓、應用程式崩潰或裝置重新啟動。每個選項會在啟用前說明範圍與風險。拒絕可選項仍可執行一般本機掃描。</string>
     <string name="ns_exit">離開</string>
+    <string name="update_identity_mismatch">更新套件的套件名稱或簽章與目前安裝不同，無法覆蓋安裝。CI 測試版金鑰可能改變，請使用固定簽章的正式版。</string>
 </resources>

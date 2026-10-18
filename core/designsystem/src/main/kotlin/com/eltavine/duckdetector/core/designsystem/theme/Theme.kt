@@ -13,11 +13,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Modified 2026 by NS Detector contributors: tolerate wrapped non-Activity preview hosts.
  */
 
 package com.eltavine.duckdetector.core.designsystem.theme
 
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialExpressiveTheme
@@ -52,11 +55,11 @@ public fun DuckDetectorTheme(
 
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as Activity).window
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars =
-                !darkTheme
+            view.context.hostActivity()?.window?.let { window ->
+                WindowCompat.setDecorFitsSystemWindows(window, false)
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+                WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
+            }
         }
     }
 
@@ -106,4 +109,10 @@ public fun DuckDetectorTheme(
             }
         }
     }
+}
+
+private tailrec fun Context.hostActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> if (baseContext === this) null else baseContext.hostActivity()
+    else -> null
 }

@@ -10,15 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -29,44 +26,20 @@ import com.eltavine.duckdetector.core.designsystem.theme.DuckTypography
 import com.eltavine.duckdetector.core.ui.components.WrapSafeText
 import com.eltavine.duckdetector.features.dashboard.presentation.history.DashboardHistoryChange
 import com.eltavine.duckdetector.features.dashboard.presentation.history.DashboardHistoryChangeKind
-import com.eltavine.duckdetector.features.dashboard.presentation.history.DashboardScanSnapshot
 import com.eltavine.duckdetector.features.dashboard.presentation.history.compareDashboardScans
-import com.eltavine.duckdetector.features.dashboard.presentation.history.completedHistorySnapshot
-import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardUiState
 import io.github.xiaotong6666.uihelper.adaptive.AdaptiveTextButton
 import io.github.xiaotong6666.uihelper.adaptive.adaptiveContainerContentColor
 import io.github.xiaotong6666.uihelper.adaptive.adaptiveSecondaryTextColor
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-/** Keeps persistence out of the JVM presentation module and saves only complete, minimal snapshots. */
+/** Renders the controller state; storage is independent of this lazy item's composition. */
 @Composable
-internal fun DashboardHistoryPanel(uiState: DashboardUiState, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val store = remember(context) { DashboardHistoryStore(context.applicationContext) }
-    val scope = rememberCoroutineScope()
-    val storageMutex = remember(store) { Mutex() }
-    val snapshot = remember(uiState) { uiState.completedHistorySnapshot() }
-    var history by remember { mutableStateOf(emptyList<DashboardScanSnapshot>()) }
-    var storageFailed by remember { mutableStateOf(false) }
+internal fun DashboardHistoryPanel(state: DashboardHistoryState, modifier: Modifier = Modifier) {
+    val history = state.scans
     var expanded by remember { mutableStateOf(false) }
     var selectedTime by remember { mutableStateOf<Long?>(null) }
-    var clearing by remember { mutableStateOf(false) }
-
-    LaunchedEffect(store, snapshot) {
-        storageMutex.withLock {
-            val result = withContext(Dispatchers.IO) {
-                runCatching { if (snapshot == null) store.load() else store.append(snapshot) }
-            }
-            result.onSuccess { history = it; storageFailed = false }.onFailure { storageFailed = true }
-        }
-    }
 
     DuckPanel(modifier = modifier) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -79,19 +52,8 @@ internal fun DashboardHistoryPanel(uiState: DashboardUiState, modifier: Modifier
                 )
                 AdaptiveTextButton(
                     text = stringResource(R.string.dashboard_history_clear),
-                    enabled = !clearing && (history.isNotEmpty() || storageFailed),
-                    onClick = {
-                        clearing = true
-                        scope.launch {
-                            storageMutex.withLock {
-                                val lastCompleted = snapshot?.completedAtEpochMillis ?: history.firstOrNull()?.completedAtEpochMillis
-                                val result = withContext(Dispatchers.IO) { runCatching { store.clear(lastCompleted) } }
-                                result.onSuccess { history = emptyList(); selectedTime = null; storageFailed = false }
-                                    .onFailure { storageFailed = true }
-                                clearing = false
-                            }
-                        }
-                    },
+                    enabled = !state.clearing && (history.isNotEmpty() || state.storageFailed),
+                    onClick = { selectedTime = null; state.onClear() },
                 )
             }
             WrapSafeText(
@@ -99,7 +61,7 @@ internal fun DashboardHistoryPanel(uiState: DashboardUiState, modifier: Modifier
                 style = DuckTypography.PanelCaption,
                 color = adaptiveSecondaryTextColor(),
             )
-            if (storageFailed) {
+            if (state.storageFailed) {
                 WrapSafeText(text = stringResource(R.string.dashboard_history_storage_failed), color = MaterialTheme.colorScheme.error)
             }
             if (history.isEmpty()) {

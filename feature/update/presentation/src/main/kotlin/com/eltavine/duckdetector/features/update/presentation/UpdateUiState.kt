@@ -55,4 +55,5 @@ data class UpdateUiState(
     val availableUpdate: AvailableNightlyUpdate? = null,
     val isDialogVisible: Boolean = false,
     val download: UpdateDownloadState = UpdateDownloadState.Idle,
+    val isInstalling: Boolean = false,
 )

@@ -6,4 +6,5 @@
     <string name="ns_optional_title">可选检测默认关闭</string>
     <string name="ns_optional_risks">在线证书吊销刷新与实验检测均为可选。一些实验探针会主动触发特殊系统路径，在特定固件上可能造成短暂卡顿、应用崩溃或设备重启。每个选项会在启用前说明范围与风险。拒绝可选项仍可执行常规本地扫描。</string>
     <string name="ns_exit">退出</string>
+    <string name="update_identity_mismatch">更新包的包名或签名与当前安装不同，无法覆盖安装。CI 测试版密钥可能变化，请使用固定签名的正式版。</string>
 </resources>

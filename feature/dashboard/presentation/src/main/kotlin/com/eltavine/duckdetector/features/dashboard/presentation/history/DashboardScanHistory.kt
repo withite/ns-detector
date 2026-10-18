@@ -54,9 +54,21 @@ fun DashboardUiState.completedHistorySnapshot(): DashboardScanSnapshot? {
 fun appendDashboardHistory(
     history: List<DashboardScanSnapshot>,
     snapshot: DashboardScanSnapshot,
-): List<DashboardScanSnapshot> = (listOf(snapshot) + history.filter {
-    it.completedAtEpochMillis != snapshot.completedAtEpochMillis
-}).sortedByDescending { it.completedAtEpochMillis }.take(DASHBOARD_HISTORY_LIMIT)
+    clearedScanIds: Set<Long> = emptySet(),
+): List<DashboardScanSnapshot> {
+    val retained = visibleDashboardHistory(history, clearedScanIds)
+    if (snapshot.completedAtEpochMillis in clearedScanIds) return retained
+    return (listOf(snapshot) + retained.filter {
+        it.completedAtEpochMillis != snapshot.completedAtEpochMillis
+    }).sortedByDescending { it.completedAtEpochMillis }.take(DASHBOARD_HISTORY_LIMIT)
+}
+
+/** Exact scan identities avoid suppressing new scans after the device clock moves backwards. */
+fun visibleDashboardHistory(
+    history: List<DashboardScanSnapshot>,
+    clearedScanIds: Set<Long>,
+): List<DashboardScanSnapshot> = history.filterNot { it.completedAtEpochMillis in clearedScanIds }
+    .sortedByDescending { it.completedAtEpochMillis }.take(DASHBOARD_HISTORY_LIMIT)
 
 /**
  * Compare typed outcomes only. A disappeared module or lost visibility does not resolve a finding;

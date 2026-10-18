@@ -6,4 +6,5 @@
     <string name="ns_optional_title">Optional checks stay off until you choose</string>
     <string name="ns_optional_risks">Online certificate-revocation refresh and experimental checks are optional. Some experimental probes deliberately exercise unusual system paths and may cause a temporary stall, app crash or device restart on affected firmware. Each option explains its scope before you enable it. Declining still permits the ordinary local scan.</string>
     <string name="ns_exit">Exit</string>
+    <string name="update_identity_mismatch">This APK has a different package or signing identity and cannot replace this installation. CI preview keys may change; use the consistently signed release build.</string>
 </resources>

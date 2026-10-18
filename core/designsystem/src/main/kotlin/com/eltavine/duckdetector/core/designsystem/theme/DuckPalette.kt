@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Modified 2026 by NS Detector contributors: improve light-theme status contrast.
  */
 
 package com.eltavine.duckdetector.core.designsystem.theme
@@ -74,8 +75,8 @@ internal fun duckPalette(scheme: ColorScheme, dark: Boolean): DuckPalette = if (
         groupedSurface = scheme.surfaceContainer,
         groupedInset = scheme.surfaceContainer,
         separator = scheme.outlineVariant.copy(alpha = 0.7f),
-        positive = Color(0xFF36D167),
-        caution = Color(0xFFF5A623),
+        positive = Color(0xFF167D48),
+        caution = Color(0xFF9C5700),
         critical = scheme.error,
         neutral = scheme.onSurfaceVariant,
     )
@@ -100,9 +101,9 @@ internal fun expressiveDuckPalette(scheme: ColorScheme, dark: Boolean): DuckPale
             groupedSurface = scheme.surfaceBright,
             groupedInset = scheme.surfaceContainerHigh,
             separator = scheme.outlineVariant.copy(alpha = 0.7f),
-            positive = Color(0xFF34C759),
-            caution = Color(0xFFFF9500),
-            critical = Color(0xFFFF3B30),
-            neutral = Color(0xFF8E8E93),
+            positive = Color(0xFF167D48),
+            caution = Color(0xFF9C5700),
+            critical = Color(0xFFC8372E),
+            neutral = Color(0xFF666870),
         )
     }

@@ -75,10 +75,6 @@ import com.eltavine.duckdetector.core.navigation.DuckRoute
 import com.eltavine.duckdetector.core.navigation.rememberDuckRoutes
 import com.eltavine.duckdetector.core.designsystem.theme.DuckTheme
 import com.eltavine.duckdetector.core.ui.openExternalUri
-import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardUiState
-import com.eltavine.duckdetector.features.dashboard.presentation.model.buildDashboardFindings
-import com.eltavine.duckdetector.features.dashboard.presentation.model.buildDashboardOverview
-import com.eltavine.duckdetector.features.dashboard.presentation.model.dashboardCardOrder
 import com.eltavine.duckdetector.features.dashboard.ui.DashboardScreen
 import com.eltavine.duckdetector.features.dashboard.ui.DashboardProjectAction
 import com.eltavine.duckdetector.features.dashboard.ui.DashboardTopBarBrandIcon
@@ -121,6 +117,7 @@ internal fun AppReadyShell(
     val updateInstallPermissionMessage = stringResource(R.string.update_install_permission_required)
     val updateApkUnavailableMessage = stringResource(R.string.update_apk_unavailable)
     val updateInstallFailedMessage = stringResource(R.string.update_install_failed)
+    val updateIdentityMismatchMessage = stringResource(R.string.update_identity_mismatch)
     val scope = rememberCoroutineScope()
     val notifier = remember(appContext) { ScanProgressNotifier(appContext) }
     val updateFactory = remember(context) { updateViewModelFactory(context) }
@@ -146,30 +143,11 @@ internal fun AppReadyShell(
     val scanViewModel: DetectorScanViewModel = viewModel(
         factory = remember { DetectorScanViewModel.factory(detectors.map { it.summary }) },
     )
-    val scanState by scanViewModel.coordinator.state.collectAsState()
+    val scanPresentation by scanViewModel.presentation.collectAsState()
+    val scanState = scanPresentation.scan
     val detectorSummaries = scanState.detectors
     val isDashboardLoading = scanState.isLoading
-    val dashboardScanDurationMillis = scanState.timeline.durationMillis
-    val dashboardScanCompletedAtEpochMillis = scanState.timeline.completedAtEpochMillis
-
-    val dashboardState = remember(
-        detectorSummaries,
-        dashboardScanDurationMillis,
-        dashboardScanCompletedAtEpochMillis,
-        isDashboardLoading,
-    ) {
-        DashboardUiState(
-            overview = buildDashboardOverview(
-                contributions = detectorSummaries,
-                scanDurationMillis = dashboardScanDurationMillis,
-                scanCompletedAtEpochMillis = dashboardScanCompletedAtEpochMillis,
-            ),
-            topFindings = buildDashboardFindings(detectorSummaries),
-            cardOrder = dashboardCardOrder(detectorSummaries),
-            isLoading = isDashboardLoading,
-            detectorSummaries = detectorSummaries,
-        )
-    }
+    val dashboardState = scanPresentation.dashboard
     val settingsState = remember(updateUiState.status, gitHubAcceleration) {
         SettingsUiState(
             versionName = BuildConfig.VERSION_NAME,
@@ -194,13 +172,13 @@ internal fun AppReadyShell(
     }
     val notificationSnapshot = remember(
         detectorSummaries.size,
-        detectorSummaries.count { it.ready },
+        scanState.readyCount,
         dashboardState.overview,
         isDashboardLoading,
     ) {
         ScanProgressNotificationSnapshot(
             totalDetectorCount = detectorSummaries.size,
-            readyDetectorCount = detectorSummaries.count { it.ready },
+            readyDetectorCount = scanState.readyCount,
             dashboardOverview = dashboardState.overview,
             scanning = isDashboardLoading,
         )
@@ -297,6 +275,7 @@ internal fun AppReadyShell(
                 currentVersionName = BuildConfig.VERSION_NAME,
                 update = availableUpdate,
                 downloadState = updateUiState.download,
+                installing = updateUiState.isInstalling,
                 onDismiss = updateViewModel::dismissUpdate,
                 onDismissFinished = updateDialogPayload.onDismissFinished,
                 onViewChanges = {
@@ -311,26 +290,35 @@ internal fun AppReadyShell(
                 onConfirm = {
                     when (updateUiState.download) {
                         is UpdateDownloadState.Ready -> {
-                            when (updateViewModel.installDownloaded()) {
-                                UpdateInstallResult.PermissionRequired -> Toast.makeText(
-                                    context,
-                                    updateInstallPermissionMessage,
-                                    Toast.LENGTH_LONG,
-                                ).show()
+                            scope.launch {
+                                when (updateViewModel.installDownloaded()) {
+                                    UpdateInstallResult.PermissionRequired -> Toast.makeText(
+                                        context,
+                                        updateInstallPermissionMessage,
+                                        Toast.LENGTH_LONG,
+                                    ).show()
 
-                                UpdateInstallResult.ApkUnavailable -> Toast.makeText(
-                                    context,
-                                    updateApkUnavailableMessage,
-                                    Toast.LENGTH_SHORT,
-                                ).show()
+                                    UpdateInstallResult.ApkUnavailable -> Toast.makeText(
+                                        context,
+                                        updateApkUnavailableMessage,
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
 
-                                UpdateInstallResult.Failed -> Toast.makeText(
-                                    context,
-                                    updateInstallFailedMessage,
-                                    Toast.LENGTH_SHORT,
-                                ).show()
+                                    UpdateInstallResult.IncompatibleApk -> Toast.makeText(
+                                        context,
+                                        updateIdentityMismatchMessage,
+                                        Toast.LENGTH_LONG,
+                                    ).show()
 
-                                UpdateInstallResult.Launched -> Unit
+                                    UpdateInstallResult.Failed -> Toast.makeText(
+                                        context,
+                                        updateInstallFailedMessage,
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+
+                                    UpdateInstallResult.InProgress,
+                                    UpdateInstallResult.Launched -> Unit
+                                }
                             }
                         }
 

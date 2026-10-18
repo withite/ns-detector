@@ -1,5 +1,6 @@
 /*
  * Copyright 2026 Duck Apps Contributor
+ * Modified 2026 by NS Detector contributors: validate the update installation identity.
  * If you have any questions, suggestions, or other inquiries, please email Eltavine <me@eltavine.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,6 +48,12 @@ sealed interface UpdateInstallResult {
     /** The cached APK has disappeared, changed size, or is no longer readable. Download it again. */
     data object ApkUnavailable : UpdateInstallResult
 
+    /** The APK cannot replace this installation because its package or current signers differ. */
+    data object IncompatibleApk : UpdateInstallResult
+
+    /** A previous user-confirmed verification is still running. */
+    data object InProgress : UpdateInstallResult
+
     data object Failed : UpdateInstallResult
 }
 
@@ -64,5 +71,5 @@ fun interface UpdateApkDownloader {
 
 /** Hands a downloaded APK to Android's package installer through a content URI. */
 fun interface UpdateApkInstaller {
-    fun install(apkPath: String, expectedApk: NightlyUpdateApk): UpdateInstallResult
+    suspend fun install(apkPath: String, expectedApk: NightlyUpdateApk): UpdateInstallResult
 }

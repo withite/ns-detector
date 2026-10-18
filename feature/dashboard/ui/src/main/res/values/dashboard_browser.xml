@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dashboard_browser_title">Explore detection modules</string>
+    <string name="dashboard_browser_search">Search module names or IDs</string>
+    <string name="dashboard_browser_clear_search">Clear search</string>
+    <string name="dashboard_browser_all">All modules</string>
+    <string name="dashboard_browser_attention">Needs attention</string>
+    <string name="dashboard_browser_limited">Limited visibility</string>
+    <string name="dashboard_browser_errors">Probe errors</string>
+    <string name="dashboard_browser_other">Other results</string>
+    <string name="dashboard_browser_count">Showing %1$d of %2$d modules</string>
+    <string name="dashboard_browser_compact">Compact view</string>
+    <string name="dashboard_browser_details">Detailed view</string>
+    <string name="dashboard_browser_show_evidence">View evidence</string>
+    <string name="dashboard_browser_hide_evidence">Hide evidence</string>
+    <string name="dashboard_browser_expanded">Expanded</string>
+    <string name="dashboard_browser_collapsed">Collapsed</string>
+    <string name="dashboard_browser_waiting">Waiting for evidence</string>
+    <string name="dashboard_browser_waiting_detail">This module has not returned evidence for the current scan.</string>
+    <string name="dashboard_browser_empty">No matching modules</string>
+    <string name="dashboard_browser_empty_hint">Try another search or reset the filters to show all modules.</string>
+    <string name="dashboard_browser_reset">Reset search and filters</string>
+</resources>

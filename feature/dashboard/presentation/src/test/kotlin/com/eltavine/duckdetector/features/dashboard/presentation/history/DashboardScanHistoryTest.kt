@@ -55,5 +55,17 @@ class DashboardScanHistoryTest {
         assertTrue(compareDashboardScans(before, reworded).isEmpty())
     }
 
+    @Test
+    fun `cleared scan ids suppress delayed writes without suppressing a clock rollback`() {
+        val cleared = scan(2_000L, DetectorStatus.warning())
+        val olderBaseline = scan(1_000L, DetectorStatus.allClear())
+        val tombstones = setOf(cleared.completedAtEpochMillis)
+        val retained = visibleDashboardHistory(listOf(cleared, olderBaseline), tombstones)
+        assertEquals(listOf(olderBaseline), retained)
+        assertEquals(retained, appendDashboardHistory(retained, cleared, tombstones))
+        val afterClockRollback = scan(1_500L, DetectorStatus.allClear())
+        assertEquals(listOf(afterClockRollback, olderBaseline), appendDashboardHistory(retained, afterClockRollback, tombstones))
+    }
+
     private fun scan(time: Long, status: DetectorStatus) = DashboardScanSnapshot(time, 100, listOf(DashboardDetectorSnapshot("test", status, "headline")))
 }

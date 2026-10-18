@@ -21,264 +21,95 @@ package com.eltavine.duckdetector.features.dashboard.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Timer
-import androidx.compose.material.icons.rounded.ArrowForward
-import androidx.compose.material.icons.rounded.Badge
-import androidx.compose.material.icons.rounded.CheckCircleOutline
-import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.FileDownload
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Schedule
-import androidx.compose.material.icons.rounded.WarningAmber
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.eltavine.duckdetector.core.designsystem.components.DuckPanel
 import com.eltavine.duckdetector.core.designsystem.theme.DuckTheme
 import com.eltavine.duckdetector.core.designsystem.theme.DuckTypography
-import com.eltavine.duckdetector.core.evidence.DetectionSeverity
-import com.eltavine.duckdetector.core.ui.LocalAppBuildInfo
-import com.eltavine.duckdetector.core.ui.components.DetectorHairline
+import com.eltavine.duckdetector.core.ui.components.DuckIcon
 import com.eltavine.duckdetector.core.ui.components.WrapSafeText
 import com.eltavine.duckdetector.core.ui.presentation.rememberStatusAppearance
-import com.eltavine.duckdetector.core.ui.presentation.formatBuildTimeUtc
-import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardOverviewMetricModel
 import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardOverviewModel
-import io.github.xiaotong6666.uihelper.adaptive.AdaptiveContent
-import com.eltavine.duckdetector.core.ui.components.DuckIcon
-import io.github.xiaotong6666.uihelper.adaptive.AdaptiveStatusHeroCard
-import io.github.xiaotong6666.uihelper.adaptive.StatusHeroTone
-import io.github.xiaotong6666.uihelper.adaptive.adaptiveValue
+import io.github.xiaotong6666.uihelper.adaptive.AdaptiveFilledIconButton
 
+/** A concise completed-scan conclusion; the console owns acquisition progress and distribution. */
 @Composable
-internal fun DashboardOverviewCard(
-    model: DashboardOverviewModel,
-    onExportReport: () -> Unit,
-) {
+internal fun DashboardOverviewCard(model: DashboardOverviewModel, onExportReport: () -> Unit) {
     val appearance = rememberStatusAppearance(model.status)
-    val buildInfo = LocalAppBuildInfo.current
-    val versionLabel = stringResource(R.string.dashboard_version_label, buildInfo.versionName, buildInfo.versionCode)
-    val buildTimeLabel = stringResource(R.string.dashboard_build_time_utc, formatBuildTimeUtc(buildInfo.buildTimeUtc))
-    val tone = model.status.severity
-    val heroTone = when (tone) {
-        DetectionSeverity.DANGER -> StatusHeroTone.Danger
-        DetectionSeverity.WARNING -> StatusHeroTone.Warning
-        DetectionSeverity.ALL_CLEAR -> StatusHeroTone.Success
-        DetectionSeverity.INFO -> StatusHeroTone.Neutral
-    }
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        AdaptiveStatusHeroCard(
-            title = dashboardOverviewHeadline(model),
-            summary = dashboardOverviewSummary(model),
-            icon = when (tone) {
-                DetectionSeverity.DANGER -> Icons.Rounded.ErrorOutline
-                DetectionSeverity.WARNING -> Icons.Rounded.WarningAmber
-                DetectionSeverity.ALL_CLEAR -> Icons.Rounded.CheckCircleOutline
-                DetectionSeverity.INFO -> Icons.Rounded.Info
-            },
-            tone = heroTone,
-            accentColor = appearance.iconTint,
-            miuixMetaContentEndPadding = 16.dp,
-            onClick = onExportReport,
-            metaContent = { contentColor ->
-                ReportHeroMetadata(
-                    versionLabel = versionLabel,
-                    buildTimeLabel = buildTimeLabel,
-                    contentColor = contentColor,
-                )
-            },
-            actionContent = { contentColor ->
-                ReportHeroAction(contentColor = contentColor)
-            },
-        )
-        DuckPanel(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            OverviewTitle(model = model)
-            DetectorHairline()
-            OverviewMetrics(metrics = model.metrics)
-        }
-    }
-}
-
-@Composable
-private fun ReportHeroMetadata(
-    versionLabel: String,
-    buildTimeLabel: String,
-    contentColor: Color,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-        ReportMetaLine(icon = Icons.Rounded.Badge, label = versionLabel, color = contentColor.copy(alpha = 0.82f))
-        ReportMetaLine(icon = Icons.Rounded.Schedule, label = buildTimeLabel, color = contentColor.copy(alpha = 0.72f))
-    }
-}
-
-@Composable
-private fun ReportHeroAction(contentColor: Color) {
-    val endDividerPadding = adaptiveValue(material = 16.dp, miuix = 108.dp)
-    val endContentPadding = adaptiveValue(material = 16.dp, miuix = 106.dp)
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 48.dp)
-                .drawBehind {
-                    val startX = 20.dp.toPx()
-                    val endX = size.width - endDividerPadding.toPx()
-                    drawLine(
-                        color = contentColor.copy(alpha = 0.16f),
-                        start = Offset(startX, 0f),
-                        end = Offset(endX.coerceAtLeast(startX), 0f),
-                        strokeWidth = 1f,
-                    )
-                }
-                .padding(
-                    start = 16.dp,
-                    end = endContentPadding,
-                    top = 8.dp,
-                    bottom = 8.dp,
-                ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            DuckIcon(Icons.Rounded.FileDownload, contentDescription = null, modifier = Modifier.size(19.dp), tint = contentColor)
-            WrapSafeText(
-                text = stringResource(R.string.dashboard_export_report_hint),
-                modifier = Modifier.weight(1f),
-                style = DuckTypography.ReportAction,
-                color = contentColor,
-            )
-            AdaptiveContent(
-                material = {
-                    DuckIcon(
-                        Icons.Rounded.ArrowForward,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        tint = contentColor.copy(alpha = 0.78f),
-                    )
-                },
-                miuix = {},
-            )
-        }
-    }
-}
-
-@Composable
-private fun ReportMetaLine(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, color: Color) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        DuckIcon(icon, contentDescription = null, modifier = Modifier.size(14.dp), tint = color)
-        WrapSafeText(
-            text = label,
-            modifier = Modifier.weight(1f),
-            style = DuckTypography.ReportMeta,
-            color = color,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
-
-/** The title is one line, or the scan's completion time over its duration. */
-@Composable
-private fun OverviewTitle(model: DashboardOverviewModel) {
-    val lines = dashboardOverviewTitle(model).lines().filter { it.isNotBlank() }
-    Row(
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    val scheme = MaterialTheme.colorScheme
+    DuckPanel(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        if (model.showTitleIcon) {
-            DuckIcon(
-                imageVector = Icons.Outlined.Timer,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(top = 2.dp)
-                    .size(14.dp),
-            )
-        }
-        WrapSafeText(
-            text = lines.joinToString(separator = " · "),
-            style = DuckTypography.Footnote,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
-
-@Composable
-private fun OverviewMetrics(
-    metrics: List<DashboardOverviewMetricModel>,
-) {
-    val fontScale = LocalDensity.current.fontScale
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        // Keep labels readable at large system font sizes without shrinking the text.
-        val columns = if (maxWidth < 320.dp || fontScale > 1.3f) 2 else 3
-        Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            metrics.chunked(columns).forEach { row ->
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    row.forEach { metric ->
-                        OverviewMetric(metric = metric, modifier = Modifier.weight(1f))
-                    }
-                    repeat(columns - row.size) {
-                        Box(modifier = Modifier.weight(1f))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun OverviewMetric(
-    metric: DashboardOverviewMetricModel,
-    modifier: Modifier = Modifier,
-) {
-    val appearance = rememberStatusAppearance(metric.status)
-    Column(
-        modifier = modifier.semantics(mergeDescendants = true) {},
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        WrapSafeText(
-            text = metric.value,
-            style = DuckTypography.MetricNumeral,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
         Row(
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Box(
-                modifier = Modifier
-                    .size(7.dp)
-                    .background(color = appearance.iconTint, shape = CircleShape),
-            )
+                modifier = Modifier.size(42.dp).background(appearance.tintWash, RoundedCornerShape(13.dp)),
+                contentAlignment = Alignment.Center,
+            ) {
+                DuckIcon(appearance.icon, null, Modifier.size(24.dp), tint = appearance.iconTint)
+            }
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                WrapSafeText(
+                    text = stringResource(R.string.dashboard_console_result_title),
+                    style = DuckTypography.PanelCaption,
+                    color = scheme.onSurfaceVariant,
+                )
+                WrapSafeText(
+                    text = dashboardOverviewHeadline(model),
+                    modifier = Modifier.semantics { heading() },
+                    style = DuckTypography.PanelTitle,
+                    color = scheme.onSurface,
+                )
+            }
+            AdaptiveFilledIconButton(
+                onClick = onExportReport,
+                materialContainerColor = DuckTheme.palette.groupedInset,
+                materialContentColor = scheme.onSurface,
+                miuixContainerColor = DuckTheme.palette.groupedInset,
+                miuixContentColor = scheme.onSurface,
+            ) {
+                DuckIcon(
+                    imageVector = Icons.Rounded.FileDownload,
+                    contentDescription = stringResource(R.string.dashboard_export_report_hint),
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+        }
+        WrapSafeText(
+            text = dashboardOverviewSummary(model),
+            style = DuckTypography.PanelSupporting,
+            color = scheme.onSurfaceVariant,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            DuckIcon(Icons.Rounded.Schedule, null, Modifier.size(14.dp), tint = scheme.onSurfaceVariant)
             WrapSafeText(
-                text = dashboardMetricLabel(metric.metric),
+                text = dashboardOverviewTitle(model).replace('\n', ' '),
                 style = DuckTypography.PanelCaption,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = scheme.onSurfaceVariant,
             )
         }
     }

@@ -65,11 +65,32 @@ class GitHubReleaseManifestClientTest {
     fun `stable channel never selects a preview APK`() {
         var assetRequests = 0
         val client = GitHubReleaseManifestClient(UpdateHttpClient { url, _ ->
-            if (url == UpdateRepository.MANIFEST_URL) JSONArray().put(release("preview-12")).toString()
+            if (url.endsWith("/releases/latest")) release("preview-12").toString()
             else { assetRequests += 1; previewManifest("preview-12") }
         }, channel = ReleaseUpdateChannel.STABLE)
         assertThrows(IOException::class.java) { client.get(UpdateRepository.MANIFEST_URL, "application/json") }
         assertEquals(0, assetRequests)
+    }
+
+    @Test
+    fun `stable channel uses latest endpoint even when many previews exist`() {
+        val urls = mutableListOf<String>()
+        val manifest = JSONObject(previewManifest("v1.0.1")).put("channel", "stable").toString()
+        val client = GitHubReleaseManifestClient(UpdateHttpClient { url, _ ->
+            urls += url
+            if (url.endsWith("/releases/latest")) release("v1.0.1").put("prerelease", false).toString()
+            else manifest
+        }, channel = ReleaseUpdateChannel.STABLE)
+        assertEquals(manifest, client.get(UpdateRepository.MANIFEST_URL, "application/json"))
+        assertEquals(listOf("https://api.github.com/repos/withite/ns-detector/releases/latest",
+            manifestUrl("v1.0.1")), urls)
+    }
+
+    @Test
+    fun `missing stable release stays an explicit failure`() {
+        val client = GitHubReleaseManifestClient(UpdateHttpClient { _, _ -> throw IOException("HTTP 404") },
+            channel = ReleaseUpdateChannel.STABLE)
+        assertThrows(IOException::class.java) { client.get(UpdateRepository.MANIFEST_URL, "application/json") }
     }
 
     private fun previewManifest(tag: String): String = JSONObject(validUpdateManifestJson())

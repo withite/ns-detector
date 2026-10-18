@@ -21,6 +21,13 @@ NS Detector 不在冷启动检查更新。用户在设置中主动检查后，�
 下载请求、进度和就绪路径绑定完整清单快照。更新清单改变时取消旧请求，并通过请求代次
 丢弃迟到回调；StateFlow 原子更新保留并发发生的对话框关闭操作。
 
+稳定版通过 GitHub `/releases/latest` 只查询非预发布的 `stable` 清单，不受频繁预览发布影响。
+`.debug` 测试包从 `/releases?per_page=20` 只查询预发布的 `preview` 清单，
+检查与下载前的独立清单验证使用相同通道。安装前先解析 APK 包名和当前签名证书集合：
+必须与本机已安装应用完全一致，否则显示明确的不可覆盖安装提示，不会打开安装器。
+CI 测试密钥可能随 runner 改变，预览包因此可能无法覆盖升级。正式版使用固定长期密钥。
+当前采取保守策略，不支持签名证书轮换或签名继承链迁移；系统安装器仍执行最终 APK 验证。
+
 安装使用应用私有缓存子目录的 FileProvider，只授予临时读取权限。Android 8 / API 26
 及以上先检查未知来源安装授权；返回设置后仍保留下载文件。缓存文件丢失、不可读或大小发生变化时
 切换到可重试下载状态。打开系统安装器只表示安装界面已启动，不表示安装已完成。
@@ -29,6 +36,8 @@ NS Detector 不在冷启动检查更新。用户在设置中主动检查后，�
 
 - [GitHub release assets](https://docs.github.com/en/rest/releases/assets)：资产下载可重定向到存储地址。
 - [HttpURLConnection](https://developer.android.com/reference/java/net/HttpURLConnection)：连接、响应头与读取超时契约。
+- [SigningInfo.getApkContentsSigners](https://developer.android.com/reference/android/content/pm/SigningInfo#getApkContentsSigners())：读取当前 APK 的签名证书，不能将签名历史误当作当前签名。
+- [App signing](https://developer.android.com/studio/publish/app-signing#considerations)：同包更新需要兼容的签名身份。
 - [FileProvider](https://developer.android.com/reference/androidx/core/content/FileProvider)：内容 URI、路径范围与临时读取授权。
 - [PackageManager.canRequestPackageInstalls](https://developer.android.com/reference/android/content/pm/PackageManager#canRequestPackageInstalls())：API 26 起的来源授权检查。
 - [Android 16 ApplicationPackageManager](https://android.googlesource.com/platform/frameworks/base/+/refs/tags/android-16.0.0_r1/core/java/android/app/ApplicationPackageManager.java)：该检查调用系统 PackageManager 服务，服务错误可能传播为运行时异常；安装适配层将失败显式返回。

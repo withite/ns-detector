@@ -29,6 +29,8 @@ import com.eltavine.duckdetector.features.update.domain.UpdateApkDownloader
 import com.eltavine.duckdetector.features.update.domain.UpdateApkInstaller
 import com.eltavine.duckdetector.features.update.domain.UpdateInstallResult
 import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Opens Android's package installer for a downloaded APK.
@@ -42,12 +44,19 @@ internal class AndroidUpdateApkInstaller(
     private val fileProviderAuthority: String,
 ) : UpdateApkInstaller {
 
-    override fun install(apkPath: String, expectedApk: NightlyUpdateApk): UpdateInstallResult {
+    override suspend fun install(apkPath: String, expectedApk: NightlyUpdateApk): UpdateInstallResult {
         val apk = File(apkPath)
-        if (!apk.isFile || !apk.canRead() || apk.length() != expectedApk.sizeBytes) {
-            return UpdateInstallResult.ApkUnavailable
+        val failure = withContext(Dispatchers.IO) {
+            when {
+                !apk.isFile || !apk.canRead() || apk.length() != expectedApk.sizeBytes -> UpdateInstallResult.ApkUnavailable
+                !hasCompatibleInstallIdentity(context, apk.absolutePath) -> UpdateInstallResult.IncompatibleApk
+                else -> null
+            }
         }
-        return try {
+        if (failure != null) return failure
+        // withContext checks cancellation before returning to UI; a dismissed verification cannot
+        // unexpectedly open the installer later. Platform UI is always launched on Main.
+        return withContext(Dispatchers.Main.immediate) { try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
                 !context.packageManager.canRequestPackageInstalls()
             ) {
@@ -57,7 +66,7 @@ internal class AndroidUpdateApkInstaller(
             }
         } catch (_: Exception) {
             UpdateInstallResult.Failed
-        }
+        } }
     }
 
     private fun openUnknownAppSourcesSettings(): UpdateInstallResult {

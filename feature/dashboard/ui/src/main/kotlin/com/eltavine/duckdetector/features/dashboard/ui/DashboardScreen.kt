@@ -21,61 +21,45 @@ package com.eltavine.duckdetector.features.dashboard.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberOverscrollEffect
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.eltavine.duckdetector.core.designsystem.components.StatusBarProtection
 import com.eltavine.duckdetector.core.designsystem.theme.DuckTheme
-import com.eltavine.duckdetector.core.designsystem.components.DuckPanel
-import com.eltavine.duckdetector.core.designsystem.theme.DuckTypography
-import com.eltavine.duckdetector.core.evidence.DetectorId
 import com.eltavine.duckdetector.core.ui.components.LocalDetectorCardExpansionSignal
 import com.eltavine.duckdetector.core.ui.detector.DetectorSession
 import com.eltavine.duckdetector.core.ui.detector.DeviceProfileSession
-import com.eltavine.duckdetector.core.ui.components.WrapSafeText
 import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardFindingModel
 import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardUiState
-import io.github.xiaotong6666.uihelper.adaptive.AdaptiveCircularProgressIndicator
-import io.github.xiaotong6666.uihelper.adaptive.AdaptiveContent
-import io.github.xiaotong6666.uihelper.adaptive.adaptiveContainerContentColor
 import io.github.xiaotong6666.uihelper.adaptive.adaptiveScrollableOverscrollEffect
-import io.github.xiaotong6666.uihelper.adaptive.adaptiveSecondaryTextColor
 import io.github.xiaotong6666.uihelper.adaptive.adaptiveValue
 import io.github.xiaotong6666.uihelper.adaptive.adaptiveVerticalScrollFeedback
 import io.github.xiaotong6666.uihelper.adaptive.adaptiveViewportOverscroll
-import kotlinx.coroutines.launch
 
 @Composable
 fun DashboardScreen(
@@ -88,176 +72,128 @@ fun DashboardScreen(
 ) {
     val materialOverscrollEffect = rememberOverscrollEffect()
     val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
-    var expansionRequest by remember { mutableStateOf<DashboardExpansionRequest?>(null) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var filterName by rememberSaveable { mutableStateOf(DashboardConsoleFilter.ALL.name) }
+    var compact by rememberSaveable { mutableStateOf(true) }
+    var selectedDetectorId by rememberSaveable { mutableStateOf<String?>(null) }
+    var requestedDetectorId by rememberSaveable { mutableStateOf<String?>(null) }
+    var expansionCounter by rememberSaveable { mutableLongStateOf(0L) }
+    val selectedFilter = DashboardConsoleFilter.entries.firstOrNull { it.name == filterName } ?: DashboardConsoleFilter.ALL
+    val sessionsById = remember(detectors) { detectors.associateBy { it.id } }
+    val summaries = remember(uiState.detectorSummaries, detectors) {
+        val published = uiState.detectorSummaries.associateBy { it.id }
+        // Use catalog order throughout a scan so arriving evidence never moves a module under a finger.
+        detectors.map { published[it.id] ?: it.summary.value }
+    }
+    val summariesById = remember(summaries) { summaries.associateBy { it.id } }
+    val console = remember(summaries, selectedFilter, query) {
+        buildDashboardConsoleModel(summaries, DashboardConsoleSelection(selectedFilter, query))
+    }
+    val visibleDetectors = remember(console.visibleDetectorIds, sessionsById) {
+        console.visibleDetectorIds.mapNotNull(sessionsById::get)
+    }
+    // Filters change browsing only; exports and history always consume the complete scan.
+    val exportReport = rememberDashboardReportExporter(uiState, detectors, deviceProfile)
+    val historyState = rememberDashboardHistory(uiState)
     val hostedHorizontalInset = adaptiveValue(material = 16.dp, miuix = 12.dp)
     val pageSpacing = adaptiveValue(material = 16.dp, miuix = 12.dp)
-    val showStandaloneMaterialChrome = adaptiveValue(
-        material = scaffoldPadding == null,
-        miuix = false,
-    )
+    val showStandaloneMaterialChrome = adaptiveValue(material = scaffoldPadding == null, miuix = false)
     val layoutDirection = LocalLayoutDirection.current
-    val orderedDetectors = remember(uiState.cardOrder, detectors) {
-        val detectorsById = detectors.associateBy { it.id }
-        uiState.cardOrder.mapNotNull { detectorsById[it] }
+    val resetFilters: () -> Unit = { query = ""; filterName = DashboardConsoleFilter.ALL.name }
+    val onFindingClick: (DashboardFindingModel) -> Unit = { finding ->
+        val detectorId = finding.detectorId
+        val detectorIndex = detectors.indexOfFirst { it.id == detectorId }
+        if (detectorId != null && detectorIndex >= 0) {
+            resetFilters()
+            selectedDetectorId = detectorId.value
+            requestedDetectorId = detectorId.value
+            expansionCounter += 1L
+            // requestScrollToItem applies to the next measurement, after clearing the filters.
+            val moduleStartIndex = if (showStandaloneMaterialChrome) 4 else 3
+            listState.requestScrollToItem(moduleStartIndex + detectorIndex)
+        }
     }
-    val exportReport = rememberDashboardReportExporter(uiState, orderedDetectors, deviceProfile)
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(DuckTheme.palette.groupedBackground)
-            // Render at the entire page viewport, not at an inset card or scroll item.
-            // The LazyColumn below supplies the scroll deltas to the same native effect.
+        modifier = modifier.fillMaxSize().background(DuckTheme.palette.groupedBackground)
             .adaptiveViewportOverscroll(materialOverscrollEffect),
     ) {
         LazyColumn(
             state = listState,
-            modifier = Modifier
-                .fillMaxSize()
-                // uihelper preserves the native MIUIX ordering: elastic overscroll remains outside
-                // the top-bar nested-scroll observer so its rebound cannot collapse chrome.
-                .adaptiveVerticalScrollFeedback()
-                .then(pageModifier),
+            modifier = Modifier.widthIn(max = 960.dp).fillMaxSize().align(Alignment.TopCenter)
+                .adaptiveVerticalScrollFeedback().then(pageModifier),
             overscrollEffect = adaptiveScrollableOverscrollEffect(materialOverscrollEffect),
             verticalArrangement = Arrangement.spacedBy(pageSpacing),
             contentPadding = if (scaffoldPadding != null) {
-                // MIUIX owns the top bar and navigation bar. Their insets must not be re-applied.
                 PaddingValues(
                     start = scaffoldPadding.calculateStartPadding(layoutDirection) + hostedHorizontalInset,
                     top = scaffoldPadding.calculateTopPadding() + 12.dp,
                     end = scaffoldPadding.calculateEndPadding(layoutDirection) + hostedHorizontalInset,
-                    bottom = scaffoldPadding.calculateBottomPadding() + 16.dp,
+                    bottom = scaffoldPadding.calculateBottomPadding() + 20.dp,
                 )
             } else {
                 WindowInsets.safeDrawing
-                    .add(WindowInsets(left = 16.dp, top = 12.dp, right = 16.dp, bottom = 96.dp))
-                    .asPaddingValues()
+                    .add(WindowInsets(left = 16.dp, top = 12.dp, right = 16.dp, bottom = 96.dp)).asPaddingValues()
             },
         ) {
-            // Hosted pages put brand actions in the real app bar. Keep the original
-            // inline brand header only for standalone/dashboard preview hosts.
-            if (showStandaloneMaterialChrome) {
-                item { BrandHeader() }
+            if (showStandaloneMaterialChrome) item(key = "brand") { BrandHeader() }
+            item(key = "console") { DashboardScanConsole(console, uiState.isLoading) }
+            item(key = "scan_outcome") {
+                if (uiState.isLoading) DashboardCollectingNotice()
+                else DashboardOverviewCard(uiState.overview, exportReport)
             }
-            item {
-                DashboardSummarySection(
-                    uiState = uiState,
-                    onExportReport = exportReport,
-                    onFindingClick = { finding ->
-                        val detectorId = finding.detectorId ?: return@DashboardSummarySection
-                        val detectorIndex = orderedDetectors.indexOfFirst { it.id == detectorId }
-                        if (detectorIndex >= 0) {
-                            val detectorStartIndex = if (showStandaloneMaterialChrome) 2 else 1
-                            coroutineScope.launch {
-                                listState.animateScrollToItem(detectorStartIndex + detectorIndex)
-                                expansionRequest = DashboardExpansionRequest(
-                                    detectorId = detectorId,
-                                    signal = (expansionRequest?.signal ?: 0L) + 1L,
-                                )
-                            }
-                        }
-                    },
+            item(key = "browser") {
+                DashboardBrowserControls(
+                    query = query,
+                    onQueryChange = { query = it },
+                    filter = selectedFilter,
+                    onFilterChange = { filterName = it.name },
+                    visibleCount = visibleDetectors.size,
+                    totalCount = console.totalCount,
+                    compact = compact,
+                    onCompactChange = { compact = it },
                 )
             }
-            items(
-                items = orderedDetectors,
-                key = { detector -> detector.id.value },
-            ) { detector ->
-                val expansionSignal = expansionRequest
-                    ?.takeIf { request -> request.detectorId == detector.id }
-                    ?.signal
-                    ?: 0L
-                CompositionLocalProvider(
-                    LocalDetectorCardExpansionSignal provides expansionSignal,
-                ) {
-                    detector.Card()
+            if (visibleDetectors.isEmpty()) {
+                item(key = "no_modules") { DashboardBrowserEmptyState(onReset = resetFilters) }
+            }
+            items(items = visibleDetectors, key = { "module:${it.id.value}" }, contentType = { "detector_module" }) { detector ->
+                val expansionSignal = if (requestedDetectorId == detector.id.value) expansionCounter else 0L
+                if (compact) {
+                    DashboardCompactModule(
+                        summary = requireNotNull(summariesById[detector.id]),
+                        expanded = selectedDetectorId == detector.id.value,
+                        onToggle = {
+                            if (selectedDetectorId == detector.id.value) selectedDetectorId = null
+                            else {
+                                selectedDetectorId = detector.id.value
+                                requestedDetectorId = detector.id.value
+                                expansionCounter += 1L
+                            }
+                        },
+                    ) { DashboardDetectorDetails(detector, expansionSignal) }
+                } else {
+                    DashboardDetectorDetails(detector, expansionSignal)
                 }
             }
-            item {
-                deviceProfile.Card()
+            item(key = "findings") {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    DashboardSectionHeading(
+                        title = stringResource(R.string.dashboard_findings_title),
+                        detail = stringResource(R.string.dashboard_findings_hint),
+                    )
+                    DashboardFindingsCard(uiState.topFindings, onFindingClick)
+                }
             }
+            item(key = "history") { DashboardHistoryPanel(state = historyState) }
+            item(key = "scope") { DashboardEvidenceGuide() }
+            item(key = "device_profile") { deviceProfile.Card() }
         }
-
-        if (showStandaloneMaterialChrome) {
-            StatusBarProtection(modifier = Modifier.align(Alignment.TopCenter))
-        }
+        if (showStandaloneMaterialChrome) StatusBarProtection(Modifier.align(Alignment.TopCenter))
     }
 }
 
-private data class DashboardExpansionRequest(
-    val detectorId: DetectorId,
-    val signal: Long,
-)
-
 @Composable
-private fun DashboardSummarySection(
-    uiState: DashboardUiState,
-    onExportReport: () -> Unit,
-    onFindingClick: (DashboardFindingModel) -> Unit,
-) {
-    if (uiState.isLoading) {
-        // Do not draw the finished Danger card behind an opaque loading overlay. Its independent
-        // Material radius leaked through the MIUIX squircle corners, and made the placeholder
-        // inherit the combined height of cards that are not ready yet.
-        DashboardLoadingOverlay()
-    } else {
-        // The status hero and finding queue already have their own internal spacing.
-        // An additional 24dp here produced the empty band between the two cards.
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            DashboardOverviewCard(model = uiState.overview, onExportReport = onExportReport)
-            DashboardHistoryPanel(uiState = uiState)
-            DashboardSectionHeading(
-                title = stringResource(R.string.dashboard_findings_title),
-                detail = stringResource(R.string.dashboard_findings_hint),
-            )
-            DashboardFindingsCard(
-                findings = uiState.topFindings,
-                onFindingClick = onFindingClick,
-            )
-            DashboardEvidenceGuide()
-            DashboardSectionHeading(
-                title = stringResource(R.string.dashboard_modules_title),
-                detail = stringResource(R.string.dashboard_modules_hint),
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun DashboardLoadingOverlay(
-    modifier: Modifier = Modifier,
-) {
-    DuckPanel(
-        modifier = modifier.semantics { liveRegion = LiveRegionMode.Polite },
-        contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 44.dp, bottom = 44.dp),
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            AdaptiveContent(
-                miuix = {
-                    // Native MIUIX indeterminate progress: grey track and moving accent arc.
-                    AdaptiveCircularProgressIndicator(size = 48.dp)
-                },
-                material = { LoadingIndicator(modifier = Modifier.size(56.dp)) },
-            )
-            WrapSafeText(
-                text = stringResource(R.string.dashboard_loading_title),
-                modifier = Modifier.padding(top = 6.dp),
-                style = DuckTypography.LoadingTitle,
-                color = adaptiveContainerContentColor(),
-                textAlign = TextAlign.Center,
-            )
-            WrapSafeText(
-                text = stringResource(R.string.dashboard_loading_summary),
-                style = DuckTypography.LoadingSupporting,
-                color = adaptiveSecondaryTextColor(),
-                textAlign = TextAlign.Center,
-            )
-        }
-    }
+private fun DashboardDetectorDetails(detector: DetectorSession, expansionSignal: Long) {
+    CompositionLocalProvider(LocalDetectorCardExpansionSignal provides expansionSignal) { detector.Card() }
 }

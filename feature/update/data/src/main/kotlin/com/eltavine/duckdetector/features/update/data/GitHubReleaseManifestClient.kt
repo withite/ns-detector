@@ -36,14 +36,19 @@ internal class GitHubReleaseManifestClient(
         val directFeed = UpdateRepository.MANIFEST_URL
         val proxyFeed = "https://gh-proxy.com/$directFeed"
         if (url != directFeed && url != proxyFeed) return transport.get(url, accept)
-        val releases = JSONArray(transport.get(url, "application/vnd.github+json"))
+        val prefix = if (url == proxyFeed) "https://gh-proxy.com/" else ""
+        val releases = if (channel == ReleaseUpdateChannel.STABLE) {
+            // /latest excludes prereleases and cannot lose stable builds behind a busy preview feed.
+            JSONArray().put(JSONObject(transport.get(prefix + STABLE_RELEASE_URL, "application/vnd.github+json")))
+        } else {
+            JSONArray(transport.get(url, "application/vnd.github+json"))
+        }
         val release = (0 until releases.length()).asSequence()
             .map { releases.getJSONObject(it) }
             .filter { !it.optBoolean("draft", true) }
             .filter { it.optBoolean("prerelease", false) == channel.prerelease }
             .mapNotNull(::releaseAsset)
             .firstOrNull() ?: throw IOException("No published NS Detector update manifest is available.")
-        val prefix = if (url == proxyFeed) "https://gh-proxy.com/" else ""
         val manifest = transport.get(prefix + release.manifestUrl, "application/json")
         // The APK and its manifest must belong to the same versioned release.
         val parsed = UpdateManifestParser().parse(manifest)
@@ -76,6 +81,7 @@ internal class GitHubReleaseManifestClient(
     private data class PublishedManifest(val manifestUrl: String, val directoryUrl: String)
 
     private companion object {
+        private const val STABLE_RELEASE_URL = "https://api.github.com/repos/withite/ns-detector/releases/latest"
         private val SAFE_TAG = Regex("^[A-Za-z0-9._-]{1,100}$")
     }
 }

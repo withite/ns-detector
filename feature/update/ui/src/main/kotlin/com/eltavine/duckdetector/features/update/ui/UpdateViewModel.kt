@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.currentCoroutineContext
 
 internal fun interface UpdateCheckGate {
     fun tryAcquire(): Boolean
@@ -70,6 +71,8 @@ class UpdateViewModel internal constructor(
     private var downloadJob: Job? = null
     private val downloadGeneration = AtomicLong()
     private var checkGeneration = 0L
+    private val installGate = AtomicBoolean(false)
+    private var installationJob: Job? = null
 
     fun checkAutomatically() {
         if (!automaticCheckGate.tryAcquire()) {
@@ -88,6 +91,7 @@ class UpdateViewModel internal constructor(
     }
 
     fun dismissUpdate() {
+        installationJob?.cancel()
         _uiState.update { it.copy(isDialogVisible = false) }
     }
 
@@ -123,6 +127,7 @@ class UpdateViewModel internal constructor(
 
     /** The resolved update is an immutable snapshot used by every progress and completion callback. */
     fun downloadUpdate() {
+        if (installGate.get()) return
         if (downloadJob?.isActive == true) return
         val manifest = _uiState.value.availableUpdate?.manifest ?: return
         val generation = downloadGeneration.incrementAndGet()
@@ -155,7 +160,20 @@ class UpdateViewModel internal constructor(
         }
     }
 
-    fun installDownloaded(): UpdateInstallResult {
+    suspend fun installDownloaded(): UpdateInstallResult {
+        if (!installGate.compareAndSet(false, true)) return UpdateInstallResult.InProgress
+        installationJob = currentCoroutineContext()[Job]
+        _uiState.update { it.copy(isInstalling = true) }
+        return try {
+            performInstall()
+        } finally {
+            installationJob = null
+            installGate.set(false)
+            _uiState.update { it.copy(isInstalling = false) }
+        }
+    }
+
+    private suspend fun performInstall(): UpdateInstallResult {
         val state = _uiState.value
         val download = state.download as? UpdateDownloadState.Ready ?: return UpdateInstallResult.Failed
         if (download.manifest != state.availableUpdate?.manifest) {
@@ -164,6 +182,8 @@ class UpdateViewModel internal constructor(
         }
         val result = try {
             installer.install(download.apkPath, download.manifest.apk)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (_: Exception) {
             UpdateInstallResult.Failed
         }
@@ -173,6 +193,8 @@ class UpdateViewModel internal constructor(
                 it.copy(download = UpdateDownloadState.Idle)
             }
             UpdateInstallResult.PermissionRequired,
+            UpdateInstallResult.IncompatibleApk,
+            UpdateInstallResult.InProgress,
             UpdateInstallResult.Failed -> Unit
         }
         return result
@@ -214,6 +236,7 @@ class UpdateViewModel internal constructor(
     }
 
     private fun invalidateDownload() {
+        installationJob?.cancel()
         downloadGeneration.incrementAndGet()
         downloadJob?.cancel()
         downloadJob = null
