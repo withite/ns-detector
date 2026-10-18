@@ -4,6 +4,8 @@ Android 设备环境诊断工具，基于固定版本的 Duck Detector 开发，
 
 [下载与构建记录](https://github.com/withite/ns-detector/actions) · [版本下载](https://github.com/withite/ns-detector/releases) · [构建与签名](docs/ns-detector/build.md) · [隐私说明](docs/ns-detector/privacy.md) · [测试矩阵](docs/ns-detector/test-matrix.md) · [上游与归属](docs/ns-detector/upstream.md)
 
+已发布 [1.0.0 签名候选版 APK](https://github.com/withite/ns-detector/releases/download/v1.0.0/NS-Detector-1.0.0.apk)。1,547 个单元测试、四 ABI 编译、SDK / 依赖 / API 与 lint 检查，以及签名 APK 的模拟器安装、20/20 模块返回和界面交互验证通过。详见[实际验证记录](docs/ns-detector/validation-1.0.0.md)；多厂商真机验证仍待执行。
+
 ## 当前交付范围
 
 本项目完整保留 Duck 上游全部 18 个检测模块，新增网络环境与本应用完整性，共 20 个模块。仪表盘提供分项证据、执行覆盖情况和解释；扫描历史保留最近 20 次已完成扫描的脱敏摘要，并比较类型化状态变化；TXT / JSON 导出报告默认脱敏。
