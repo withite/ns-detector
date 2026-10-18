@@ -148,7 +148,10 @@ class DuckDetectorAndroidApplicationConventionPlugin : Plugin<Project> {
                 }
             }
         }
-        tasks.matching { it.name == "preReleaseBuild" || it.name == "validateSigningRelease" }
+        // Analysis and lint compile release classes too; only distributable packaging needs a key.
+        tasks.matching {
+            it.name in setOf("packageRelease", "assembleRelease", "bundleRelease", "validateSigningRelease")
+        }
             .configureEach { dependsOn(verifyReleaseSigning) }
 
         registerGeneratedAssets()

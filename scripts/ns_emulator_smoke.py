@@ -9,7 +9,7 @@ import subprocess
 import time
 import xml.etree.ElementTree as ET
 
-PACKAGE = "io.github.withite.nsdetector.debug"
+PACKAGE = os.environ.get("NS_SMOKE_PACKAGE", "io.github.withite.nsdetector.debug")
 OUTPUT = Path("smoke-output")
 OUTPUT.mkdir(exist_ok=True)
 
@@ -44,7 +44,10 @@ def launch():
 
 
 def main():
-    apk = next(Path("dist").glob("*-debug.apk"))
+    apks = list(Path("dist").glob("*.apk"))
+    if len(apks) != 1:
+        raise RuntimeError("Expected exactly one APK for installation smoke testing")
+    apk = apks[0]
     adb("install", "-r", str(apk))
     adb("logcat", "-c")
     launch()
@@ -101,6 +104,13 @@ def main():
     if not adb("shell", "pidof", PACKAGE).strip():
         raise RuntimeError("Application did not survive relaunch")
     screenshot("04-relaunch")
+    adb("shell", "cmd", "locale", "set-app-locales", PACKAGE, "--user", "0", "--locales", "zh-CN")
+    time.sleep(8)
+    chinese = hierarchy()
+    chinese_text = " ".join(node.attrib.get("text", "") for node in chinese.iter("node"))
+    if not any(word in chinese_text for word in ("扫描", "检测", "环境", "设置", "证据")):
+        raise RuntimeError("Chinese application locale did not render localized UI")
+    screenshot("05-chinese")
     logs = adb("logcat", "-d")
     if any("AndroidRuntime" in line and f"Process: {PACKAGE}, PID:" in line for line in logs.splitlines()):
         raise RuntimeError("Runtime log contains a fatal exception in the main app process")

@@ -19,3 +19,10 @@ __pycache__/
 /build-logic/.gradle
 /build-logic/build
 commit.txt
+
+# Private signing material must stay outside the repository.
+*.keystore
+*.jks
+*.p12
+/dist/
+/smoke-output/

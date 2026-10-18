@@ -3,6 +3,11 @@ name: NS Detector
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - NOTICE
+      - LICENSE
   workflow_dispatch:
 concurrency:
   group: ns-detector-${{ github.ref }}
@@ -49,6 +54,7 @@ jobs:
           cache-read-only: "false"
       - name: Run all unit tests and build all four ABIs
         run: |
+          printf 'VERSION_NAME=%s\nVERSION_CODE=%s\n' "$NS_VERSION_NAME" "$((10000 + NS_VERSION_CODE))" >> "$GITHUB_ENV"
           ./gradlew --stacktrace :build-logic:test unitTest checkPublicApi :app:assembleDebug \
             -Pnsdetector.versionName="$NS_VERSION_NAME" \
             -Pnsdetector.versionCode="$((10000 + NS_VERSION_CODE))"
