@@ -30,6 +30,7 @@ dependencies {
     api(project(":core:ui"))
     implementation(project(":feature:networkenvironment:detector"))
     implementation(project(":feature:networkenvironment:presentation"))
+    implementation(libs.androidx.foundation.layout)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.ui)
 }

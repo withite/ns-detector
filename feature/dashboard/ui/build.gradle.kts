@@ -28,6 +28,7 @@ dependencies {
     implementation(libs.uihelper)
     implementation(project(":core:evidence"))
     implementation(project(":core:report"))
+    implementation(project(":core:scan"))
     api(project(":core:ui"))
     implementation(project(":core:designsystem"))
     api(project(":feature:dashboard:presentation"))
