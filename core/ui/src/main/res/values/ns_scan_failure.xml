@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 NS Detector contributors. SPDX-License-Identifier: Apache-2.0 -->
+<resources>
+    <string name="ns_scan_failed_title">Check could not complete</string>
+    <string name="ns_scan_failed_scope">No security conclusion is available for this scan. Retry to collect new evidence.</string>
+    <string name="ns_scan_retry">Retry check</string>
+</resources>

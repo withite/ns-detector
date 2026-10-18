@@ -18,7 +18,6 @@
 
 package com.eltavine.duckdetector.notifications
 
-import com.eltavine.duckdetector.core.evidence.DetectionSeverity
 import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardOverviewModel
 import com.eltavine.duckdetector.features.dashboard.presentation.model.OverviewVerdict
 import kotlin.math.roundToInt

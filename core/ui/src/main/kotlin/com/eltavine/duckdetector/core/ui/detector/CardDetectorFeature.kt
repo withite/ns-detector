@@ -67,7 +67,7 @@ private class CardDetectorSession<R : Any, M : DetectorHeadline>(
 
     override val summary: StateFlow<DetectorSummary> = viewModel.summary
 
-    override fun report(): DetectorReport = detector.export(viewModel.state.value.cardModel)
+    override fun report(): DetectorReport = viewModel.report()
 
     override fun rescan() {
         viewModel.rescan()
@@ -76,6 +76,11 @@ private class CardDetectorSession<R : Any, M : DetectorHeadline>(
     @Composable
     override fun Card() {
         val state by viewModel.state.collectAsState()
-        card(state.cardModel)
+        val failure = state.failure
+        if (failure != null) {
+            CardDetectorFailureCard(state.cardModel.title, failure, onRetry = viewModel::rescan)
+        } else {
+            card(state.cardModel)
+        }
     }
 }

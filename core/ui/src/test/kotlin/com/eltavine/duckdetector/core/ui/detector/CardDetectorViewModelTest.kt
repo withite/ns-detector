@@ -35,6 +35,10 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import kotlinx.coroutines.CancellationException
 import org.junit.Before
 import org.junit.Test
 
@@ -56,7 +60,7 @@ class CardDetectorViewModelTest {
     @Test
     fun `shows the loading card until the first scan finishes`() = runTest(dispatcher) {
         val scanner = GatedScanner()
-        val viewModel = CardDetectorViewModel(ProbeDetector, scanner)
+        val viewModel = CardDetectorViewModel(ProbeDetector, scanner, dispatcher)
 
         assertEquals(CardDetectorState(ready = false, cardModel = Card(0)), viewModel.state.value)
         assertEquals(summary(verdict = "report 0", ready = false), viewModel.summary.value)
@@ -70,7 +74,7 @@ class CardDetectorViewModelTest {
     @Test
     fun `a rescan shows the loading card again and then publishes the new report`() = runTest(dispatcher) {
         val scanner = GatedScanner()
-        val viewModel = CardDetectorViewModel(ProbeDetector, scanner)
+        val viewModel = CardDetectorViewModel(ProbeDetector, scanner, dispatcher)
         scanner.finish(1)
 
         viewModel.rescan()
@@ -79,6 +83,44 @@ class CardDetectorViewModelTest {
         scanner.finish(2)
         assertEquals(CardDetectorState(ready = true, cardModel = Card(2)), viewModel.state.value)
         assertEquals(2, scanner.scans)
+    }
+
+    @Test
+    fun `collection failure is a finished error and retry can recover`() = runTest(dispatcher) {
+        var fail = true
+        val vm = CardDetectorViewModel(ProbeDetector, DetectorScanner {
+            if (fail) error("unavailable platform service") else 9
+        }, dispatcher)
+        assertEquals(CardScanStage.COLLECTION, vm.state.value.failure?.stage)
+        assertEquals(DetectorStatus.info(InfoKind.ERROR), vm.summary.value.status)
+        assertTrue(vm.summary.value.ready)
+        assertEquals("Scan failed", vm.report().verdict)
+        fail = false
+        vm.rescan()
+        assertNull(vm.state.value.failure)
+        assertEquals(Card(9), vm.state.value.cardModel)
+    }
+
+    @Test
+    fun `presentation failure never exposes the loading model as a clean report`() = runTest(dispatcher) {
+        val detector = object : Detector<Int, Card> by ProbeDetector {
+            override fun describe(report: Int): Card {
+                if (report != 0) throw IllegalArgumentException("invalid payload")
+                return Card(0)
+            }
+        }
+        val vm = CardDetectorViewModel(detector, DetectorScanner { 1 }, dispatcher)
+        assertEquals(CardScanStage.PRESENTATION, vm.state.value.failure?.stage)
+        assertTrue(vm.state.value.ready)
+        assertEquals(DetectorStatus.info(InfoKind.ERROR), vm.summary.value.status)
+        assertEquals("Scan failed", vm.report().verdict)
+    }
+
+    @Test
+    fun `owner cancellation is not turned into an execution error`() = runTest(dispatcher) {
+        val vm = CardDetectorViewModel(ProbeDetector, DetectorScanner { throw CancellationException() }, dispatcher)
+        assertFalse(vm.state.value.ready)
+        assertNull(vm.state.value.failure)
     }
 
     private fun summary(verdict: String, ready: Boolean) = DetectorSummary(

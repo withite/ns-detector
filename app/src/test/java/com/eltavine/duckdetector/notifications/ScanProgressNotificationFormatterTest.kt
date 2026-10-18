@@ -17,6 +17,10 @@
 
 package com.eltavine.duckdetector.notifications
 
+import com.eltavine.duckdetector.core.evidence.DetectorId
+import com.eltavine.duckdetector.core.evidence.InfoKind
+import com.eltavine.duckdetector.core.scan.DetectorSummary
+import com.eltavine.duckdetector.features.dashboard.presentation.model.buildDashboardOverview
 import com.eltavine.duckdetector.core.evidence.DetectorStatus
 import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardOverviewMetric
 import com.eltavine.duckdetector.features.dashboard.presentation.model.DashboardOverviewMetricModel
@@ -122,6 +126,28 @@ class ScanProgressNotificationFormatterTest {
 
         assertNull(model.subText)
         assertEquals("Warning", model.shortCriticalText)
+    }
+
+    @Test
+    fun `finished restricted and failed scans retain their explicit outcomes in notifications`() {
+        listOf(
+            InfoKind.SUPPORT to OverviewVerdict.COVERAGE_LIMITED,
+            InfoKind.ERROR to OverviewVerdict.ERROR,
+        ).forEach { (kind, expectedVerdict) ->
+            val overview = buildDashboardOverview(
+                listOf(DetectorSummary(DetectorId("test"), "Test", DetectorStatus.info(kind), "Details", "Details", true)),
+                scanDurationMillis = 100L,
+                scanCompletedAtEpochMillis = 1_700_000_000_000L,
+            )
+            val model = formatter.format(ScanProgressNotificationSnapshot(1, 1, overview, scanning = false))
+
+            assertEquals(expectedVerdict, overview.verdict)
+            assertEquals(overview.headline, model.title)
+            assertEquals(overview.headline, model.shortCriticalText)
+            assertEquals(overview.summary, model.text)
+            assertEquals(overview.title, model.subText)
+            assertEquals(100, model.progressPercent)
+        }
     }
 
     private fun overview(

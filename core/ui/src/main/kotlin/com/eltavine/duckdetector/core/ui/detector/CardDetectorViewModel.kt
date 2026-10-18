@@ -23,9 +23,12 @@ import androidx.lifecycle.viewModelScope
 import com.eltavine.duckdetector.core.detector.Detector
 import com.eltavine.duckdetector.core.detector.DetectorScanner
 import com.eltavine.duckdetector.core.report.DetectorHeadline
+import com.eltavine.duckdetector.core.report.DetectorReport
 import com.eltavine.duckdetector.core.scan.DetectorSummary
 import com.eltavine.duckdetector.core.scan.ScanSessionRunner
 import com.eltavine.duckdetector.core.scan.summarize
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +41,7 @@ import kotlinx.coroutines.flow.update
 internal data class CardDetectorState<M : DetectorHeadline>(
     val ready: Boolean,
     val cardModel: M,
+    val failure: CardScanFailure? = null,
 )
 
 /**
@@ -49,6 +53,7 @@ internal data class CardDetectorState<M : DetectorHeadline>(
 internal class CardDetectorViewModel<R : Any, M : DetectorHeadline>(
     private val detector: Detector<R, M>,
     private val scanner: DetectorScanner<R>,
+    private val presentationDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -70,16 +75,27 @@ internal class CardDetectorViewModel<R : Any, M : DetectorHeadline>(
         scans.launch(
             begin = {
                 val loading = detector.loadingReport()
-                _state.update { it.copy(ready = false, cardModel = detector.describe(loading)) }
+                _state.value = CardDetectorState(ready = false, cardModel = detector.describe(loading))
             },
-            collect = { scanner.scan() },
-            publish = { report ->
-                _state.update { it.copy(ready = true, cardModel = detector.describe(report)) }
+            collect = { collectDetectorCard(detector, scanner, presentationDispatcher) },
+            publish = { result ->
+                _state.update { previous ->
+                    when (result) {
+                        is CardScanResult.Success -> CardDetectorState(ready = true, cardModel = result.model)
+                        is CardScanResult.Failed -> previous.copy(ready = true, failure = result.failure)
+                    }
+                }
             },
         )
     }
 
-    private fun CardDetectorState<M>.summary(): DetectorSummary = cardModel.summarize(detector.id, ready)
+    fun report(): DetectorReport {
+        val current = state.value
+        return current.failure?.report(current.cardModel.title) ?: detector.export(current.cardModel)
+    }
+
+    private fun CardDetectorState<M>.summary(): DetectorSummary =
+        failure?.summary(detector.id, cardModel.title) ?: cardModel.summarize(detector.id, ready)
 
     companion object {
         fun <R : Any, M : DetectorHeadline> factory(

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 NS Detector contributors. SPDX-License-Identifier: Apache-2.0 -->
+<resources>
+    <string name="ns_scan_failed_title">检测未能完成</string>
+    <string name="ns_scan_failed_scope">本次检测无法给出安全结论。重试可重新采集证据。</string>
+    <string name="ns_scan_retry">重试检测</string>
+</resources>

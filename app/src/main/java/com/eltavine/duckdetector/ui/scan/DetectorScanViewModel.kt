@@ -24,6 +24,7 @@ import androidx.lifecycle.viewModelScope
 import com.eltavine.duckdetector.core.scan.DetectorSummary
 import com.eltavine.duckdetector.core.scan.ScanClock
 import com.eltavine.duckdetector.core.scan.ScanCoordinator
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -37,7 +38,8 @@ internal class DetectorScanViewModel(
     detectors: List<StateFlow<DetectorSummary>>,
 ) : ViewModel() {
 
-    val coordinator = ScanCoordinator(AndroidScanClock, viewModelScope, detectors)
+    private val coordinator = ScanCoordinator(AndroidScanClock, viewModelScope, detectors)
+    val presentation = coordinator.state.presentScans(viewModelScope, Dispatchers.Default)
 
     companion object {
         fun factory(detectors: List<StateFlow<DetectorSummary>>): ViewModelProvider.Factory {

@@ -17,6 +17,7 @@
 
 package com.eltavine.duckdetector.core.scan
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -25,7 +26,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -99,6 +99,43 @@ class ScanSessionRunnerTest {
     }
 
     @Test
+    fun `rapid requests retain only the latest waiter without cancelling active cleanup`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val runner = ScanSessionRunner(backgroundScope)
+            val running = CompletableDeferred<String>()
+            var collections = 0
+            runner.launch(
+                begin = {},
+                collect = {
+                    collections++
+                    try {
+                        running.await()
+                    } finally {
+                        events += "active cleanup"
+                    }
+                },
+                publish = { events += it },
+            )
+
+            repeat(1_000) { index ->
+                runner.launch(
+                    begin = {},
+                    collect = { collections++; "request $index" },
+                    publish = { events += it },
+                )
+            }
+
+            assertEquals(2, backgroundScope.coroutineContext[Job]!!.children.count())
+            assertEquals(1, collections)
+            assertTrue(events.isEmpty())
+            running.complete("stale")
+
+            assertEquals(2, collections)
+            assertEquals(listOf("active cleanup", "request 999"), events)
+            assertEquals(0, backgroundScope.coroutineContext[Job]!!.children.count())
+        }
+
+    @Test
     fun `a failed scan releases admission for the next request`() {
         val failures = mutableListOf<Throwable>()
         val scope = CoroutineScope(
@@ -125,6 +162,30 @@ class ScanSessionRunnerTest {
         scope.cancel()
         gate.complete("late")
         advanceUntilIdle()
+
+        assertEquals(listOf("begin"), events)
+    }
+
+    @Test
+    fun `a collector swallowing cancellation cannot publish after its owner ends`() = runTest {
+        val scope = CoroutineScope(StandardTestDispatcher(testScheduler) + Job())
+        val runner = ScanSessionRunner(scope)
+        val gate = CompletableDeferred<String>()
+        runner.launch(
+            begin = { events += "begin" },
+            collect = {
+                try {
+                    gate.await()
+                } catch (_: CancellationException) {
+                    "cleanup fallback"
+                }
+            },
+            publish = { events += it },
+        )
+        runCurrent()
+
+        scope.cancel()
+        runCurrent()
 
         assertEquals(listOf("begin"), events)
     }
