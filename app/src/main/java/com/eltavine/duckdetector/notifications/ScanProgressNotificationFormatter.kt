@@ -73,6 +73,8 @@ class ScanProgressNotificationFormatter {
             OverviewVerdict.DANGER,
             OverviewVerdict.WARNING,
             OverviewVerdict.INFO,
+            OverviewVerdict.COVERAGE_LIMITED,
+            OverviewVerdict.ERROR,
             OverviewVerdict.OK -> overview.headline
 
             OverviewVerdict.READY,
