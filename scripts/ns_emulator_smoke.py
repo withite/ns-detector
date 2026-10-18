@@ -12,18 +12,72 @@ import xml.etree.ElementTree as ET
 PACKAGE = os.environ.get("NS_SMOKE_PACKAGE", "io.github.withite.nsdetector.debug")
 OUTPUT = Path("smoke-output")
 OUTPUT.mkdir(exist_ok=True)
+EXPECTED_MODULE_COUNT = 20
 
 
-def adb(*args, binary=False, check=True):
+def window_text(root):
+    return " ".join(node.attrib.get("text", "") + " " + node.attrib.get("content-desc", "")
+                    for node in root.iter("node"))
+
+
+def dashboard_visible(root):
+    text = window_text(root).casefold()
+    return any(word.casefold() in text for word in (
+        "Device console", "设备环境控制台", "Environment overview", "Evidence overview",
+        "证据总览", "环境总览", "Export diagnostic report", "Export report", "导出报告",
+        "Local scan history", "扫描历史",
+    ))
+
+
+def adb(*args, binary=False, check=True, deadline=None):
+    timeout = 40 if deadline is None else min(40, deadline - time.monotonic())
+    if timeout <= 0:
+        raise TimeoutError("ADB operation exceeded the polling deadline")
     return subprocess.run(["adb", *args], check=check, stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE, text=not binary, timeout=40).stdout
+                          stderr=subprocess.PIPE, text=not binary, timeout=timeout).stdout
 
 
-def hierarchy():
-    adb("shell", "uiautomator", "dump", "/sdcard/ns-window.xml")
-    raw = adb("shell", "cat", "/sdcard/ns-window.xml")
+def hierarchy(deadline=None):
+    adb("shell", "uiautomator", "dump", "/sdcard/ns-window.xml", deadline=deadline)
+    raw = adb("shell", "cat", "/sdcard/ns-window.xml", deadline=deadline)
     (OUTPUT / "latest-window.xml").write_text(raw)
-    return ET.fromstring(raw)
+    root = ET.fromstring(raw)
+    text = window_text(root).casefold()
+    if any(word in text for word in (
+        "keeps stopping", "isn't responding", "isn’t responding", "is not responding", "has stopped",
+        "无响应", "未响应", "没有响应", "已停止运行", "屡次停止运行",
+        "沒有回應", "無回應", "未回應", "已停止運作", "持續停止運作",
+    )):
+        raise RuntimeError("Android reported a crash or ANR; see latest-window.xml")
+    return root
+
+
+def wait_for_completed_scan(timeout=180):
+    if not 0 < timeout <= 180:
+        raise ValueError("Scan completion polling must be bounded to at most 180 seconds")
+    started = time.monotonic()
+    deadline = started + timeout
+    latest_progress = None
+    try:
+        # Startup cards can leave the list scrolled; expose the console before checking progress.
+        adb("shell", "input", "swipe", "540", "700", "540", "1900", "350", deadline=deadline)
+        while time.monotonic() < deadline:
+            root = hierarchy(deadline=deadline)
+            match = re.search(r"\b(\d+)\s*/\s*(\d+)\s*(?:modules returned|个模块已返回)",
+                              window_text(root), flags=re.IGNORECASE)
+            if match:
+                latest_progress = tuple(int(value) for value in match.groups())
+                if latest_progress == (EXPECTED_MODULE_COUNT, EXPECTED_MODULE_COUNT):
+                    (OUTPUT / "completed-window.xml").write_text((OUTPUT / "latest-window.xml").read_text())
+                    return latest_progress[0], round(time.monotonic() - started, 3)
+            if not adb("shell", "pidof", PACKAGE, deadline=deadline).strip():
+                raise RuntimeError("Application process exited before scan completion")
+            time.sleep(min(3, max(0, deadline - time.monotonic())))
+    except (TimeoutError, subprocess.TimeoutExpired):
+        pass
+    screenshot("scan-completion-timeout")
+    raise RuntimeError(f"Scan did not visibly return {EXPECTED_MODULE_COUNT}/{EXPECTED_MODULE_COUNT} "
+                       f"modules within {timeout}s; last progress={latest_progress}; see latest-window.xml")
 
 
 def tap(node):
@@ -58,13 +112,7 @@ def main():
     while time.monotonic() - started < 180:
         root = hierarchy()
         nodes = list(root.iter("node"))
-        all_text = " ".join(node.attrib.get("text", "") + " " + node.attrib.get("content-desc", "") for node in nodes)
-        if any(word in all_text.lower() for word in ("keeps stopping", "isn't responding", "has stopped")):
-            raise RuntimeError("Android reported a crash or ANR")
-        if any(word.casefold() in all_text.casefold() for word in (
-            "Environment overview", "Evidence overview", "证据总览", "环境总览",
-            "Export diagnostic report", "Export report", "导出报告", "Local scan history", "扫描历史",
-        )):
+        if dashboard_visible(root):
             reached_dashboard = True
             break
         # Prefer offline and low-impact choices; never opt into an experiment or network access.
@@ -87,10 +135,8 @@ def main():
         time.sleep(1.5)
     if not reached_dashboard:
         raise RuntimeError("Dashboard was not reached through the real consent flow")
-    # Give the real detectors time to settle, without treating emulator verdicts as truth.
-    for _ in range(12):
-        time.sleep(3)
-        hierarchy()
+    # Observe real module completion. Emulator duration is not a physical-device performance metric.
+    completed_count, completion_wait_seconds = wait_for_completed_scan()
     screenshot("02-dashboard")
     if not adb("shell", "pidof", PACKAGE).strip():
         raise RuntimeError("Application process exited during scan")
@@ -103,6 +149,8 @@ def main():
     time.sleep(8)
     if not adb("shell", "pidof", PACKAGE).strip():
         raise RuntimeError("Application did not survive relaunch")
+    if not dashboard_visible(hierarchy()):
+        raise RuntimeError("Application did not restore the dashboard after relaunch; see latest-window.xml")
     screenshot("04-relaunch")
     adb("shell", "cmd", "locale", "set-app-locales", PACKAGE, "--user", "0", "--locales", "zh-CN")
     time.sleep(8)
@@ -115,7 +163,9 @@ def main():
     if any("AndroidRuntime" in line and f"Process: {PACKAGE}, PID:" in line for line in logs.splitlines()):
         raise RuntimeError("Runtime log contains a fatal exception in the main app process")
     result = {"status": "passed", "package": PACKAGE, "consentActions": actions,
-              "scope": "Android API 35 x86_64 emulator installation, launcher, dashboard, scan and restart; not physical-device accuracy validation."}
+              "completedModuleCount": completed_count, "expectedModuleCount": EXPECTED_MODULE_COUNT,
+              "emulatorCompletionWaitSeconds": completion_wait_seconds,
+              "scope": "Android API 35 x86_64 emulator installation, launcher, dashboard, full module return and restart; not physical-device accuracy or performance validation."}
     (OUTPUT / "smoke-result.json").write_text(json.dumps(result, indent=2))
     print(json.dumps(result))
 
