@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 from urllib.parse import quote
+from ns_check_upstream_coverage import CATALOG, detector_names
 
 
 def command(*args):
@@ -64,6 +65,7 @@ def collect(variant, unsigned=False):
     info = {
         "applicationId": metadata["applicationId"], "variant": variant, "signed": not unsigned,
         "versionName": version, "versionCode": element["versionCode"],
+        "detectorCount": len(detector_names((root / CATALOG).read_text())),
         "commit": commit, "upstreamCommit": "b1135897cff4ddf01797f042bdd15f7d7e364e0d",
         "buildUrl": f"https://github.com/{repository}/actions/runs/{os.environ.get('GITHUB_RUN_ID', '')}",
         "toolchain": {key: value for key, value in properties.items() if key.startswith("duckdetector.android.")},

@@ -32,6 +32,8 @@ jobs:
           for checker in .github/scripts/check-*.py; do python3 "$checker"; done
           for suite in .github/scripts/test-*.py; do python3 "$suite"; done
           python3 scripts/test_new_detector.py
+          python3 scripts/test_ns_emulator_motion.py
+          python3 scripts/test_ns_artifact_metadata.py
           python3 capability/selinuxpolicy/data/src/test/python/test_sidtab_native.py
           python3 capability/selinuxpolicy/data/src/test/python/test_proc_attr_native.py
           python3 capability/selinuxpolicy/data/src/test/python/test_avc_lookup_native.py

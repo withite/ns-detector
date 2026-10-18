@@ -197,7 +197,7 @@ def exercise_module_browser():
     root, _ = locate(browser_count(1))
     preserve("06-search-one-module", root)
     click_label(("Clear search", "清除搜索"), forward=False)
-    root, _ = locate(browser_count(20))
+    root, _ = locate(browser_count(EXPECTED_MODULE_COUNT))
     attention = ("Needs attention", "需要关注")
     owner = selection_owner(root, attention)
     selection_verified = owner is not None
@@ -211,7 +211,7 @@ def exercise_module_browser():
     root, _ = locate(("No matching modules", "没有匹配的模块"))
     preserve("08-no-matching-modules", root)
     click_label(("Reset search and filters", "重置搜索与筛选"))
-    root, _ = locate(browser_count(20), forward=False)
+    root, _ = locate(browser_count(EXPECTED_MODULE_COUNT), forward=False)
     all_owner = selection_owner(root, ("All modules", "全部模块"))
     if all_owner is not None and not any(all_owner.attrib.get(key) == "true"
                                           for key in ("selected", "checked")):
@@ -284,7 +284,21 @@ def exercise_export_picker():
             "scope": "Picker interaction and filename restoration only; frozen bytes and cache cleanup not verified."}
 
 
+def artifact_module_count(metadata):
+    if not isinstance(metadata, dict):
+        raise RuntimeError("Artifact metadata must be an object")
+    expected = metadata.get("detectorCount")
+    if ("detectorCount" not in metadata and metadata.get("versionName") == "1.0.0"
+            and metadata.get("applicationId") == "io.github.withite.nsdetector"):
+        expected = 20  # Only the known legacy release predates the catalog count field.
+    if type(expected) is not int or not 1 <= expected <= 1000:
+        raise RuntimeError("Invalid artifact detectorCount")
+    return expected
+
+
 def main():
+    global EXPECTED_MODULE_COUNT
+    EXPECTED_MODULE_COUNT = artifact_module_count(json.loads(Path("dist/build-info.json").read_text()))
     apks = list(Path("dist").glob("*.apk"))
     if len(apks) != 1:
         raise RuntimeError("Expected exactly one APK for installation smoke testing")

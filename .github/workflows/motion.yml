@@ -1,0 +1,129 @@
+# Optional paired rendering evidence. No private signing material is required.
+name: Compare dashboard motion
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_assets_ref:
+        description: Branch containing reviewed signed release-assets APK and build-info.json
+        required: true
+        type: string
+      candidate_apk_sha256:
+        description: Reviewed candidate APK SHA-256
+        required: true
+        type: string
+      candidate_source_commit:
+        description: Reviewed candidate APK source commit
+        required: true
+        type: string
+      baseline_apk_sha256:
+        description: Reviewed public v1.0.0 APK SHA-256
+        required: true
+        type: string
+      baseline_source_commit:
+        description: Reviewed public v1.0.0 APK source commit
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  motion:
+    name: Same-emulator baseline then candidate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      NS_CANDIDATE_HASH: ${{ inputs.candidate_apk_sha256 }}
+      NS_CANDIDATE_SOURCE: ${{ inputs.candidate_source_commit }}
+      NS_BASELINE_HASH: ${{ inputs.baseline_apk_sha256 }}
+      NS_BASELINE_SOURCE: ${{ inputs.baseline_source_commit }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Test FRAMESTATS parser and validate reviewed identities
+        run: |
+          python3 scripts/test_ns_emulator_motion.py
+          python3 scripts/test_ns_artifact_metadata.py
+          python3 - <<'PY'
+          import os, re
+          for name, pattern in {
+              'NS_CANDIDATE_HASH': r'[0-9a-f]{64}', 'NS_BASELINE_HASH': r'[0-9a-f]{64}',
+              'NS_CANDIDATE_SOURCE': r'[0-9a-f]{40}', 'NS_BASELINE_SOURCE': r'[0-9a-f]{40}',
+          }.items():
+              if not re.fullmatch(pattern, os.environ[name]):
+                  raise SystemExit(f'Invalid {name}')
+          PY
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.candidate_assets_ref }}
+          path: .candidate-input
+          persist-credentials: false
+          sparse-checkout: release-assets
+      - name: Download fixed public baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release download v1.0.0 --repo "$GH_REPO" --dir baseline-input --pattern '*.apk' --pattern build-info.json
+      - name: Validate and stage both signed APKs
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json, os, shutil
+          out = Path('motion-input')
+          out.mkdir()
+          for case, folder, prefix in (
+              ('baseline', Path('baseline-input'), 'NS_BASELINE'),
+              ('candidate', Path('.candidate-input/release-assets'), 'NS_CANDIDATE'),
+          ):
+              apks = list(folder.glob('*.apk'))
+              if len(apks) != 1 or apks[0].is_symlink() or not apks[0].is_file():
+                  raise SystemExit(f'Expected one regular signed APK for {case}')
+              metadata_path = folder / 'build-info.json'
+              if metadata_path.is_symlink() or not metadata_path.is_file():
+                  raise SystemExit(f'Expected regular build metadata for {case}')
+              info = json.loads(metadata_path.read_text())
+              if not isinstance(info, dict):
+                  raise SystemExit(f'Expected object build metadata for {case}')
+              if (info.get('signed') is not True or info.get('variant') != 'release'
+                      or info.get('applicationId') != 'io.github.withite.nsdetector'
+                      or info.get('commit') != os.environ[prefix + '_SOURCE']):
+                  raise SystemExit(f'Release metadata mismatch for {case}')
+              if hashlib.sha256(apks[0].read_bytes()).hexdigest() != os.environ[prefix + '_HASH']:
+                  raise SystemExit(f'Reviewed APK hash mismatch for {case}')
+              count = info.get('detectorCount', 20 if case == 'baseline' else None)
+              if type(count) is not int or not 1 <= count <= 1000 or (case == 'baseline' and count != 20):
+                  raise SystemExit(f'Invalid catalog detector count for {case}')
+              with open(os.environ['GITHUB_ENV'], 'a') as env_file:
+                  env_file.write(f'{prefix}_MODULES={count}\n')
+              shutil.copyfile(apks[0], out / f'{case}.apk')
+              shutil.copyfile(folder / 'build-info.json', out / f'{case}-build-info.json')
+          PY
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: 35
+          cores: 4
+          arch: x86_64
+          target: default
+          profile: pixel_6
+          disable-animations: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -memory 4096
+          script: >-
+            python3 scripts/ns_emulator_motion.py
+            --baseline motion-input/baseline.apk --candidate motion-input/candidate.apk
+            --baseline-sha256 "$NS_BASELINE_HASH" --candidate-sha256 "$NS_CANDIDATE_HASH"
+            --baseline-source "$NS_BASELINE_SOURCE" --candidate-source "$NS_CANDIDATE_SOURCE"
+            --baseline-modules "$NS_BASELINE_MODULES" --candidate-modules "$NS_CANDIDATE_MODULES"
+      - name: Upload raw rendering evidence and reviewed metadata
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: ns-detector-motion-comparison
+          path: |
+            motion-output/
+            motion-input/*-build-info.json
+          if-no-files-found: ignore
+          retention-days: 30

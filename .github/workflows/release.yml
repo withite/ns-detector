@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       version_name:
-        description: Release version, for example 1.0.0
-        default: '1.0.0'
+        description: Release version, for example 1.1.0
+        default: '1.1.0'
         required: true
         type: string
       version_code:
         description: Monotonically increasing Android version code
-        default: '10000'
+        default: '10100'
         required: true
         type: string
       external_signing:
