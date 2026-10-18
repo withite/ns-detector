@@ -7,8 +7,21 @@ on:
         description: Existing draft release tag holding a signed APK
         required: true
         type: string
+      signed_assets_ref:
+        description: Optional branch containing public signed files in release-assets/
+        required: false
+        default: ''
+        type: string
+      expected_apk_sha256:
+        description: Reviewed signed APK SHA-256, 64 lowercase hexadecimal characters
+        required: true
+        type: string
+      source_commit:
+        description: Reviewed APK source commit, 40 lowercase hexadecimal characters
+        required: true
+        type: string
 permissions:
-  contents: read
+  contents: write
 jobs:
   smoke:
     name: Verify signed APK in Android emulator
@@ -16,22 +29,120 @@ jobs:
     timeout-minutes: 25
     env:
       NS_SMOKE_PACKAGE: io.github.withite.nsdetector
+      NS_SMOKE_SOURCE_COMMIT: ${{ inputs.source_commit }}
+      NS_EXPECTED_APK_SHA256: ${{ inputs.expected_apk_sha256 }}
+      NS_TAG: ${{ inputs.tag_name }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - name: Download the signed draft APK
+      - name: Validate requested release identity
+        run: |
+          python3 - <<'PY'
+          import os, re
+          for name, pattern in {
+              'NS_TAG': r'v[0-9]+\.[0-9]+\.[0-9]+',
+              'NS_EXPECTED_APK_SHA256': r'[0-9a-f]{64}',
+              'NS_SMOKE_SOURCE_COMMIT': r'[0-9a-f]{40}',
+          }.items():
+              if not re.fullmatch(pattern, os.environ[name]):
+                  raise SystemExit(f'Invalid {name}')
+          PY
+      - name: Fetch public signed assets branch
+        if: inputs.signed_assets_ref != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.signed_assets_ref }}
+          path: .release-input
+          persist-credentials: false
+          sparse-checkout: release-assets
+      - name: Stage public signed files
+        if: inputs.signed_assets_ref != ''
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import shutil
+          source, target = Path('.release-input/release-assets'), Path('dist')
+          if not source.is_dir():
+              raise SystemExit('The selected branch has no release-assets directory')
+          target.mkdir()
+          for path in source.iterdir():
+              if not path.is_file() or path.is_symlink():
+                  raise SystemExit('Public release assets must be ordinary files')
+              shutil.copy2(path, target / path.name)
+          PY
+      - name: Download existing signed draft files
+        if: inputs.signed_assets_ref == ''
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          NS_TAG: ${{ inputs.tag_name }}
+        run: gh release download "$NS_TAG" --repo "$GH_REPO" --dir dist
+      - name: Verify signed assets and reviewed source
         run: |
           python3 - <<'PY'
-          import os,re
-          if not re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+',os.environ['NS_TAG']):
-              raise SystemExit('Expected a stable version tag')
+          from pathlib import Path
+          import hashlib, json, os, re, subprocess
+          dist = Path('dist')
+          digest = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+          listed = set()
+          for line in (dist / 'SHA256SUMS').read_text().splitlines():
+              match = re.fullmatch(r'([0-9a-f]{64})  ([^/\\\x00]+)', line)
+              if not match:
+                  raise SystemExit('Malformed release checksum entry')
+              expected, name = match.groups()
+              path = dist / name
+              if name in ('.', '..', 'SHA256SUMS') or name in listed or path.is_symlink() or not path.is_file():
+                  raise SystemExit('Invalid or duplicate release basename')
+              if digest(path) != expected:
+                  raise SystemExit(f'Checksum mismatch: {name}')
+              listed.add(name)
+          actual = {path.name for path in dist.iterdir() if path.is_file()}
+          if actual != listed | {'SHA256SUMS'} or any(not p.is_file() for p in dist.iterdir()):
+              raise SystemExit('Every public release file must be covered by SHA256SUMS')
+          info = json.loads((dist / 'build-info.json').read_text())
+          manifest = json.loads((dist / 'update.json').read_text())
+          policy = json.loads(Path('app/src/main/assets/ns_signing_policy.json').read_text())
+          package, commit = os.environ['NS_SMOKE_PACKAGE'], os.environ['NS_SMOKE_SOURCE_COMMIT']
+          version, expected_hash = os.environ['NS_TAG'][1:], os.environ['NS_EXPECTED_APK_SHA256']
+          if (info.get('signed') is not True or info.get('variant') != 'release'
+                  or info.get('applicationId') != package or info.get('versionName') != version
+                  or info.get('commit') != commit):
+              raise SystemExit('Build metadata does not match the reviewed signed release')
+          certificate = info.get('signing', {}).get('certificateSha256', '')
+          if (policy.get('version') != 1 or policy.get('allowedPackage') != package
+                  or not re.fullmatch(r'[0-9a-f]{64}', certificate)
+                  or certificate not in policy.get('certificateSha256', [])):
+              raise SystemExit('Release signing certificate does not match the host policy')
+          apks = list(dist.glob('*.apk'))
+          if len(apks) != 1 or digest(apks[0]) != expected_hash:
+              raise SystemExit('Expected exactly the reviewed signed APK')
+          apk = apks[0]
+          sdk = Path(os.environ.get('ANDROID_HOME') or os.environ['ANDROID_SDK_ROOT'])
+          available = [path for path in (sdk / 'build-tools').iterdir()
+                       if re.match(r'(?:3[5-9]|[4-9][0-9])\.', path.name)
+                       and (path / 'apksigner').is_file() and (path / 'zipalign').is_file()]
+          if not available:
+              raise SystemExit('Android Build Tools 35+ are required to verify this release')
+          tools = max(available, key=lambda p: tuple(map(int, re.findall(r'\d+', p.name))))
+          verification = subprocess.check_output(
+              [str(tools / 'apksigner'), 'verify', '--verbose', '--print-certs', str(apk)], text=True)
+          fingerprints = {value.lower() for value in re.findall(
+              r'certificate SHA-256 digest: ([0-9a-fA-F]{64})', verification)}
+          if fingerprints != {certificate} or not re.search(r'Number of signers: 1\b', verification):
+              raise SystemExit('Actual APK signature does not match the single pinned release certificate')
+          subprocess.run([str(tools / 'zipalign'), '-c', '-P', '16', '4', str(apk)], check=True)
+          evidence = Path('smoke-output')
+          evidence.mkdir(exist_ok=True)
+          (evidence / 'apk-signature-verified.txt').write_text(verification)
+          if (manifest.get('channel') != 'stable' or manifest.get('versionName') != version
+                  or manifest.get('versionCode') != info.get('versionCode')
+                  or manifest.get('commit', {}).get('sha') != commit
+                  or manifest.get('apk', {}).get('name') != apk.name
+                  or manifest.get('apk', {}).get('sha256') != expected_hash
+                  or manifest.get('apk', {}).get('sizeBytes') != apk.stat().st_size):
+              raise SystemExit('Update metadata does not match the reviewed APK')
+          print(f'Validated {apk.name}, source {commit}, certificate {certificate}')
           PY
-          gh release download "$NS_TAG" --repo "$GH_REPO" --pattern '*.apk' --dir dist
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -46,6 +157,29 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -memory 4096
           script: python3 scripts/ns_emulator_smoke.py
+      - name: Record reviewed source in runtime evidence
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, os
+          path = Path('smoke-output/smoke-result.json')
+          result = json.loads(path.read_text())
+          result['sourceCommit'] = os.environ['NS_SMOKE_SOURCE_COMMIT']
+          result['expectedApkSha256'] = os.environ['NS_EXPECTED_APK_SHA256']
+          path.write_text(json.dumps(result, indent=2) + '\n')
+          PY
+      - name: Upload verified public files to the existing draft
+        if: success() && inputs.signed_assets_ref != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if [ "$(gh release view "$NS_TAG" --repo "$GH_REPO" --json isDraft --jq '.isDraft')" != true ]; then
+            echo 'The target release must still be a draft; refusing to replace public files.'
+            exit 1
+          fi
+          gh release upload "$NS_TAG" dist/* --repo "$GH_REPO" --clobber
+          gh release edit "$NS_TAG" --repo "$GH_REPO" --target "$NS_SMOKE_SOURCE_COMMIT"
       - name: Upload signed-release runtime evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
