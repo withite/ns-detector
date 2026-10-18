@@ -6,7 +6,7 @@ Android 设备环境诊断工具，基于固定版本的 Duck Detector 开发，
 
 ## 当前交付范围
 
-本项目完整保留 Duck 上游全部 18 个检测模块，在此基础上完善功能并新增第 19 个网络环境模块。仪表盘提供分项证据、执行覆盖情况和解释；扫描历史保留最近 20 次已完成扫描的脱敏摘要，并比较类型化状态变化；TXT / JSON 导出报告默认脱敏。
+本项目完整保留 Duck 上游全部 18 个检测模块，新增网络环境与本应用完整性，共 20 个模块。仪表盘提供分项证据、执行覆盖情况和解释；扫描历史保留最近 20 次已完成扫描的脱敏摘要，并比较类型化状态变化；TXT / JSON 导出报告默认脱敏。
 
 | 范围 | 模块 |
 | --- | --- |
@@ -15,10 +15,15 @@ Android 设备环境诊断工具，基于固定版本的 Duck Detector 开发，
 | 应用与调试 | Dangerous Apps、ADB Runtime、Play Integrity Fix |
 | 硬件与虚拟化 | TEE、Virtualization |
 | 网络环境 | 应用默认网络的 VPN、Android 推荐代理和 Private DNS 状态 |
+| 本应用完整性 | 当前签名证书与宿主策略、debuggable / testOnly、Java 调试器与本进程 TracerPid |
+
+Dashboard V2 按实际返回的模块数展示进度，分开显示待完成、发现项、覆盖受限、执行错误与环境信息；完成度不等于设备安全评分。模块列表支持名称 / ID 搜索和类型化状态筛选，扫描期间保持固定顺序；筛选只影响浏览，不改变完整报告或历史记录。界面提供 Material / Miuix、明暗主题和大字体适配。
+
+为减少主线程工作，扫描统计与结果投影在工作线程执行；同一检测器最多保留一个执行中的扫描和一个最新等待请求，旧结果不能覆盖新请求。更新 APK 的文件、包名和签名预检查在 IO 线程执行，验证期间防止重复确认，关闭弹窗会取消后续安装界面跳转。这些实现改进仍需结合真实设备验证流畅度与稳定性。
 
 覆盖守卫 [`scripts/ns_check_upstream_coverage.py`](scripts/ns_check_upstream_coverage.py) 对照固定上游提交，检查全部 18 个检测器、18 个原生单元与 10 个进程/Provider 入口仍在；这不替代运行态验证。
 
-每项检测的依据与观察限制见对应的 `feature/<模块>/EVIDENCE.md`。新增网络模块的依据见 [Network Environment](feature/networkenvironment/EVIDENCE.md)。VPN、代理、Private DNS、开发者配置或单个包名不能单独证明设备危险；网络模块将这些状态作为环境信息展示。
+每项检测的依据与观察限制见对应的 `feature/<模块>/EVIDENCE.md`。新增模块的依据见 [Network Environment](feature/networkenvironment/EVIDENCE.md) 与 [Application Integrity](feature/appintegrity/EVIDENCE.md)。VPN、代理、Private DNS、开发者配置、调试器或单个包名不能单独证明设备危险；相关观察作为环境信息展示。本应用签名与内置策略不匹配时会给出局部警告，但匹配不能证明 APK 或设备可信；该策略与进程都可能被修改，SDK 未提供策略时明确显示不支持。
 
 “顶级”是持续验证目标，不是当前检出率承诺。源码、CI、模拟器和真机分别承担不同验证工作；实际通过的检查以对应提交的 Actions 记录为准。当前没有可发布的多厂商真机准确率或性能数据，尚不能宣称已完成正式版真机验收。
 
@@ -34,7 +39,7 @@ Android 设备环境诊断工具，基于固定版本的 Duck Detector 开发，
 | All Clear | 本次可执行的探针未观察到相应证据，不能证明设备从未被修改。 |
 | Info / Support | 某些检查不支持或不可用；缺少观察能力不能视为通过。 |
 | Info / Error | 检查执行失败，详情说明原因。 |
-| Info / Context | 描述 VPN、代理和 Private DNS 等已观察到的环境信息，不据此断言 Root 或受攻击；不会单独算作覆盖受限。 |
+| Info / Context | 描述 VPN、代理、Private DNS 和本应用调试状态等已观察到的信息，不据此断言 Root 或受攻击；不会单独算作覆盖受限。 |
 
 TEE 模块提供设备侧 KeyStore、证书链和证明字段检查。它不等同于独立可信服务端校验，也不提供 Google Play Integrity 官方判定；`Play Integrity Fix` 模块检查的是本地修改迹象。任何本地扫描都不能保证发现隐藏的 Root、Hook 或虚拟环境。
 
