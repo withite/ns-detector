@@ -82,7 +82,7 @@ def wait_for_completed_scan(timeout=180):
 
 def tap(node):
     bounds = [int(number) for number in re.findall(r"\d+", node.attrib.get("bounds", ""))]
-    if len(bounds) == 4 and bounds[2] > bounds[0] and bounds[3] > bounds[1]:
+    if len(bounds) == 4 and bounds[2] - bounds[0] >= 16 and bounds[3] - bounds[1] >= 16:
         adb("shell", "input", "tap", str((bounds[0] + bounds[2]) // 2), str((bounds[1] + bounds[3]) // 2))
         return True
     return False
@@ -100,7 +100,7 @@ def launch():
 def matching_node(root, labels):
     return next((node for node in root.iter("node") if node.attrib.get("enabled") != "false"
                  and len(b := re.findall(r"\d+", node.attrib.get("bounds", ""))) == 4
-                 and int(b[2]) > int(b[0]) and int(b[3]) > int(b[1])
+                 and int(b[2]) - int(b[0]) >= 16 and int(b[3]) - int(b[1]) >= 16
                  and any(node.attrib.get(key, "").strip() in labels
                          for key in ("text", "content-desc"))), None)
 
