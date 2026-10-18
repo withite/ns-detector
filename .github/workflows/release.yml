@@ -1,8 +1,6 @@
 # NS Detector release signing is independent from upstream distribution.
 name: NS Detector Release
 on:
-  push:
-    tags: ['v*']
   workflow_dispatch:
     inputs:
       version_name:

@@ -27,7 +27,7 @@ Debug 不需要签名 Secret，安装包 ID 为 `io.github.withite.nsdetector.de
 | --- | --- | --- |
 | CI / 预览构建 | `main` 提交、Pull Request、手动运行，以工作流定义为准 | 单元测试、架构守卫、Debug APK、SDK AAR、lint/测试报告；主分支增加模拟器启动检查与截图。无需自备 Secret。 |
 | 预览分发 | `main` 构建与模拟器检查通过 | 版本化 `preview-<run_number>` prerelease，保留提交来源，使用测试应用 ID 和调试签名。 |
-| 正式发布 | `v*` 标签或手动运行 `release.yml` | 默认验证四项签名配置，产生正式 APK 和校验信息；不会退回调试签名。手动选 `external_signing=true` 时仅导出未签名工件，不自动发布。 |
+| 正式发布 | 手动运行 `release.yml` | 默认验证四项签名配置，产生正式 APK 和校验信息；不会退回调试签名。选 `external_signing=true` 时仅导出未签名工件，不自动发布。发布已有签名文件时创建版本标签不重复触发编译。 |
 | 离线签名后验证 | 手动运行 `verify-release.yml` | 校验已签名公开文件和指定源码，安装到模拟器验证；可将验证通过的文件上传到现有草稿 Release，保留最终发布步骤。 |
 
 预览是开发验证产物。模拟器启动成功不能代替硬件 KeyStore、SELinux、挂载、app zygote 和真实 Root/Hook 环境的真机验证。某次运行是否通过、是否生成 APK，以其最终日志为准；文档没有代替未运行的检查作出通过声明。
