@@ -32,18 +32,19 @@ import java.util.Locale
 /** Localized wording projects typed observations; configuration never becomes a risk finding. */
 class NetworkEnvironmentCardModelMapper(locale: Locale = Locale.getDefault()) {
     private val chinese = locale.language == Locale.CHINESE.language
+    private val trustStoreRows = NetworkTrustStoreRowMapper(chinese)
 
     fun map(report: NetworkEnvironmentReport): NetworkEnvironmentCardModel = NetworkEnvironmentCardModel(
         title = text("Network Environment", "网络环境"),
-        subtitle = text("VPN · HTTP proxy · Private DNS", "VPN · HTTP 代理 · 私人 DNS"),
+        subtitle = text("VPN · Proxy · Private DNS · CA store", "VPN · 代理 · 私人 DNS · CA 存储"),
         status = report.toDetectorStatus(),
         verdict = verdict(report),
         summary = when (report.stage) {
-            NetworkEnvironmentStage.LOADING -> text("Reading public Android connectivity APIs.", "正在读取 Android 公开网络接口。")
+            NetworkEnvironmentStage.LOADING -> text("Reading public Android connectivity and CA-store APIs.", "正在读取 Android 公开网络与 CA 存储接口。")
             NetworkEnvironmentStage.FAILED -> report.errorMessage ?: text("Collection failed.", "采集失败。")
             NetworkEnvironmentStage.READY -> text(
-                "A point-in-time snapshot for this app. VPN, proxies and Private DNS are informational configurations and do not raise the risk level. Network endpoints and DNS hostnames are not retained.",
-                "这是本应用可见的即时快照。VPN、代理和私人 DNS 均为环境配置信息，不增加风险等级。报告不保留网络端点与 DNS 主机名。",
+                "A point-in-time snapshot for this app. VPN, proxies, Private DNS and visible CA entries are contextual configurations and do not raise the risk level. Network endpoints, DNS hostnames, CA aliases and certificate contents are not retained.",
+                "这是本应用可见的即时快照。VPN、代理、私人 DNS 与可见 CA 条目均为环境配置信息，不增加风险等级。报告不保留网络端点、DNS 主机名、CA 别名与证书内容。",
             )
         },
         detailsTitle = text("Connectivity observations", "网络配置观察"),
@@ -95,6 +96,7 @@ class NetworkEnvironmentCardModelMapper(locale: Locale = Locale.getDefault()) {
             ),
             failureName = report.network.privateDns.failureName,
         ),
+        trustStoreRows.map(report.trustStore),
     )
 
     private fun row(

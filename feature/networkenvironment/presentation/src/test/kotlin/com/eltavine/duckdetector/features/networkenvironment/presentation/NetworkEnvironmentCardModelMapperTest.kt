@@ -29,6 +29,9 @@ import com.eltavine.duckdetector.features.networkenvironment.domain.NetworkPriva
 import com.eltavine.duckdetector.features.networkenvironment.domain.NetworkProxyMode
 import com.eltavine.duckdetector.features.networkenvironment.domain.NetworkProxyObservation
 import com.eltavine.duckdetector.features.networkenvironment.domain.NetworkVpnObservation
+import com.eltavine.duckdetector.features.networkenvironment.domain.NetworkTrustStoreCounts
+import com.eltavine.duckdetector.features.networkenvironment.domain.NetworkTrustStoreObservation
+import com.eltavine.duckdetector.features.networkenvironment.domain.TrustStoreObservationState
 import java.util.Locale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -90,7 +93,7 @@ class NetworkEnvironmentCardModelMapperTest {
             assertEquals("Not evaluated", model.verdict)
             val expectedKind = if (state == NetworkObservationState.FAILED) InfoKind.ERROR else InfoKind.SUPPORT
             assertEquals(expectedKind, model.status.infoKind)
-            assertTrue(model.rows.all { it.status.infoKind == expectedKind })
+            assertTrue(model.rows.take(3).all { it.status.infoKind == expectedKind })
             model.rows[0].value
         }
         assertEquals(states.size, values.distinct().size)
@@ -127,5 +130,6 @@ class NetworkEnvironmentCardModelMapperTest {
             NetworkPrivateDnsObservation(NetworkObservationState.OBSERVED, NetworkPrivateDnsMode.ACTIVE_STRICT),
         ),
         proxy = NetworkProxyObservation(NetworkObservationState.OBSERVED, NetworkProxyMode.AUTOMATIC),
+        trustStore = NetworkTrustStoreObservation(TrustStoreObservationState.OBSERVED, NetworkTrustStoreCounts(0, 144)),
     )
 }

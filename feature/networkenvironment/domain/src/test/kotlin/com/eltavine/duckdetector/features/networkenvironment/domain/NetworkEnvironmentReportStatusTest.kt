@@ -39,6 +39,7 @@ class NetworkEnvironmentReportStatusTest {
                             NetworkPrivateDnsObservation(NetworkObservationState.OBSERVED, dns),
                         ),
                         proxy = NetworkProxyObservation(NetworkObservationState.OBSERVED, proxy),
+                        trustStore = NetworkTrustStoreObservation(TrustStoreObservationState.OBSERVED, NetworkTrustStoreCounts(0, 144)),
                     )
                     assertEquals(DetectorStatus.info(InfoKind.CONTEXT), report.toDetectorStatus())
                     assertTrue(report.probed)

@@ -20,13 +20,15 @@ package com.eltavine.duckdetector.features.networkenvironment.domain
 import com.eltavine.duckdetector.core.evidence.DetectorStatus
 import com.eltavine.duckdetector.core.evidence.InfoKind
 
-/** VPN, HTTP proxies and Private DNS are ordinary configurations, never integrity findings. */
+/** Connectivity and visible CA-store entries are context, never integrity findings. */
 fun NetworkEnvironmentReport.toDetectorStatus(): DetectorStatus = DetectorStatus.info(
     when {
         stage == NetworkEnvironmentStage.FAILED ||
-            observationStates.any { it == NetworkObservationState.FAILED } -> InfoKind.ERROR
+            observationStates.any { it == NetworkObservationState.FAILED } ||
+            trustStore.state == TrustStoreObservationState.FAILED -> InfoKind.ERROR
         stage != NetworkEnvironmentStage.READY ||
-            observationStates.any { it != NetworkObservationState.OBSERVED } -> InfoKind.SUPPORT
+            observationStates.any { it != NetworkObservationState.OBSERVED } ||
+            trustStore.state != TrustStoreObservationState.OBSERVED -> InfoKind.SUPPORT
         else -> InfoKind.CONTEXT
     },
 )

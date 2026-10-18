@@ -25,25 +25,41 @@ import com.eltavine.duckdetector.features.networkenvironment.domain.NetworkEnvir
 import com.eltavine.duckdetector.features.networkenvironment.domain.NetworkEnvironmentStage
 import com.eltavine.duckdetector.features.networkenvironment.domain.NetworkObservationState
 import com.eltavine.duckdetector.features.networkenvironment.domain.NetworkProxyObservation
+import com.eltavine.duckdetector.features.networkenvironment.domain.NetworkTrustStoreObservation
+import com.eltavine.duckdetector.features.networkenvironment.domain.TrustStoreObservationState
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
 /** Independent source failures preserve observations from the remaining source. */
 class NetworkEnvironmentRepository internal constructor(
     private val probe: NetworkEnvironmentProbe,
+    private val trustStoreProbe: NetworkTrustStoreProbe,
 ) : DetectorScanner<NetworkEnvironmentReport> {
-    constructor(context: Context) : this(AndroidNetworkEnvironmentProbe(context))
+    constructor(context: Context) : this(AndroidNetworkEnvironmentProbe(context), AndroidNetworkTrustStoreProbe())
 
     override suspend fun scan(): NetworkEnvironmentReport = withContext(Dispatchers.IO) {
-        collect()
+        val coroutineContext = currentCoroutineContext()
+        collect { coroutineContext.ensureActive() }
     }
 
-    internal fun collect(): NetworkEnvironmentReport = NetworkEnvironmentReport(
-        stage = NetworkEnvironmentStage.READY,
-        network = readNetwork(),
-        proxy = readProxy(),
-    )
+    internal fun collect(checkCancellation: () -> Unit = {}): NetworkEnvironmentReport {
+        checkCancellation()
+        val network = readNetwork()
+        checkCancellation()
+        val proxy = readProxy()
+        checkCancellation()
+        val trustStore = readTrustStore(checkCancellation)
+        checkCancellation()
+        return NetworkEnvironmentReport(
+            stage = NetworkEnvironmentStage.READY,
+            network = network,
+            proxy = proxy,
+            trustStore = trustStore,
+        )
+    }
 
     private fun readNetwork(): NetworkDefaultSnapshot = try {
         probe.readDefaultNetwork()
@@ -64,5 +80,15 @@ class NetworkEnvironmentRepository internal constructor(
         NetworkProxyObservation(state = NetworkObservationState.PERMISSION_REQUIRED)
     } catch (failure: Exception) {
         NetworkProxyObservation(state = NetworkObservationState.FAILED, failureName = FailureName.of(failure))
+    }
+
+    private fun readTrustStore(checkCancellation: () -> Unit): NetworkTrustStoreObservation = try {
+        trustStoreProbe.read(checkCancellation)
+    } catch (cancellation: CancellationException) {
+        throw cancellation
+    } catch (_: SecurityException) {
+        NetworkTrustStoreObservation(TrustStoreObservationState.PERMISSION_REQUIRED)
+    } catch (failure: Exception) {
+        NetworkTrustStoreObservation(TrustStoreObservationState.FAILED, failureName = FailureName.of(failure))
     }
 }

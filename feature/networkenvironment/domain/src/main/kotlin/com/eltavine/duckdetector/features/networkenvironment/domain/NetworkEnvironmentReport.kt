@@ -19,21 +19,23 @@ package com.eltavine.duckdetector.features.networkenvironment.domain
 
 enum class NetworkEnvironmentStage { LOADING, READY, FAILED }
 
-/** Public Android connectivity observations at scan time, not a device-integrity verdict. */
+/** Public Android connectivity and CA-store observations, not a device-integrity verdict. */
 data class NetworkEnvironmentReport(
     val stage: NetworkEnvironmentStage,
     val network: NetworkDefaultSnapshot = NetworkDefaultSnapshot(),
     val proxy: NetworkProxyObservation = NetworkProxyObservation(),
     val errorMessage: String? = null,
+    val trustStore: NetworkTrustStoreObservation = NetworkTrustStoreObservation(),
 ) {
     val observationStates: List<NetworkObservationState>
         get() = listOf(network.vpn.state, proxy.state, network.privateDns.state)
 
     val probed: Boolean
-        get() = observationStates.any { it == NetworkObservationState.OBSERVED }
+        get() = observationStates.any { it == NetworkObservationState.OBSERVED } || trustStore.hasObservation
 
     val partiallyEvaluated: Boolean
-        get() = probed && observationStates.any { it != NetworkObservationState.OBSERVED }
+        get() = probed && (observationStates.any { it != NetworkObservationState.OBSERVED } ||
+            trustStore.state != TrustStoreObservationState.OBSERVED)
 
     companion object {
         fun loading(): NetworkEnvironmentReport = NetworkEnvironmentReport(NetworkEnvironmentStage.LOADING)
