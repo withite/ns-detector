@@ -20,6 +20,7 @@ package com.eltavine.duckdetector.sdk
 
 import com.eltavine.duckdetector.core.detector.Detector
 import com.eltavine.duckdetector.features.adbruntime.detector.AdbRuntimeDetector
+import com.eltavine.duckdetector.features.appintegrity.detector.AppIntegrityDetector
 import com.eltavine.duckdetector.features.bootloader.detector.BootloaderDetector
 import com.eltavine.duckdetector.features.customrom.detector.CustomRomDetector
 import com.eltavine.duckdetector.features.dangerousapps.detector.DangerousAppsDetector
@@ -52,6 +53,7 @@ public object DetectorCatalog {
         BootloaderDetector,
         TeeDetector,
         AdbRuntimeDetector,
+        AppIntegrityDetector,
         CustomRomDetector,
         DangerousAppsDetector,
         HeapResidueDetector,
