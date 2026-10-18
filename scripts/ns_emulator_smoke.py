@@ -82,7 +82,7 @@ def wait_for_completed_scan(timeout=180):
 
 def tap(node):
     bounds = [int(number) for number in re.findall(r"\d+", node.attrib.get("bounds", ""))]
-    if len(bounds) == 4:
+    if len(bounds) == 4 and bounds[2] > bounds[0] and bounds[3] > bounds[1]:
         adb("shell", "input", "tap", str((bounds[0] + bounds[2]) // 2), str((bounds[1] + bounds[3]) // 2))
         return True
     return False
@@ -95,6 +95,172 @@ def screenshot(name):
 def launch():
     adb("shell", "am", "start", "-W", "-a", "android.intent.action.MAIN",
         "-c", "android.intent.category.LAUNCHER", "-n", f"{PACKAGE}/android.app.NativeActivity")
+
+
+def matching_node(root, labels):
+    return next((node for node in root.iter("node") if node.attrib.get("enabled") != "false"
+                 and len(b := re.findall(r"\d+", node.attrib.get("bounds", ""))) == 4
+                 and int(b[2]) > int(b[0]) and int(b[3]) > int(b[1])
+                 and any(node.attrib.get(key, "").strip() in labels
+                         for key in ("text", "content-desc"))), None)
+
+
+def wait_window(predicate, description, timeout=30):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        root = hierarchy(deadline=deadline)
+        if predicate(root):
+            return root
+        time.sleep(min(1, max(0, deadline - time.monotonic())))
+    raise RuntimeError(f"Timed out waiting for {description}; see latest-window.xml")
+
+
+def locate(labels, forward=True, scrolls=8):
+    # Scan in both directions: the persisted list position can put controls above or below us.
+    for direction, limit in ((forward, scrolls), (not forward, scrolls * 2)):
+        for attempt in range(limit + 1):
+            root = hierarchy()
+            node = matching_node(root, labels)
+            if node is not None:
+                return root, node
+            if attempt < limit:
+                bounds = [list(map(int, re.findall(r"\d+", n.attrib.get("bounds", ""))))
+                          for n in root.iter("node")]
+                width = max((b[2] for b in bounds if len(b) == 4), default=1080)
+                height = max((b[3] for b in bounds if len(b) == 4), default=2400)
+                start, end = (0.78, 0.35) if direction else (0.35, 0.78)
+                adb("shell", "input", "swipe", str(width // 2), str(int(height * start)),
+                    str(width // 2), str(int(height * end)), "400")
+                time.sleep(0.5)
+    raise RuntimeError(f"Could not find visible control {labels}; see latest-window.xml")
+
+
+def click_label(labels, forward=True):
+    _, node = locate(labels, forward=forward)
+    if not tap(node):
+        raise RuntimeError(f"Control has no tappable bounds: {labels}")
+    time.sleep(0.5)
+
+
+def preserve(name, root=None):
+    root = root if root is not None else hierarchy()
+    (OUTPUT / f"{name}.xml").write_text(ET.tostring(root, encoding="unicode"))
+    screenshot(name)
+
+
+def browser_count(count):
+    return (f"Showing {count} of {EXPECTED_MODULE_COUNT} modules",
+            f"显示 {count} / {EXPECTED_MODULE_COUNT} 个模块")
+
+
+def selection_owner(root, labels):
+    return next((node for node in root.iter("node")
+                 if (node.attrib.get("class") == "android.widget.RadioButton"
+                     or node.attrib.get("checkable") == "true")
+                 and matching_node(node, labels) is not None), None)
+
+
+def search_modules(query):
+    click_label(("Search module names or IDs", "搜索模块名称或标识"), forward=False)
+    adb("shell", "input", "text", query)
+    # Hardware-keyboard emulator settings may suppress the IME; BACK must not close the app.
+    if re.search(r"\b(?:mInputShown|inputShown)=true\b", adb("shell", "dumpsys", "input_method")):
+        adb("shell", "input", "keyevent", "KEYCODE_BACK")
+    time.sleep(0.5)
+
+
+def exercise_module_browser():
+    search_labels = ("Search module names or IDs", "搜索模块名称或标识")
+    locate(search_labels)
+    search_modules("network_environment")
+    root, _ = locate(browser_count(1))
+    preserve("06-search-one-module", root)
+    click_label(("Clear search", "清除搜索"), forward=False)
+    root, _ = locate(browser_count(20))
+    attention = ("Needs attention", "需要关注")
+    owner = selection_owner(root, attention)
+    selection_verified = owner is not None
+    if selection_verified:
+        click_label(attention, forward=False)
+        root = wait_window(lambda r: (n := selection_owner(r, attention)) is not None and
+                           any(n.attrib.get(key) == "true" for key in ("selected", "checked")),
+                           "selected attention filter")
+        preserve("07-attention-filter", root)
+    search_modules("zznsnomatchzz")
+    root, _ = locate(("No matching modules", "没有匹配的模块"))
+    preserve("08-no-matching-modules", root)
+    click_label(("Reset search and filters", "重置搜索与筛选"))
+    root, _ = locate(browser_count(20), forward=False)
+    all_owner = selection_owner(root, ("All modules", "全部模块"))
+    if all_owner is not None and not any(all_owner.attrib.get(key) == "true"
+                                          for key in ("selected", "checked")):
+        raise RuntimeError("Reset did not select All modules")
+    preserve("09-browser-reset", root)
+    return {"moduleIdSearch": True, "emptySearchAndReset": True,
+            "attentionSelectionSemanticsVerified": selection_verified}
+
+
+def saf_filename(root, extension):
+    return next((node.attrib.get("text", "") for node in root.iter("node")
+                 if node.attrib.get("resource-id") == "android:id/title"
+                 and node.attrib.get("class") == "android.widget.EditText"
+                 and node.attrib.get("package", "").endswith(".documentsui")
+                 and node.attrib.get("text", "").startswith("ns_detector_report_")
+                 and node.attrib.get("text", "").endswith(extension)), None)
+
+
+def cancel_to_dashboard():
+    for _ in range(4):
+        root = hierarchy()
+        if dashboard_active(root):
+            return root
+        adb("shell", "input", "keyevent", "KEYCODE_BACK")
+        time.sleep(1)
+    raise RuntimeError("Cancelling the document picker did not return to the dashboard")
+
+
+def dashboard_active(root):
+    return (dashboard_visible(root)
+            and matching_node(root, ("Choose report format", "选择报告格式")) is None
+            and not any(n.attrib.get("package", "").endswith(".documentsui") for n in root.iter("node"))
+            and any(n.attrib.get("package") == PACKAGE for n in root.iter("node")))
+
+
+def open_export_format(labels):
+    click_label(("Export diagnostic report", "导出诊断报告"), forward=False)
+    root = wait_window(lambda r: matching_node(r, ("Choose report format", "选择报告格式")) is not None,
+                       "report format dialog")
+    if labels:
+        click_label(labels)
+    return root
+
+
+def exercise_export_picker():
+    preserve("10-export-format", open_export_format(None))
+    adb("shell", "input", "keyevent", "KEYCODE_BACK")
+    preserve("11-format-cancelled", wait_window(dashboard_active, "dashboard after dialog cancellation"))
+    open_export_format(("JSON report", "JSON 报告"))
+    root = wait_window(lambda r: saf_filename(r, ".json"), "JSON system document picker")
+    filename = saf_filename(root, ".json")
+    preserve("12-json-picker", root)
+    try:
+        adb("shell", "wm", "user-rotation", "lock", "1")
+        root = wait_window(lambda r: r.attrib.get("rotation") in ("1", "3") and
+                           saf_filename(r, ".json") == filename, "rotated picker with original filename")
+        preserve("13-json-picker-rotated", root)
+    finally:
+        adb("shell", "wm", "user-rotation", "lock", "0")
+    root = wait_window(lambda r: r.attrib.get("rotation") == "0" and
+                       saf_filename(r, ".json") == filename, "restored portrait picker")
+    preserve("14-json-picker-restored", root)
+    preserve("15-json-cancelled", cancel_to_dashboard())
+    open_export_format(("Text report", "文本报告"))
+    root = wait_window(lambda r: saf_filename(r, ".txt"), "text picker after JSON cancellation")
+    preserve("16-text-picker-recovery", root)
+    preserve("17-text-cancelled", cancel_to_dashboard())
+    return {"formatDialogCancel": True, "jsonPickerRotationAndCancel": True,
+            "textPickerRecoveryAndCancel": True, "jsonPickerFilename": filename,
+            "scope": "Picker interaction and filename restoration only; frozen bytes and cache cleanup not verified."}
 
 
 def main():
@@ -116,9 +282,9 @@ def main():
             reached_dashboard = True
             break
         # Prefer offline and low-impact choices; never opt into an experiment or network access.
-        targets = ("Skip", "Not now", "Keep offline", "Built-in only", "Keep disabled", "Use offline snapshot", "Decline", "Disable", "Use regular", "Use regular notifications",
+        targets = ("Skip", "Not now", "Keep offline", "Built-in only", "Keep disabled", "Use offline snapshot", "Decline", "Don't allow", "Don’t allow", "Deny", "Disable", "Use regular", "Use regular notifications",
                    "Continue anyway", "I Agree & Continue", "I agree and continue", "Agree and continue", "I agree", "Continue", "Done",
-                   "暂不", "跳过", "保持离线", "拒绝", "禁用", "使用普通通知", "仍然继续", "同意并继续", "我已阅读并同意", "继续", "完成")
+                   "暂不", "跳过", "保持离线", "拒绝", "不允许", "禁用", "使用普通通知", "仍然继续", "同意并继续", "我已阅读并同意", "继续", "完成")
         clicked = False
         for label in targets:
             for node in nodes:
@@ -143,6 +309,8 @@ def main():
     adb("shell", "input", "swipe", "540", "1700", "540", "650", "500")
     time.sleep(1)
     screenshot("03-evidence-and-history")
+    browser_interactions = exercise_module_browser()
+    export_interactions = exercise_export_picker()
     # An installed app must survive a subsequent launcher entry with persisted preferences.
     adb("shell", "am", "force-stop", PACKAGE)
     launch()
@@ -165,6 +333,7 @@ def main():
     result = {"status": "passed", "package": PACKAGE, "consentActions": actions,
               "completedModuleCount": completed_count, "expectedModuleCount": EXPECTED_MODULE_COUNT,
               "emulatorCompletionWaitSeconds": completion_wait_seconds,
+              "browserInteractions": browser_interactions, "exportInteractions": export_interactions,
               "scope": "Android API 35 x86_64 emulator installation, launcher, dashboard, full module return and restart; not physical-device accuracy or performance validation."}
     (OUTPUT / "smoke-result.json").write_text(json.dumps(result, indent=2))
     print(json.dumps(result))
