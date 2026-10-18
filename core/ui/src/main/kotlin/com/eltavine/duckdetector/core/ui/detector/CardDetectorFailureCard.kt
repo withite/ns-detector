@@ -24,7 +24,7 @@ internal fun CardDetectorFailureCard(title: String, failure: CardScanFailure, on
         leadingIcon = Icons.Rounded.ErrorOutline,
         expanded = true,
         footerActions = {
-            AdaptiveTextButton(onClick = onRetry) { WrapSafeText(stringResource(R.string.ns_scan_retry)) }
+            AdaptiveTextButton(text = stringResource(R.string.ns_scan_retry), onClick = onRetry)
         },
     ) {
         WrapSafeText(failure.name)
