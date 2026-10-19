@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "channel": "stable",
+  "branch": "main",
+  "versionName": "1.1.0",
+  "versionCode": 10100,
+  "commit": {
+    "sha": "2bfdd88b71f66a6f88e508884fe60de1e2562eee",
+    "subject": "Compare dashboard frame timings and verify artifact module counts",
+    "body": "Assisted-by: Codex",
+    "authorName": "Kjuqr Eedvahh",
+    "authoredAt": "2026-10-18T23:05:17Z"
+  },
+  "builtAtUtc": "2026-10-18T23:05:17Z",
+  "apk": {
+    "name": "NS-Detector-1.1.0.apk",
+    "sizeBytes": 18942319,
+    "sha256": "c6499663101eae07e0a2473387a905c6acccc21c6a2fb239ab3e708447765c8c",
+    "downloadUrl": "https://github.com/withite/ns-detector/releases/download/v1.1.0/NS-Detector-1.1.0.apk"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "applicationId": "io.github.withite.nsdetector",
+  "variant": "release",
+  "signed": true,
+  "versionName": "1.1.0",
+  "versionCode": 10100,
+  "detectorCount": 21,
+  "commit": "2bfdd88b71f66a6f88e508884fe60de1e2562eee",
+  "upstreamCommit": "b1135897cff4ddf01797f042bdd15f7d7e364e0d",
+  "buildUrl": "https://github.com/withite/ns-detector/actions/runs/39198092520",
+  "toolchain": {
+    "duckdetector.android.buildTools": "37.0.0",
+    "duckdetector.android.cmake": "4.1.2",
+    "duckdetector.android.compileSdk": "37",
+    "duckdetector.android.compileSdkMinor": "0",
+    "duckdetector.android.minSdk": "29",
+    "duckdetector.android.ndk": "30.0.16138531",
+    "duckdetector.android.targetSdk": "37"
+  },
+  "validation": "See Actions reports; cross-OEM physical device validation is pending.",
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86",
+    "x86_64"
+  ],
+  "signing": {
+    "method": "private external signing after GitHub compilation",
+    "certificateSha256": "488a010361e5dc289c7041eb4dbe0bc611dcae5b37d030d384e1f7d9101a1a7c"
+  }
+}
