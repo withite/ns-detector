@@ -20,11 +20,16 @@ on:
         description: Reviewed APK source commit, 40 lowercase hexadecimal characters
         required: true
         type: string
+      run_emulator_tests:
+        description: Also install and exercise the APK in an Android emulator
+        required: true
+        default: true
+        type: boolean
 permissions:
   contents: write
 jobs:
   smoke:
-    name: Verify signed APK in Android emulator
+    name: Verify signed release files
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
@@ -144,11 +149,13 @@ jobs:
           print(f'Validated {apk.name}, source {commit}, certificate {certificate}')
           PY
       - name: Enable KVM
+        if: inputs.run_emulator_tests
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0; packaged dependencies
+        if: inputs.run_emulator_tests
         with:
           api-level: 35
           cores: 4
@@ -161,6 +168,7 @@ jobs:
             python3 scripts/ns_emulator_smoke.py
             python3 scripts/ns_emulator_feature_smoke.py
       - name: Record reviewed source in runtime evidence
+        if: inputs.run_emulator_tests
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -170,6 +178,21 @@ jobs:
           result['sourceCommit'] = os.environ['NS_SMOKE_SOURCE_COMMIT']
           result['expectedApkSha256'] = os.environ['NS_EXPECTED_APK_SHA256']
           path.write_text(json.dumps(result, indent=2) + '\n')
+          PY
+      - name: Record file verification without installation
+        if: inputs.run_emulator_tests == false
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, os
+          result = {
+              'status': 'file-verification-passed',
+              'sourceCommit': os.environ['NS_SMOKE_SOURCE_COMMIT'],
+              'expectedApkSha256': os.environ['NS_EXPECTED_APK_SHA256'],
+              'installationTests': 'not-run',
+              'scope': 'Signed files, hashes, metadata, pinned certificate and ZIP alignment only; no APK installation or emulator runtime tests.',
+          }
+          Path('smoke-output/file-verification.json').write_text(json.dumps(result, indent=2) + '\n')
           PY
       - name: Upload verified public files to the existing draft
         if: success() && inputs.signed_assets_ref != ''
